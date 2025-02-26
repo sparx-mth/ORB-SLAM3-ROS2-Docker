@@ -8,8 +8,8 @@ ORB_SLAM3_RGBD_ROS2:
     robot_base_frame: base_footprint
     global_frame: map
     odom_frame: odom
-    rgb_image_topic_name: rgb_camera
-    depth_image_topic_name: depth_camera
+    rgb_image_topic_name: /camera/color/image_raw
+    depth_image_topic_name: /camera/depth/image_raw
     imu_topic_name: imu #Not used in this variant. Try RGB_IMU to use this information.
     odom_topic_name: ground_truth_pose #Used if odometry_mode parameter is set to true. (Set to ground_truth_pose for pose from simulation example. You can choose the topic you want)
     robot_x: 0.0
@@ -22,13 +22,13 @@ ORB_SLAM3_RGBD_ROS2:
     do_loop_closing: true
 
     # traversability related
-    lidar_topic_name: lidar/points
+    lidar_topic_name: /camera/depth/points
     publish_traversability_data: true # publishes the traversability grid and the occupancy map. Works only if `traversability_ros_integration` is set to false.
-    traversability_ros_integration: true # if true, publishes the messages on /traversability_keyframe_additions and /traversability_keyframe_updates. If true, does not involve the traversability class within ORB_SLAM3 and must be integrated with ROS. Set it to true if you want traversability to run in a seperate process.
+    traversability_ros_integration: false # if true, publishes the messages on /traversability_keyframe_additions and /traversability_keyframe_updates. If true, does not involve the traversability class within ORB_SLAM3 and must be integrated with ROS. Set it to true if you want traversability to run in a seperate process.
 
 local_traversability_node:
   ros__parameters:
-    pointcloud_topic_name: "lidar/points"
+    pointcloud_topic_name: "/camera/depth/points"
     expected_frequency: 4.0 # Hz.
 
 traversability_threshold_node:

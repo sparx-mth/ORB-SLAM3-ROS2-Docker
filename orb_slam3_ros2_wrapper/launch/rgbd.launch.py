@@ -25,7 +25,7 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
     declare_use_sim_time_cmd = DeclareLaunchArgument(
         name='use_sim_time',
-        default_value='True',
+        default_value='False',
         description='Use simulation (Gazebo) clock if true')
 
     robot_namespace =  LaunchConfiguration('robot_namespace')
@@ -44,7 +44,7 @@ def generate_launch_description():
     def all_nodes_launch(context, robot_namespace, robot_x, robot_y):
         params_file = LaunchConfiguration('params_file')
         vocabulary_file_path = "/home/orb/ORB_SLAM3/Vocabulary/ORBvoc.txt"
-        config_file_path = "/root/colcon_ws/src/orb_slam3_ros2_wrapper/params/gazebo_rgbd.yaml"
+        config_file_path = "/root/colcon_ws/src/orb_slam3_ros2_wrapper/params/orbbec_astra.yaml"
         declare_params_file_cmd = DeclareLaunchArgument(
             'params_file',
             default_value=os.path.join(orb_wrapper_pkg, 'params', 'rgbd-ros-params.yaml'),
@@ -78,14 +78,14 @@ def generate_launch_description():
             # prefix=["gdbserver localhost:3000"],
             namespace=robot_namespace.perform(context),
             arguments=[vocabulary_file_path, config_file_path],
-            parameters=[configured_params])
+            parameters=[configured_params, use_sim_time])
 
         threshold_traversability_ros = Node(
             package='traversability_mapping_ros',
             executable='threshold_occupancy',
             namespace=robot_namespace.perform(context),
             output='screen',
-            parameters=[params_file])
+            parameters=[params_file, use_sim_time])
         
         return [declare_params_file_cmd, orb_slam3_node, threshold_traversability_ros]
 
