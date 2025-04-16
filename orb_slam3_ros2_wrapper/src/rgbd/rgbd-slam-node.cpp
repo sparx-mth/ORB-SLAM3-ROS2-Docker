@@ -12,7 +12,7 @@ namespace ORB_SLAM3_Wrapper
     RgbdSlamNode::RgbdSlamNode(const std::string &strVocFile,
                                const std::string &strSettingsFile,
                                ORB_SLAM3::System::eSensor sensor)
-        : Node("ORB_SLAM3_RGBD_ROS2")
+        : BaseSlamNode(strVocFile, strSettingsFile, sensor)
     {
         // Declare parameters (topic names)
         this->declare_parameter("rgb_image_topic_name", rclcpp::ParameterValue("camera/image_raw"));
@@ -179,121 +179,5 @@ namespace ORB_SLAM3_Wrapper
 
             ++frequency_tracker_count_;
         }
-    }
-
-    void RgbdSlamNode::publishMapPointCloud(std::shared_ptr<rmw_request_id_t> request_header,
-                                            std::shared_ptr<slam_msgs::srv::GetAllLandmarksInMap::Request> request,
-                                            std::shared_ptr<slam_msgs::srv::GetAllLandmarksInMap::Response> response)
-    {
-        if (isTracked_)
-        {
-            // Using high resolution clock to measure time
-            auto start = std::chrono::high_resolution_clock::now();
-
-            sensor_msgs::msg::PointCloud2 mapPCL;
-
-            auto t1 = std::chrono::high_resolution_clock::now();
-            auto time_create_mapPCL = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - start).count();
-            RCLCPP_DEBUG_STREAM(this->get_logger(), "Time to create mapPCL object: " << time_create_mapPCL << " seconds");
-
-            interface_->getCurrentMapPoints(mapPCL);
-
-            if (mapPCL.data.size() == 0)
-                return;
-
-            auto t2 = std::chrono::high_resolution_clock::now();
-            auto time_get_map_points = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
-            RCLCPP_DEBUG_STREAM(this->get_logger(), "Time to get current map points: " << time_get_map_points << " seconds");
-
-            mapPointsPub_->publish(mapPCL);
-            auto t3 = std::chrono::high_resolution_clock::now();
-            auto time_publish_map_points = std::chrono::duration_cast<std::chrono::duration<double>>(t3 - t2).count();
-            RCLCPP_DEBUG_STREAM(this->get_logger(), "Time to publish map points: " << time_publish_map_points << " seconds");
-            RCLCPP_DEBUG_STREAM(this->get_logger(), "=======================");
-
-            // Calculate the time taken for each line
-
-            // Print the time taken for each line
-            response->landmarks = mapPCL;
-        }
-    }
-
-    void RgbdSlamNode::resetActiveMapSrv(std::shared_ptr<rmw_request_id_t> request_header,
-                           std::shared_ptr<std_srvs::srv::SetBool::Request> request,
-                           std::shared_ptr<std_srvs::srv::SetBool::Response> response)
-    {
-        interface_->resetLocalMapping();
-    }
-
-    void RgbdSlamNode::publishMapData()
-    {
-        if (isTracked_)
-        {
-            auto start = std::chrono::high_resolution_clock::now();
-            slam_msgs::msg::SlamInfo slamInfoMsg;
-            RCLCPP_DEBUG_STREAM(this->get_logger(), "Publishing map data");
-            double tracking_freq = frequency_tracker_count_ / std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - frequency_tracker_clock_).count();
-            RCLCPP_INFO_STREAM(this->get_logger(), "Current ORB-SLAM3 tracking frequency: " << tracking_freq << " frames / sec");
-            frequency_tracker_clock_ = std::chrono::high_resolution_clock::now();
-            frequency_tracker_count_ = 0;
-            // publish the map data (current active keyframes etc)
-            slam_msgs::msg::MapData mapDataMsg;
-            interface_->mapDataToMsg(mapDataMsg, true, false);
-            mapDataPub_->publish(mapDataMsg);
-            slamInfoMsg.num_maps = interface_->getNumberOfMaps();
-            slamInfoMsg.num_keyframes_in_current_map = mapDataMsg.graph.poses_id.size();
-            slamInfoMsg.tracking_frequency = tracking_freq;
-            auto t1 = std::chrono::high_resolution_clock::now();
-            auto time_publishMapData = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - start).count();
-            RCLCPP_DEBUG_STREAM(this->get_logger(), "Time to create mapdata: " << time_publishMapData << " seconds");
-            RCLCPP_INFO_STREAM(this->get_logger(), "*************************");
-            slamInfoPub_->publish(slamInfoMsg);
-        }
-    }
-
-    void RgbdSlamNode::getMapServer(std::shared_ptr<rmw_request_id_t> request_header,
-                                    std::shared_ptr<slam_msgs::srv::GetMap::Request> request,
-                                    std::shared_ptr<slam_msgs::srv::GetMap::Response> response)
-    {
-        RCLCPP_INFO(this->get_logger(), "GetMap2 service called.");
-        slam_msgs::msg::MapData mapDataMsg;
-        interface_->mapDataToMsg(mapDataMsg, false, request->tracked_points, request->kf_id_for_landmarks);
-        response->data = mapDataMsg;
-    }
-
-    void RgbdSlamNode::getMapPointsInViewServer(std::shared_ptr<rmw_request_id_t> request_header,
-                                                std::shared_ptr<slam_msgs::srv::GetLandmarksInView::Request> request,
-                                                std::shared_ptr<slam_msgs::srv::GetLandmarksInView::Response> response)
-    {
-        RCLCPP_INFO(this->get_logger(), "GetMapPointsInView service called.");
-        std::vector<slam_msgs::msg::MapPoint> landmarks;
-        std::vector<ORB_SLAM3::MapPoint*> points;
-        interface_->mapPointsVisibleFromPose(request->pose, points, 1000, request->max_dist_pose_observation, request->max_angle_pose_observation);
-        auto affineMapToPos = interface_->getTypeConversionPtr()->poseToAffine(request->pose);
-        auto affinePosToMap = affineMapToPos.inverse();
-        // Populate the pose of the points vector into the ros message
-        for (const auto& point : points) {
-            slam_msgs::msg::MapPoint landmark;
-            Eigen::Vector3f landmark_position = point->GetWorldPos();
-            auto position = interface_->getTypeConversionPtr()->vector3fORBToROS(landmark_position);
-            position = interface_->getTypeConversionPtr()->transformPointWithReference<Eigen::Vector3f>(affinePosToMap, position);
-            // RCLCPP_INFO_STREAM(this->get_logger(), "x: " << position.x() << " y: " << position.y() << " z: " << position.z());
-            landmark.position.x = position.x();
-            landmark.position.y = position.y();
-            landmark.position.z = position.z();
-            landmarks.push_back(landmark);
-        }
-        response->map_points = landmarks;
-        auto cloud = interface_->getTypeConversionPtr()->MapPointsToPCL(points);
-        visibleLandmarksPub_->publish(cloud);
-
-        // Convert the pose in request to PoseStamped and publish
-        geometry_msgs::msg::PoseStamped pose_stamped;
-        pose_stamped.header.stamp = this->now();
-        pose_stamped.header.frame_id = "map"; // Assuming the frame is "map", adjust if needed
-        pose_stamped.pose = request->pose;
-
-        // Publish the PoseStamped
-        visibleLandmarksPose_->publish(pose_stamped);
     }
 }

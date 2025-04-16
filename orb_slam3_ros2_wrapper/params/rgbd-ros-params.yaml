@@ -2,7 +2,7 @@
 # The frame_ids are automatically namespaced in the rgbd.launch.py file.
 # If the robot namespace is "robot_0" then the frame_ids become "robot_0/camera_link"
 
-ORB_SLAM3_RGBD_ROS2:
+ORB_SLAM3_ROS2:
   ros__parameters:
     # slam related
     robot_base_frame: base_footprint

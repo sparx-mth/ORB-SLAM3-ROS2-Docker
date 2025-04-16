@@ -59,8 +59,9 @@ add_executable(rgbd
   src/type_conversion.cpp
   src/orb_slam3_interface.cpp
   src/time_profiler.cpp
+  src/base_slam_node.cpp
   src/rgbd/rgbd-slam-node.cpp
-  src/rgbd/rgbd.cpp
+  # src/rgbd/rgbd.cpp
 )
 ament_target_dependencies(rgbd rclcpp sensor_msgs cv_bridge message_filters ORB_SLAM3 Pangolin tf2_ros tf2_eigen slam_msgs pcl_ros pcl_conversions PCL nav_msgs std_srvs)
 
