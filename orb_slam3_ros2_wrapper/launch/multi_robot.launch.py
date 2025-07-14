@@ -33,7 +33,7 @@ def generate_launch_description():
                 "robot_z": str(robot_coordinates[i][2]),
             }.items(),
         )
-        for i in range(1)
+        for i in range(3)
     ]
 
     return LaunchDescription(

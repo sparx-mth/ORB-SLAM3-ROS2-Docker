@@ -52,4 +52,33 @@ def generate_launch_description():
                 output='screen'
             )
         )
+
+    # map_merger_node
+    launch_nodes.append(
+        Node(
+            package='orb_slam3_planner',
+            executable='map_merger_node',
+            name='map_merger_node',
+            output='screen'
+        )
+    )
+
+    # map_merger_node
+    launch_nodes.append(
+        Node(
+            package='orb_slam3_planner',
+            executable='shared_map_builder_node',
+            name='shared_map_builder_node',
+            output='screen'
+        )
+    )
+    # map_merger_node
+    launch_nodes.append(
+        Node(
+            package='orb_slam3_planner',
+            executable='global_map_visualizer',
+            name='global_map_visualizer',
+            output='screen'
+        )
+    )
     return LaunchDescription(launch_nodes)
