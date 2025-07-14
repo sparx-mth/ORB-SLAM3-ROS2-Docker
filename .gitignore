@@ -31,3 +31,5 @@ container_root/profilers/**
 **container_root/trav_ws/**
 **traversability_mapping**
 container_root/ros_env_vars.sh
+__pycache__/
+*.pyc
