@@ -63,7 +63,7 @@ class ImprovedMultiRobotVisualizer(Node):
             # Pose subscription
             self.create_subscription(
                 PoseStamped,
-                f'/robot_{robot_id}/orb_slam3/camera_pose',
+                f'/robot_{robot_id}/robot_pose_slam',
                 self.pose_callback_factory(robot_id),
                 10
             )

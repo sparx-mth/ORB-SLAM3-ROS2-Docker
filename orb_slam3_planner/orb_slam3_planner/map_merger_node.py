@@ -63,8 +63,8 @@ class ImprovedMapMergerNode(Node):
         for robot_id in self.robots:
             self.create_subscription(
                 PoseStamped,
-                f'/robot_{robot_id}/orb_slam3/camera_pose',
-                self.create_pose_callback(robot_id),
+                f'/robot_{robot_id}/robot_pose_slam',
+                self.pose_callback_factory(robot_id),
                 10
             )
 
@@ -93,15 +93,28 @@ class ImprovedMapMergerNode(Node):
 
         return transform
 
-    def create_pose_callback(self, robot_id):
-        """Create a callback for robot pose updates"""
-
+    def pose_callback_factory(self, robot_id):
         def callback(msg):
-            # Update the robot's transformation based on its current pose
-            # This helps refine the transformation if robots are moving
-            pass  # For now, we'll use fixed transformations
+            with self.vis_lock:
+                # Get pose in robot's local frame
+                local_pose = np.array([
+                    msg.pose.position.x,
+                    msg.pose.position.y,
+                    msg.pose.position.z,
+                    1.0
+                ])
 
-        return callback
+                # Transform to global frame
+                global_pose = self.robot_transforms[robot_id] @ local_pose
+                self.robot_poses[robot_id] = global_pose[:3]
+
+                # Add to trajectory
+                self.trajectories[robot_id].append(global_pose[:3].copy())
+
+                if not self.first_pose_received[robot_id]:
+                    self.first_pose_received[robot_id] = True
+                    self.should_reset_view = True
+
 
     def publish_transforms(self):
         """Publish TF transforms for visualization"""
