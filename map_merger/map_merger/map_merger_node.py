@@ -17,7 +17,7 @@ class MapMergerNode(Node):
         self.robots = {
             0: [-5.0, -7.0, 1.0], 
             1: [-1.0, 0.0, 1.65],
-            2 :[5.0, 5.0, 1.65],
+            # 2 :[5.0, 5.0, 1.65],
         }
 
         # Create a service client for each robot to get all landmarks in the map
@@ -25,14 +25,15 @@ class MapMergerNode(Node):
         for robot_id in self.robots:
             service_name = f'/robot_{robot_id}/orb_slam3/get_all_landmarks_in_map'
             self.agents_clients[robot_id] = self.create_client(GetAllLandmarksInMap, service_name)
+        
+        # Create a publisher for the merged map (PointCloud2)
+        self.map_publisher = self.create_publisher(PointCloud2, '/merged_map', 10)
 
         # Ensure the services are available
         for robot_id, client in self.agents_clients.items():
             while not client.wait_for_service(timeout_sec=30.0):
-                self.get_logger().info(f'Service for robot_{robot_id} not available, waiting...')
+                self.get_logger().info(f'Service for robot_{robot_id} not available, waiting...')        
         
-        # Create a publisher for the merged map (PointCloud2)
-        self.map_publisher = self.create_publisher(PointCloud2, '/merged_map', 10)
 
         # To store the merged map
         self.merged_map = []
@@ -44,10 +45,17 @@ class MapMergerNode(Node):
         # Create a timer that requests the map data every 1 seconds
         self.timer = self.create_timer(1.0, self.timer_callback)
 
+        # Add a periodic publisher timer (e.g., every 30 seconds)
+        self.periodic_pub_timer = self.create_timer(30.0, self.periodic_publish_callback)
+
     def timer_callback(self):
-        # For each robot, request the map data every 2 seconds
+        # For each robot, request the map data every 1 seconds
         for robot_id in self.robots:
             self.get_all_landmarks(robot_id)
+    
+    def periodic_publish_callback(self):
+        # Publish the merged map periodically, even if there is no update
+        self.publish_merged_map()
 
     def get_all_landmarks(self, robot_id):
         # Create a service request for getting all landmarks in the map
