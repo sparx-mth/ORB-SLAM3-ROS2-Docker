@@ -8,9 +8,6 @@ import time
 import numpy as np
 import std_msgs.msg
 
-# Import the new GlobalMapManager class
-from global_map_manager import GlobalMapManager 
-
 
 class MapMergerNode(Node):
     def __init__(self):
@@ -18,13 +15,10 @@ class MapMergerNode(Node):
 
         # List of robots with their initial positions
         self.robots = {
-            0: [-3.0, -7.0, 1.0], 
+            0: [-5.0, -7.0, 1.0], 
             1: [-1.0, 0.0, 1.65],
             2 :[5.0, 5.0, 1.65],
         }
-
-        # Initialize the GlobalMapManager
-        self.map_manager = GlobalMapManager(duplicate_check_radius=0.02)
 
         # Create a service client for each robot to get all landmarks in the map
         self.agents_clients = {}
@@ -68,66 +62,75 @@ class MapMergerNode(Node):
         try:
             # Get the result from the service call
             response = future.result()
-            
+
             if response:
+
                 self.get_logger().info(f'Received {len(response.landmarks.data)} landmarks from robot_{robot_id}.')
 
                 # Convert PointCloud2 data into a list of points
+
                 points = list(pc2.read_points(response.landmarks, field_names=("x", "y", "z"), skip_nans=True))
 
-
                 # Filter out invalid points (those with NaN values)
+
                 valid_points = self.filter_invalid_points(points)
-                
+
                 if len(valid_points) != len(points):
+
                     self.get_logger().warn(f"Skipped {len(points) - len(valid_points)} invalid map points from robot_{robot_id}.")
 
                 # Check for significant change in the map (you could use the same method for change detection here)
+
                 if self.is_significant_change(robot_id, valid_points):
+
                     # Transform landmarks from robot's frame to a global frame
-                    transformed_points_with_id = self.transform_landmarks_to_global(valid_points, robot_id)
 
-                    # Add points to the merged map using the GlobalMapManager
-                    points_added_count = self.map_manager.add_points(transformed_points_with_id)
-                    
-                    if points_added_count > 0:
-                        self.get_logger().info(f'Added {points_added_count} new unique points from robot {robot_id}. Total merged points: {self.map_manager.get_num_points()}')
-                    else:
-                        self.get_logger().info(f'No new unique points added from robot {robot_id}. Total merged points: {self.map_manager.get_num_points()}')
+                    transformed_points = self.transform_landmarks_to_global(valid_points, robot_id)
 
-                    # Always publish the map after a potential update
+                    # Merge the points into the global map
+
+                    self.merged_map.extend(transformed_points)
+
+                    # Publish the merged map
+
                     self.publish_merged_map()
+                    # Update the last landmarks for this robot
+                    self.last_landmarks[robot_id] = valid_points
 
-                # Update the last landmarks for this robot
-                self.last_landmarks[robot_id] = valid_points
+                else:
 
-            else:
-                self.get_logger().info(f'No landmarks received from robot_{robot_id}.')
+                    self.get_logger().info(f'No landmarks received from robot_{robot_id}.')
+
         except Exception as e:
+
             self.get_logger().error(f'Service call failed for robot_{robot_id}: {str(e)}')
 
-    def filter_invalid_points(self, point_cloud_data):
+
+    def filter_invalid_points(self, point_cloud):
+        # Filter out invalid points (those with NaN values)
+
         valid_points = []
-        for point in point_cloud_data:
-            if not (np.isnan(point[0]) or np.isnan(point[1]) or np.isnan(point[2]) or
-                    np.isinf(point[0]) or np.isinf(point[1]) or np.isinf(point[2])):
+        for point in point_cloud:
+            if not (np.isnan(point[0]) or np.isnan(point[1]) or np.isnan(point[2])):
                 valid_points.append(point)
         return valid_points
 
     def publish_merged_map(self): 
-        current_merged_map = self.map_manager.get_merged_map_data()
-
-        if not current_merged_map:
+        # Convert the merged map to a PointCloud2 message and publish it
+        if not self.merged_map: # Check if map is empty
+            self.get_logger().info('Merged map is empty, not publishing.')
             return
 
         header = std_msgs.msg.Header()
         header.stamp = self.get_clock().now().to_msg()
-        header.frame_id = "base_footprint" 
+        header.frame_id = "base_footprint" # Ensure this frame_id is correct relative to your RViz fixed_frame
         
         pc2_msg = PointCloud2()
         pc2_msg.header = header
         pc2_msg.height = 1
-        pc2_msg.width = len(current_merged_map)
+        pc2_msg.width = len(self.merged_map)
+        
+        # Define point fields (x, y, z, rgb)
         pc2_msg.fields = [
             PointField(name="x", offset=0, datatype=PointField.FLOAT32, count=1),
             PointField(name="y", offset=4, datatype=PointField.FLOAT32, count=1),
@@ -135,28 +138,44 @@ class MapMergerNode(Node):
             PointField(name="rgb", offset=12, datatype=PointField.UINT32, count=1)
         ]
         pc2_msg.is_bigendian = False
-        pc2_msg.point_step = 16 
+        pc2_msg.point_step = 16  # 3 floats (x, y, z) + 1 UINT32 (rgb)
         pc2_msg.row_step = pc2_msg.point_step * pc2_msg.width
         
+        # Define RGB values for each robot (as 8-bit RGB values)
+        # Using a list of tuples for ordered access, or keep dict if IDs are sparse
         colors = {
-            0: [0, 0, 255],
-            1: [0, 255, 0],
-            2: [255, 0, 0],
+            0: [0, 0, 255],  # Blue (robot 0)
+            1: [0, 255, 0],  # Green (robot 1)
+            2: [255, 0, 0],  # Red (robot 2)
+            # Add more colors for more robots if needed
+            # 3: [255, 255, 0], # Yellow
+            # 4: [0, 255, 255], # Cyan
         }
         
         points_data = bytearray() 
 
-        for point_data in current_merged_map:
+        # Add the points and color them based on their origin robot_id
+        for point_data in self.merged_map: # Renamed point to point_data for clarity
+            # point_data is now expected to be [x, y, z, original_robot_id]
             x, y, z = point_data[0], point_data[1], point_data[2]
-            original_robot_id = point_data[3]
-            rgb = colors.get(original_robot_id, [128, 128, 128])
+            original_robot_id = point_data[3] # Extract the robot_id for this specific point
+
+            # Get the RGB values for the specific robot that generated this point
+            rgb = colors.get(original_robot_id, [128, 128, 128]) # Default to grey if ID not found
+            
+            # Pack the RGB values into a single 32-bit integer: 0xAARRGGBB
             rgb_value = (0xFF << 24) | (rgb[0] << 16) | (rgb[1] << 8) | rgb[2]
+            
+            # Pack the x, y, z as float32 and rgb_value as uint32
             packed_point = struct.pack('<fffI', x, y, z, rgb_value)
             points_data.extend(packed_point)
 
-        pc2_msg.data = bytes(points_data)
+        pc2_msg.data = bytes(points_data) # Convert bytearray to bytes for the message
+        
+        # Publish the message
         self.map_publisher.publish(pc2_msg)
-        self.get_logger().info(f'Merged map published with {self.map_manager.get_num_points()} points.')
+        self.get_logger().info(f'Merged map published with {len(self.merged_map)} points.')
+
 
     def is_significant_change(self, robot_id, new_points):
         # This remains largely the same, as it's a local check for each robot's map stream.
@@ -188,18 +207,14 @@ class MapMergerNode(Node):
         return False
 
     def transform_landmarks_to_global(self, map_points, robot_id):
+        # Transform the points to global coordinates based on robot's position (simple translation here)
         robot_position = np.array(self.robots[robot_id])
-        transformed_points_with_id = [] 
+        transformed_points_with_id = [] # Now also storing robot_id
 
         for point in map_points:
-            # Try to extract x, y, z regardless of type
-            try:
-                x, y, z = point[0], point[1], point[2]
-            except Exception as e:
-                raise ValueError(f"Could not extract 3D coordinates from point: {point}") from e
-            point_xyz = np.array([x, y, z], dtype=np.float32)
-            transformed_point_xyz = point_xyz + robot_position
-            transformed_points_with_id.append([*transformed_point_xyz.tolist(), robot_id])
+            transformed_point_xyz = np.array([point[0], point[1], point[2]]) + robot_position
+            # Append the original robot_id to the transformed point
+            transformed_points_with_id.append([transformed_point_xyz[0], transformed_point_xyz[1], transformed_point_xyz[2], robot_id])
         
         return transformed_points_with_id
 
