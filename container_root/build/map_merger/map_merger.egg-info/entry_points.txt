@@ -1,0 +1,3 @@
+[console_scripts]
+map_merger_node = map_merger.map_merger_node:main
+

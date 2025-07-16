@@ -1,0 +1,40 @@
+[0.328s] Invoking command in '/root/colcon_ws/src/map_merger': AMENT_PREFIX_PATH=/root/install/slam_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/root/install/slam_msgs:${CMAKE_PREFIX_PATH} LD_LIBRARY_PATH=/root/install/slam_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/root/build/map_merger/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/root/install/map_merger/lib/python3.10/site-packages:/root/install/slam_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/map_merger build --build-base /root/build/map_merger/build install --record /root/build/map_merger/install.log --single-version-externally-managed install_data
+[0.410s] running egg_info
+[0.410s] creating ../../../build/map_merger/map_merger.egg-info
+[0.410s] writing ../../../build/map_merger/map_merger.egg-info/PKG-INFO
+[0.411s] writing dependency_links to ../../../build/map_merger/map_merger.egg-info/dependency_links.txt
+[0.411s] writing entry points to ../../../build/map_merger/map_merger.egg-info/entry_points.txt
+[0.411s] writing requirements to ../../../build/map_merger/map_merger.egg-info/requires.txt
+[0.411s] writing top-level names to ../../../build/map_merger/map_merger.egg-info/top_level.txt
+[0.411s] writing manifest file '../../../build/map_merger/map_merger.egg-info/SOURCES.txt'
+[0.411s] reading manifest file '../../../build/map_merger/map_merger.egg-info/SOURCES.txt'
+[0.411s] writing manifest file '../../../build/map_merger/map_merger.egg-info/SOURCES.txt'
+[0.412s] running build
+[0.412s] running build_py
+[0.412s] creating /root/build/map_merger/build
+[0.412s] creating /root/build/map_merger/build/lib
+[0.412s] creating /root/build/map_merger/build/lib/map_merger
+[0.412s] copying map_merger/__init__.py -> /root/build/map_merger/build/lib/map_merger
+[0.412s] copying map_merger/map_merger_node.py -> /root/build/map_merger/build/lib/map_merger
+[0.412s] copying map_merger/global_map_manager.py -> /root/build/map_merger/build/lib/map_merger
+[0.412s] running install
+[0.413s] running install_lib
+[0.413s] creating /root/install/map_merger/lib/python3.10/site-packages/map_merger
+[0.413s] copying /root/build/map_merger/build/lib/map_merger/map_merger_node.py -> /root/install/map_merger/lib/python3.10/site-packages/map_merger
+[0.413s] copying /root/build/map_merger/build/lib/map_merger/__init__.py -> /root/install/map_merger/lib/python3.10/site-packages/map_merger
+[0.413s] copying /root/build/map_merger/build/lib/map_merger/global_map_manager.py -> /root/install/map_merger/lib/python3.10/site-packages/map_merger
+[0.413s] byte-compiling /root/install/map_merger/lib/python3.10/site-packages/map_merger/map_merger_node.py to map_merger_node.cpython-310.pyc
+[0.413s] byte-compiling /root/install/map_merger/lib/python3.10/site-packages/map_merger/__init__.py to __init__.cpython-310.pyc
+[0.413s] byte-compiling /root/install/map_merger/lib/python3.10/site-packages/map_merger/global_map_manager.py to global_map_manager.cpython-310.pyc
+[0.414s] running install_data
+[0.414s] creating /root/install/map_merger/share/ament_index
+[0.414s] creating /root/install/map_merger/share/ament_index/resource_index
+[0.414s] creating /root/install/map_merger/share/ament_index/resource_index/packages
+[0.414s] copying resource/map_merger -> /root/install/map_merger/share/ament_index/resource_index/packages
+[0.414s] copying package.xml -> /root/install/map_merger/share/map_merger
+[0.414s] running install_egg_info
+[0.414s] Copying ../../../build/map_merger/map_merger.egg-info to /root/install/map_merger/lib/python3.10/site-packages/map_merger-0.0.0-py3.10.egg-info
+[0.415s] running install_scripts
+[0.424s] Installing map_merger_node script to /root/install/map_merger/lib/map_merger
+[0.424s] writing list of installed files to '/root/build/map_merger/install.log'
+[0.436s] Invoked command in '/root/colcon_ws/src/map_merger' returned '0': AMENT_PREFIX_PATH=/root/install/slam_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/root/install/slam_msgs:${CMAKE_PREFIX_PATH} LD_LIBRARY_PATH=/root/install/slam_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/root/build/map_merger/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/root/install/map_merger/lib/python3.10/site-packages:/root/install/slam_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/map_merger build --build-base /root/build/map_merger/build install --record /root/build/map_merger/install.log --single-version-externally-managed install_data

@@ -1,2 +1,7 @@
 [safe]
 	directory = /home/orb/ORB_SLAM3
+[user]
+	name = Shir Ben Ami
+	email = shirbenami@gmail.com
+[credential]
+	helper = "!f() { /root/.vscode-server/bin/2901c5ac6db8a986a5666c3af51ff804d05af0d4/node /tmp/vscode-remote-containers-b871cf3d-01d9-4ce5-9243-0351b3fbeb0e.js git-credential-helper $*; }; f"

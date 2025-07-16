@@ -1,0 +1,50 @@
+running egg_info
+creating ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info
+writing ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/PKG-INFO
+writing dependency_links to ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/dependency_links.txt
+writing entry points to ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/entry_points.txt
+writing requirements to ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/requires.txt
+writing top-level names to ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/top_level.txt
+writing manifest file '../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/SOURCES.txt'
+reading manifest file '../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/SOURCES.txt'
+writing manifest file '../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /root/build/orb_slam3_planner/build
+creating /root/build/orb_slam3_planner/build/lib
+creating /root/build/orb_slam3_planner/build/lib/orb_slam3_planner
+copying orb_slam3_planner/__init__.py -> /root/build/orb_slam3_planner/build/lib/orb_slam3_planner
+copying orb_slam3_planner/landmark_publisher_node.py -> /root/build/orb_slam3_planner/build/lib/orb_slam3_planner
+copying orb_slam3_planner/map_builder_module.py -> /root/build/orb_slam3_planner/build/lib/orb_slam3_planner
+copying orb_slam3_planner/autonomous_explorer_visualizer.py -> /root/build/orb_slam3_planner/build/lib/orb_slam3_planner
+copying orb_slam3_planner/main_node.py -> /root/build/orb_slam3_planner/build/lib/orb_slam3_planner
+copying orb_slam3_planner/planner_module.py -> /root/build/orb_slam3_planner/build/lib/orb_slam3_planner
+copying orb_slam3_planner/drone_controller_module.py -> /root/build/orb_slam3_planner/build/lib/orb_slam3_planner
+running install
+running install_lib
+creating /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner
+copying /root/build/orb_slam3_planner/build/lib/orb_slam3_planner/__init__.py -> /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner
+copying /root/build/orb_slam3_planner/build/lib/orb_slam3_planner/landmark_publisher_node.py -> /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner
+copying /root/build/orb_slam3_planner/build/lib/orb_slam3_planner/map_builder_module.py -> /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner
+copying /root/build/orb_slam3_planner/build/lib/orb_slam3_planner/autonomous_explorer_visualizer.py -> /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner
+copying /root/build/orb_slam3_planner/build/lib/orb_slam3_planner/main_node.py -> /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner
+copying /root/build/orb_slam3_planner/build/lib/orb_slam3_planner/planner_module.py -> /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner
+copying /root/build/orb_slam3_planner/build/lib/orb_slam3_planner/drone_controller_module.py -> /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner
+byte-compiling /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner/__init__.py to __init__.cpython-310.pyc
+byte-compiling /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner/landmark_publisher_node.py to landmark_publisher_node.cpython-310.pyc
+byte-compiling /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner/map_builder_module.py to map_builder_module.cpython-310.pyc
+byte-compiling /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner/autonomous_explorer_visualizer.py to autonomous_explorer_visualizer.cpython-310.pyc
+byte-compiling /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner/main_node.py to main_node.cpython-310.pyc
+byte-compiling /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner/planner_module.py to planner_module.cpython-310.pyc
+byte-compiling /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner/drone_controller_module.py to drone_controller_module.cpython-310.pyc
+running install_data
+copying package.xml -> /root/install/orb_slam3_planner/share/orb_slam3_planner
+creating /root/install/orb_slam3_planner/share/orb_slam3_planner/launch
+copying launch/orb_slam3_system.launch.py -> /root/install/orb_slam3_planner/share/orb_slam3_planner/launch
+running install_egg_info
+Copying ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info to /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner-0.0.1-py3.10.egg-info
+running install_scripts
+Installing autonomous_explorer_node script to /root/install/orb_slam3_planner/lib/orb_slam3_planner
+Installing autonomous_explorer_visualizer script to /root/install/orb_slam3_planner/lib/orb_slam3_planner
+Installing landmark_publisher_node script to /root/install/orb_slam3_planner/lib/orb_slam3_planner
+writing list of installed files to '/root/build/orb_slam3_planner/install.log'

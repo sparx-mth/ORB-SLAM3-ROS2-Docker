@@ -1,0 +1,6 @@
+source;share/orb_slam3_planner/hook/pythonpath.ps1
+source;share/orb_slam3_planner/hook/pythonpath.dsv
+source;share/orb_slam3_planner/hook/pythonpath.sh
+source;share/orb_slam3_planner/hook/ament_prefix_path.ps1
+source;share/orb_slam3_planner/hook/ament_prefix_path.dsv
+source;share/orb_slam3_planner/hook/ament_prefix_path.sh

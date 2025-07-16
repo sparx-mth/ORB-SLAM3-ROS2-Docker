@@ -1,0 +1,97 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Release-64412983c27da701384c.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4
+					]
+				}
+			],
+			"name" : "Release",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "orb_slam3_map_generator",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "depth_image_to_pcl::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-depth_image_to_pcl-Release-a39c2a4b817e228a510a.json",
+					"name" : "depth_image_to_pcl",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "get_landmarks_simulator::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-get_landmarks_simulator-Release-c9e7d365f45f2d7ee61c.json",
+					"name" : "get_landmarks_simulator",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "orb_slam3_map_generator_uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-orb_slam3_map_generator_uninstall-Release-822a749a84579b25c40b.json",
+					"name" : "orb_slam3_map_generator_uninstall",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "pointcloud_stitcher::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-pointcloud_stitcher-Release-5c9db8668279cfee02cd.json",
+					"name" : "pointcloud_stitcher",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-uninstall-Release-c7ce8ab0fc2a472f326d.json",
+					"name" : "uninstall",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/root/build/orb_slam3_map_generator",
+		"source" : "/root/colcon_ws/src/orb_slam3_map_generator"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

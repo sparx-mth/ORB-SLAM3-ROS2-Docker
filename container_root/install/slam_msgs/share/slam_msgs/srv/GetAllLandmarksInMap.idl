@@ -1,0 +1,19 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from slam_msgs/srv/GetAllLandmarksInMap.srv
+// generated code does not contain a copyright notice
+
+#include "sensor_msgs/msg/PointCloud2.idl"
+
+module slam_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "get all the landmarks of the current active map")
+    struct GetAllLandmarksInMap_Request {
+      @default (value=TRUE)
+      boolean request;
+    };
+    struct GetAllLandmarksInMap_Response {
+      sensor_msgs::msg::PointCloud2 landmarks;
+    };
+  };
+};

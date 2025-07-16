@@ -1,0 +1,29 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from slam_msgs/srv/GetGlobalPointCloud.srv
+// generated code does not contain a copyright notice
+
+
+module slam_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "This is for 3D Map stitching and this is not feature complete.")
+    struct GetGlobalPointCloud_Request {
+      @default (value=0.3)
+      float global_voxel_resolution;
+
+      @default (value=0.3)
+      float local_voxel_resolution;
+
+      @verbatim (language="comment", text=
+        "points above this discarded")
+      @default (value=2.0)
+      float z_thresh_max;
+
+      @default (value=TRUE)
+      boolean get_grayscale;
+    };
+    struct GetGlobalPointCloud_Response {
+      boolean response;
+    };
+  };
+};

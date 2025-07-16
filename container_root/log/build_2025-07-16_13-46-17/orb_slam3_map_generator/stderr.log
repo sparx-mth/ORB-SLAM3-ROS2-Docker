@@ -1,0 +1,29 @@
+[0mBuild type: Release[0m
+[33mCMake Warning (dev) at CMakeLists.txt:40 (find_package):
+  Policy CMP0074 is not set: find_package uses <PackageName>_ROOT variables.
+  Run "cmake --help-policy CMP0074" for policy details.  Use the cmake_policy
+  command to set the policy and suppress this warning.
+
+  CMake variable PCL_ROOT is set to:
+
+    /usr
+
+  For compatibility, CMake is ignoring the variable.
+This warning is for project developers.  Use -Wno-dev to suppress it.
+[0m
+[01m[K/root/colcon_ws/src/orb_slam3_map_generator/src/get_landmarks_simulator.cpp:[m[K In member function ‘[01m[Kvoid MapPointsNode::handleGetLandmarksInView(std::shared_ptr<slam_msgs::srv::GetLandmarksInView_Request_<std::allocator<void> > >, std::shared_ptr<slam_msgs::srv::GetLandmarksInView_Response_<std::allocator<void> > >)[m[K’:
+[01m[K/root/colcon_ws/src/orb_slam3_map_generator/src/get_landmarks_simulator.cpp:157:20:[m[K [01;35m[Kwarning: [m[Kunused variable ‘[01m[Kdz[m[K’ [[01;35m[K-Wunused-variable[m[K]
+  157 |             double [01;35m[Kdz[m[K = map_point.position.z - pose_z;
+      |                    [01;35m[K^~[m[K
+[01m[K/root/colcon_ws/src/orb_slam3_map_generator/src/stitch_pcl.cpp:[m[K In constructor ‘[01m[KDepthPointcloudStitcher::DepthPointcloudStitcher()[m[K’:
+[01m[K/root/colcon_ws/src/orb_slam3_map_generator/src/stitch_pcl.cpp:346:12:[m[K [01;35m[Kwarning: [m[K‘[01m[KDepthPointcloudStitcher::buffer_duration_[m[K’ will be initialized after [[01;35m[K-Wreorder[m[K]
+  346 |     double [01;35m[Kbuffer_duration_[m[K;
+      |            [01;35m[K^~~~~~~~~~~~~~~~[m[K
+[01m[K/root/colcon_ws/src/orb_slam3_map_generator/src/stitch_pcl.cpp:340:21:[m[K [01;35m[Kwarning: [m[K  ‘[01m[Ktf2_ros::Buffer DepthPointcloudStitcher::tf_buffer_[m[K’ [[01;35m[K-Wreorder[m[K]
+  340 |     tf2_ros::Buffer [01;35m[Ktf_buffer_[m[K;
+      |                     [01;35m[K^~~~~~~~~~[m[K
+[01m[K/root/colcon_ws/src/orb_slam3_map_generator/src/stitch_pcl.cpp:28:5:[m[K [01;35m[Kwarning: [m[K  when initialized here [[01;35m[K-Wreorder[m[K]
+   28 |     [01;35m[KDepthPointcloudStitcher[m[K()
+      |     [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~[m[K
+/usr/bin/ld: warning: libopencv_imgcodecs.so.4.5d, needed by /opt/ros/humble/lib/libcv_bridge.so, may conflict with libopencv_imgcodecs.so.4.4
+/usr/bin/ld: warning: libopencv_core.so.4.5d, needed by /opt/ros/humble/lib/libcv_bridge.so, may conflict with libopencv_core.so.4.4

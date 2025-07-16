@@ -1,0 +1,52 @@
+[0.323s] Invoking command in '/root/colcon_ws/src/orb_slam3_planner': AMENT_PREFIX_PATH=/root/install/slam_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/root/install/slam_msgs:${CMAKE_PREFIX_PATH} LD_LIBRARY_PATH=/root/install/slam_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/root/build/orb_slam3_planner/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/root/install/orb_slam3_planner/lib/python3.10/site-packages:/root/install/slam_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/orb_slam3_planner build --build-base /root/build/orb_slam3_planner/build install --record /root/build/orb_slam3_planner/install.log --single-version-externally-managed install_data
+[0.405s] running egg_info
+[0.405s] creating ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info
+[0.405s] writing ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/PKG-INFO
+[0.406s] writing dependency_links to ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/dependency_links.txt
+[0.406s] writing entry points to ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/entry_points.txt
+[0.406s] writing requirements to ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/requires.txt
+[0.406s] writing top-level names to ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/top_level.txt
+[0.406s] writing manifest file '../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/SOURCES.txt'
+[0.406s] reading manifest file '../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/SOURCES.txt'
+[0.407s] writing manifest file '../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/SOURCES.txt'
+[0.407s] running build
+[0.407s] running build_py
+[0.407s] creating /root/build/orb_slam3_planner/build
+[0.407s] creating /root/build/orb_slam3_planner/build/lib
+[0.407s] creating /root/build/orb_slam3_planner/build/lib/orb_slam3_planner
+[0.407s] copying orb_slam3_planner/__init__.py -> /root/build/orb_slam3_planner/build/lib/orb_slam3_planner
+[0.407s] copying orb_slam3_planner/landmark_publisher_node.py -> /root/build/orb_slam3_planner/build/lib/orb_slam3_planner
+[0.407s] copying orb_slam3_planner/map_builder_module.py -> /root/build/orb_slam3_planner/build/lib/orb_slam3_planner
+[0.407s] copying orb_slam3_planner/autonomous_explorer_visualizer.py -> /root/build/orb_slam3_planner/build/lib/orb_slam3_planner
+[0.407s] copying orb_slam3_planner/main_node.py -> /root/build/orb_slam3_planner/build/lib/orb_slam3_planner
+[0.407s] copying orb_slam3_planner/planner_module.py -> /root/build/orb_slam3_planner/build/lib/orb_slam3_planner
+[0.407s] copying orb_slam3_planner/drone_controller_module.py -> /root/build/orb_slam3_planner/build/lib/orb_slam3_planner
+[0.407s] running install
+[0.407s] running install_lib
+[0.407s] creating /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner
+[0.407s] copying /root/build/orb_slam3_planner/build/lib/orb_slam3_planner/__init__.py -> /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner
+[0.407s] copying /root/build/orb_slam3_planner/build/lib/orb_slam3_planner/landmark_publisher_node.py -> /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner
+[0.408s] copying /root/build/orb_slam3_planner/build/lib/orb_slam3_planner/map_builder_module.py -> /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner
+[0.408s] copying /root/build/orb_slam3_planner/build/lib/orb_slam3_planner/autonomous_explorer_visualizer.py -> /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner
+[0.408s] copying /root/build/orb_slam3_planner/build/lib/orb_slam3_planner/main_node.py -> /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner
+[0.408s] copying /root/build/orb_slam3_planner/build/lib/orb_slam3_planner/planner_module.py -> /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner
+[0.408s] copying /root/build/orb_slam3_planner/build/lib/orb_slam3_planner/drone_controller_module.py -> /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner
+[0.408s] byte-compiling /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner/__init__.py to __init__.cpython-310.pyc
+[0.408s] byte-compiling /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner/landmark_publisher_node.py to landmark_publisher_node.cpython-310.pyc
+[0.408s] byte-compiling /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner/map_builder_module.py to map_builder_module.cpython-310.pyc
+[0.409s] byte-compiling /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner/autonomous_explorer_visualizer.py to autonomous_explorer_visualizer.cpython-310.pyc
+[0.409s] byte-compiling /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner/main_node.py to main_node.cpython-310.pyc
+[0.410s] byte-compiling /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner/planner_module.py to planner_module.cpython-310.pyc
+[0.410s] byte-compiling /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner/drone_controller_module.py to drone_controller_module.cpython-310.pyc
+[0.410s] running install_data
+[0.410s] copying package.xml -> /root/install/orb_slam3_planner/share/orb_slam3_planner
+[0.410s] creating /root/install/orb_slam3_planner/share/orb_slam3_planner/launch
+[0.410s] copying launch/orb_slam3_system.launch.py -> /root/install/orb_slam3_planner/share/orb_slam3_planner/launch
+[0.410s] running install_egg_info
+[0.411s] Copying ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info to /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner-0.0.1-py3.10.egg-info
+[0.411s] running install_scripts
+[0.420s] Installing autonomous_explorer_node script to /root/install/orb_slam3_planner/lib/orb_slam3_planner
+[0.420s] Installing autonomous_explorer_visualizer script to /root/install/orb_slam3_planner/lib/orb_slam3_planner
+[0.420s] Installing landmark_publisher_node script to /root/install/orb_slam3_planner/lib/orb_slam3_planner
+[0.420s] writing list of installed files to '/root/build/orb_slam3_planner/install.log'
+[0.435s] Invoked command in '/root/colcon_ws/src/orb_slam3_planner' returned '0': AMENT_PREFIX_PATH=/root/install/slam_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/root/install/slam_msgs:${CMAKE_PREFIX_PATH} LD_LIBRARY_PATH=/root/install/slam_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/root/build/orb_slam3_planner/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/root/install/orb_slam3_planner/lib/python3.10/site-packages:/root/install/slam_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/orb_slam3_planner build --build-base /root/build/orb_slam3_planner/build install --record /root/build/orb_slam3_planner/install.log --single-version-externally-managed install_data

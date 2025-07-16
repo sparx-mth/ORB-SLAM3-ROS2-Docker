@@ -1,0 +1,4 @@
+source;share/orb_slam3_map_generator/local_setup.bash
+source;share/orb_slam3_map_generator/local_setup.dsv
+source;share/orb_slam3_map_generator/local_setup.sh
+source;share/orb_slam3_map_generator/local_setup.zsh

@@ -1,0 +1,38 @@
+running egg_info
+creating ../../../build/map_merger/map_merger.egg-info
+writing ../../../build/map_merger/map_merger.egg-info/PKG-INFO
+writing dependency_links to ../../../build/map_merger/map_merger.egg-info/dependency_links.txt
+writing entry points to ../../../build/map_merger/map_merger.egg-info/entry_points.txt
+writing requirements to ../../../build/map_merger/map_merger.egg-info/requires.txt
+writing top-level names to ../../../build/map_merger/map_merger.egg-info/top_level.txt
+writing manifest file '../../../build/map_merger/map_merger.egg-info/SOURCES.txt'
+reading manifest file '../../../build/map_merger/map_merger.egg-info/SOURCES.txt'
+writing manifest file '../../../build/map_merger/map_merger.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /root/build/map_merger/build
+creating /root/build/map_merger/build/lib
+creating /root/build/map_merger/build/lib/map_merger
+copying map_merger/__init__.py -> /root/build/map_merger/build/lib/map_merger
+copying map_merger/map_merger_node.py -> /root/build/map_merger/build/lib/map_merger
+copying map_merger/global_map_manager.py -> /root/build/map_merger/build/lib/map_merger
+running install
+running install_lib
+creating /root/install/map_merger/lib/python3.10/site-packages/map_merger
+copying /root/build/map_merger/build/lib/map_merger/map_merger_node.py -> /root/install/map_merger/lib/python3.10/site-packages/map_merger
+copying /root/build/map_merger/build/lib/map_merger/__init__.py -> /root/install/map_merger/lib/python3.10/site-packages/map_merger
+copying /root/build/map_merger/build/lib/map_merger/global_map_manager.py -> /root/install/map_merger/lib/python3.10/site-packages/map_merger
+byte-compiling /root/install/map_merger/lib/python3.10/site-packages/map_merger/map_merger_node.py to map_merger_node.cpython-310.pyc
+byte-compiling /root/install/map_merger/lib/python3.10/site-packages/map_merger/__init__.py to __init__.cpython-310.pyc
+byte-compiling /root/install/map_merger/lib/python3.10/site-packages/map_merger/global_map_manager.py to global_map_manager.cpython-310.pyc
+running install_data
+creating /root/install/map_merger/share/ament_index
+creating /root/install/map_merger/share/ament_index/resource_index
+creating /root/install/map_merger/share/ament_index/resource_index/packages
+copying resource/map_merger -> /root/install/map_merger/share/ament_index/resource_index/packages
+copying package.xml -> /root/install/map_merger/share/map_merger
+running install_egg_info
+Copying ../../../build/map_merger/map_merger.egg-info to /root/install/map_merger/lib/python3.10/site-packages/map_merger-0.0.0-py3.10.egg-info
+running install_scripts
+Installing map_merger_node script to /root/install/map_merger/lib/map_merger
+writing list of installed files to '/root/build/map_merger/install.log'
