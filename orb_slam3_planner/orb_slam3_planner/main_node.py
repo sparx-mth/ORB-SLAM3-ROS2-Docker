@@ -58,7 +58,7 @@ class AutonomousExplorerNode(Node):
         # ======================
         self.camera_fov = math.radians(60)
         self.camera_range = 10.0
-        self.min_points_for_obstacle = 15
+        self.min_points_for_obstacle = 20
 
         # ======================
         # Motion Parameters
@@ -282,7 +282,7 @@ class AutonomousExplorerNode(Node):
             tx, ty = self.target
             distance = math.sqrt((tx - rx) ** 2 + (ty - ry) ** 2)
 
-            if distance < 2.0:
+            if distance < self.exploration_radius:
                 self.get_logger().info("Reached target.")
                 self.visited_targets.add((tx, ty))
                 self.state = "EXPLORING"

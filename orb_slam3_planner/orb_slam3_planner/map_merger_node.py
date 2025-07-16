@@ -23,7 +23,7 @@ class ImprovedMapMergerNode(Node):
         self.robots = {
             0: {'position': [-5.0, -7.0, 1.0], 'orientation': [0.0, 0.0, 0.0]},  # Blue
             1: {'position': [-1.0, 0.0, 1.65], 'orientation': [0.0, 0.0, 0.0]},  # Green
-            2: {'position': [5.0, 5.0, 1.65], 'orientation': [0.0, 0.0, 0.0]}  # Red
+            # 2: {'position': [5.0, 5.0, 1.65], 'orientation': [0.0, 0.0, 0.0]}  # Red
         }
 
         # TF2 for coordinate transformations
