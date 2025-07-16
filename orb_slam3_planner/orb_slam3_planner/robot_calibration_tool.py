@@ -21,17 +21,17 @@ class RobotCalibrationTool(Node):
         # Default robot configurations
         self.robot_configs = {
             0: {
-                'position': [-5.0, -7.0, 1.0],
+                'position': [-5.0, -7.0, 0.0],
                 'orientation': [0.0, 0.0, 0.0],  # roll, pitch, yaw in radians
                 'description': 'Robot 0 (Blue)'
             },
             1: {
-                'position': [-1.0, 0.0, 1.65],
+                'position': [-1.0, 0.0, 0.0],
                 'orientation': [0.0, 0.0, 0.0],
                 'description': 'Robot 1 (Green)'
             },
             2: {
-                'position': [5.0, 5.0, 1.65],
+                'position': [5.0, 5.0, 0.0],
                 'orientation': [0.0, 0.0, 0.0],
                 'description': 'Robot 2 (Red)'
             }

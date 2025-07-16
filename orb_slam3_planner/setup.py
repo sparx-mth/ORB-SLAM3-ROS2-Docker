@@ -19,15 +19,15 @@ setup(
     license='MIT',
     entry_points={
         'console_scripts': [
-            # 'map_builder_node = orb_slam3_planner.map_builder_node:main',
+            'map_builder_node = orb_slam3_planner.map_builder_node:main',
             'landmark_publisher_node = orb_slam3_planner.landmark_publisher_node:main',
-            'map_merger_node = orb_slam3_planner.map_merger_node:main',
+            # 'map_merger_node = orb_slam3_planner.map_merger_node:main',
             # 'shared_map_builder_node = orb_slam3_planner.shared_map_builder_node:main',
-            # 'autonomous_explorer_node = orb_slam3_planner.main_node:main',
-            # 'autonomous_explorer_visualizer = orb_slam3_planner.autonomous_explorer_visualizer:main',
-            'global_map_visualizer = orb_slam3_planner.global_map_visualizer:main',
-            'multi_robot_visualizer = orb_slam3_planner.multi_robot_visualizer:main',
-            'robot_calibration_tool = orb_slam3_planner.robot_calibration_tool:main',
+            'autonomous_explorer_node = orb_slam3_planner.main_node:main',
+            'autonomous_explorer_visualizer = orb_slam3_planner.autonomous_explorer_visualizer:main',
+            # 'global_map_visualizer = orb_slam3_planner.global_map_visualizer:main',
+            # 'multi_robot_visualizer = orb_slam3_planner.multi_robot_visualizer:main',
+            # 'robot_calibration_tool = orb_slam3_planner.robot_calibration_tool:main',
         ],
     },
 )

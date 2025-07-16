@@ -9,7 +9,7 @@ def generate_launch_description():
 
     launch_nodes = []
 
-    for i in range(0, 3):
+    for i in range(0, 1):
         robot_ns = f'robot_{i}'
         # Landmark Publisher
         launch_nodes.append(

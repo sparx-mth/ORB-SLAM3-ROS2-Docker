@@ -21,9 +21,9 @@ class ImprovedMapMergerNode(Node):
 
         # Robot configurations with initial poses (x, y, z, roll, pitch, yaw)
         self.robots = {
-            0: {'position': [-5.0, -7.0, 1.0], 'orientation': [0.0, 0.0, 0.0]},  # Blue
-            1: {'position': [-1.0, 0.0, 1.65], 'orientation': [0.0, 0.0, 0.0]},  # Green
-            2: {'position': [5.0, 5.0, 1.65], 'orientation': [0.0, 0.0, 0.0]}  # Red
+            0: {'position': [-5.0, -7.0, 0.0], 'orientation': [0.0, 0.0, 0.0]},  # Blue
+            # 1: {'position': [-1.0, 0.0, 0.0], 'orientation': [0.0, 0.0, 0.0]},  # Green
+            # 2: {'position': [5.0, 5.0, 0.0], 'orientation': [0.0, 0.0, 0.0]}  # Red
         }
 
         # TF2 for coordinate transformations
