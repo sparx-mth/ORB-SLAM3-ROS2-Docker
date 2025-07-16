@@ -13,6 +13,7 @@ import sensor_msgs_py.point_cloud2 as pc2
 from orb_slam3_planner.map_builder_module import MapBuilder
 from orb_slam3_planner.planner_module import FrontierPlanner
 from orb_slam3_planner.drone_controller_module import DroneController
+from slam_msgs.srv import GetMapStatus
 
 
 class AutonomousExplorerNode(Node):
@@ -44,6 +45,22 @@ class AutonomousExplorerNode(Node):
 
         self.occupancy_prob = np.full((self.grid_size, self.grid_size), 0.5, dtype=np.float32)
         self.update_count = np.zeros((self.grid_size, self.grid_size), dtype=np.int32)
+
+        # Temporary map (used during SLAM loss)
+        self.temp_occupancy_prob = None
+        self.temp_update_count = None
+        self.using_temp_map = False
+
+        # Last known pose before SLAM lost
+        self.last_known_pose_before_lost = None
+
+        # Map status service client
+        status_service_name = f'/{self.robot_namespace}/orb_slam3/map_status'
+        self.map_status_client = self.create_client(GetMapStatus, status_service_name)
+
+        self.last_known_pose_before_lost = None
+        self.last_known_angle_before_lost = None
+
 
         self.height_min = 0.1
         self.height_max = 2.0
@@ -95,7 +112,7 @@ class AutonomousExplorerNode(Node):
         # Goal Timeout
         # ======================
         self.target_start_time = None
-        self.target_timeout = 30.0  # seconds to reach a goal
+        self.target_timeout = 60.0  # seconds to reach a goal
 
         # ======================
         # SLAM Tracking Defense
@@ -127,6 +144,82 @@ class AutonomousExplorerNode(Node):
 
         self.get_logger().info(f"Autonomous Explorer Node started for namespace: {self.robot_namespace}")
 
+    def start_temporary_map(self):
+        """
+        Switch to a temporary map and freeze main map updates.
+        This is called when SLAM tracking is lost.
+        """
+        self.get_logger().warn("Switching to temporary map for exploration during SLAM loss")
+
+        # Save last known pose and orientation before tracking loss
+        if self.current_pose:
+            self.last_known_pose_before_lost = self.current_pose
+            self.last_known_angle_before_lost = self.robot_angle
+        else:
+            self.get_logger().warn("No current pose to save before SLAM loss")
+
+        # Copy current map state to temporary buffers
+        self.temp_occupancy_prob = np.copy(self.occupancy_prob)
+        self.temp_update_count = np.copy(self.update_count)
+        self.using_temp_map = True
+
+    def restore_main_map(self):
+        """
+        Restore the main map after SLAM has recovered and re-localized.
+        """
+        self.get_logger().info("Restoring main map after SLAM recovery")
+
+        # Clear temp buffers
+        self.temp_occupancy_prob = None
+        self.temp_update_count = None
+        self.using_temp_map = False
+
+        # Recompute robot position if it jumped
+        if self.last_known_pose_before_lost:
+            old_pose = self.last_known_pose_before_lost.position
+            new_pose = self.current_pose.position if self.current_pose else None
+
+            if new_pose:
+                dx = new_pose.x - old_pose.x
+                dy = new_pose.y - old_pose.y
+                distance = math.sqrt(dx ** 2 + dy ** 2)
+
+                if distance > 1.0:  # Large jump? Possibly due to relocalization
+                    self.get_logger().info(f"Robot relocated by {distance:.2f} meters after recovery")
+
+        # Clear last-known state
+        self.last_known_pose_before_lost = None
+        self.last_known_angle_before_lost = None
+        self.robot_pos = None  # Force re-update
+
+    def get_active_occupancy_prob(self):
+        return self.temp_occupancy_prob if self.using_temp_map else self.occupancy_prob
+
+    def get_active_update_count(self):
+        return self.temp_update_count if self.using_temp_map else self.update_count
+
+    def check_slam_map_status(self):
+        """
+        Call the ORB-SLAM3 map_status service to check if tracking is lost or a merge has completed.
+
+        Returns:
+            tuple(bool, bool): (is_tracking_lost, is_merge_complete)
+        """
+        if not self.map_status_client.service_is_ready():
+            self.get_logger().warn("map_status service not available yet.")
+            return None, None
+
+        request = GetMapStatus.Request()
+        future = self.map_status_client.call_async(request)
+        rclpy.spin_until_future_complete(self, future, timeout_sec=0.5)
+
+        if future.done() and future.result() is not None:
+            result = future.result()
+            return result.is_tracking_lost, result.is_merge_complete
+        else:
+            self.get_logger().warn("map_status service call failed or timed out.")
+            return None, None
+
     def update_cell_probability(self, x, y, prob_change):
         """
         Update a cell's occupancy probability using Bayesian-like updates.
@@ -139,15 +232,18 @@ class AutonomousExplorerNode(Node):
         if not (0 <= x < self.grid_size and 0 <= y < self.grid_size):
             return
 
-        old_prob = self.occupancy_prob[y, x]
+        grid = self.get_active_occupancy_prob()
+        updates = self.get_active_update_count()
+
+        old_prob = grid[y, x]
 
         if prob_change > 0:
             new_prob = old_prob + prob_change * (1 - old_prob)
         else:
             new_prob = old_prob + prob_change * old_prob
 
-        self.occupancy_prob[y, x] = np.clip(new_prob, 0.01, 0.99)
-        self.update_count[y, x] += 1
+        grid[y, x] = np.clip(new_prob, 0.01, 0.99)
+        updates[y, x] += 1
 
     def pose_callback(self, msg):
         """
@@ -206,26 +302,50 @@ class AutonomousExplorerNode(Node):
         """
         Main control loop: executes exploration state machine and sends movement commands.
         """
+        lost, merged = self.check_slam_map_status()
 
-        # Handle SLAM lost state
-        if self.state == "SLAM_LOST":
-            time_lost = time.time() - self.slam_lost_start_time
+        if lost and self.state != "SLAM_LOST":
+            self.get_logger().warn("SLAM tracking lost — switching to temporary map")
+            self.state = "SLAM_LOST"
+            self.start_temporary_map()
 
-            if time_lost < self.recovery_spin_time:
-                # Spin slowly to find features
-                twist = Twist()
-                twist.angular.z = self.angular_speed * 0.4
-                self.cmd_pub.publish(twist)
-                self.get_logger().info(f"SLAM lost: spinning to recover ({time_lost:.1f}s)")
-            else:
-                # Stop and wait for manual intervention
-                self.controller.stop_robot()
-                self.get_logger().error("SLAM recovery failed. Manual restart required.")
-            return
+        elif merged and self.state == "SLAM_LOST":
+            self.get_logger().info("Map merge complete — restoring original map")
+            self.state = "EXPLORING"
+            self.restore_main_map()
+
+        # # Handle SLAM lost state
+        # if self.state == "SLAM_LOST":
+        #     time_lost = time.time() - self.slam_lost_start_time
+        #
+        #     if time_lost < self.recovery_spin_time:
+        #         # Spin slowly to find features
+        #         twist = Twist()
+        #         twist.angular.z = self.angular_speed * 0.4
+        #         self.cmd_pub.publish(twist)
+        #         self.get_logger().info(f"SLAM lost: spinning to recover ({time_lost:.1f}s)")
+        #     else:
+        #         # Stop and wait for manual intervention
+        #         self.controller.stop_robot()
+        #         self.get_logger().error("SLAM recovery failed. Manual restart required.")
+        #     return
 
         if not self.robot_pos:
-            self.controller.stop_robot()
-            return
+            if self.using_temp_map and self.last_known_pose_before_lost:
+                self.robot_angle = self.last_known_angle_before_lost
+                world_x = self.last_known_pose_before_lost.position.x
+                world_y = self.last_known_pose_before_lost.position.y
+                grid_x = int((world_x + self.map_range) / self.cell_size)
+                grid_y = int((world_y + self.map_range) / self.cell_size)
+                if 0 <= grid_x < self.grid_size and 0 <= grid_y < self.grid_size:
+                    self.robot_pos = (grid_x, grid_y)
+                    self.get_logger().warn(f"Using last known robot position: ({grid_x}, {grid_y})")
+                else:
+                    self.controller.stop_robot()
+                    return
+            else:
+                self.controller.stop_robot()
+                return
 
         if self.controller.is_stuck():
             self.get_logger().warn("Robot stuck. Switching to RECOVERY.")
@@ -245,8 +365,8 @@ class AutonomousExplorerNode(Node):
 
         elif self.state == "RECOVERY":
             twist = Twist()
-            twist.linear.x = -self.linear_speed * 0.8
-            twist.angular.z = -self.angular_speed * 1.5
+            twist.linear.x = -self.linear_speed * 1.0
+            # twist.angular.z = -self.angular_speed * 1.5
             self.cmd_pub.publish(twist)
             self.state = "EXPLORING"
 
@@ -292,12 +412,15 @@ class AutonomousExplorerNode(Node):
                 self.state = "EXPLORING"
                 self.target = None
                 self.target_start_time = None  # Reset timer
-                self.controller.stop_robot()
+                # self.controller.stop_robot()
                 return
 
             if self.controller.check_collision_ahead():
                 self.get_logger().warn("Obstacle ahead! Halting.")
-                self.controller.stop_robot()
+                twist = Twist()
+                twist.linear.x = -self.linear_speed * 1.0
+                # twist.angular.z = -self.angular_speed * 1.5
+                self.cmd_pub.publish(twist)
                 return
 
             self.controller.move_toward_target()
@@ -355,10 +478,13 @@ class AutonomousExplorerNode(Node):
         if not (0 <= x < self.grid_size and 0 <= y < self.grid_size):
             return -1
 
-        prob = self.occupancy_prob[y, x]
-        updates = self.update_count[y, x]
+        grid = self.get_active_occupancy_prob()
+        updates = self.get_active_update_count()
 
-        if updates < 2:
+        prob = grid[y, x]
+        count = updates[y, x]
+
+        if count < 2:
             return -1
         if prob > self.occupied_threshold:
             return 1

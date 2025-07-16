@@ -20,7 +20,7 @@ setup(
     entry_points={
         'console_scripts': [
             'landmark_publisher_node = orb_slam3_planner.landmark_publisher_node:main',
-            'map_merger_node = orb_slam3_planner.map_merger_node:main',
+            # 'map_merger_node = orb_slam3_planner.map_merger_node:main',
             # 'shared_map_builder_node = orb_slam3_planner.shared_map_builder_node:main',
             'autonomous_explorer_node = orb_slam3_planner.main_node:main',
             'autonomous_explorer_visualizer = orb_slam3_planner.autonomous_explorer_visualizer:main',
