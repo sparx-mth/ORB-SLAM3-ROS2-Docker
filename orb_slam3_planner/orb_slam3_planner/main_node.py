@@ -269,6 +269,10 @@ class AutonomousExplorerNode(Node):
                 self.state = "EXPLORING"
                 return
 
+            if not self.planner.is_reachable(self.robot_pos[0], self.robot_pos[1]):
+                self.state = "EXPLORING"
+                return
+
             # Check timeout
             if self.target_start_time and (time.time() - self.target_start_time) > self.target_timeout:
                 self.get_logger().warn(f"Goal timeout! Abandoning target after {self.target_timeout}s")
