@@ -1,4 +1,5 @@
 import math
+import heapq
 
 class FrontierPlanner:
     """
@@ -73,6 +74,9 @@ class FrontierPlanner:
 
         for fx, fy in frontiers:
             if not self.is_safe_position(fx, fy):
+                continue
+
+            if not self.is_reachable(fx, fy):
                 continue
 
             distance = math.sqrt((fx - rx) ** 2 + (fy - ry) ** 2)
@@ -177,3 +181,46 @@ class FrontierPlanner:
                     if self.node.occupancy_prob[ny, nx] > self.occupied_threshold:
                         return False
         return True
+
+    def is_reachable(self, tx, ty):
+        """
+        Use A* search to check if there is a valid path from the robot's current position to (tx, ty).
+        The search is run over the occupancy grid using Manhattan distance as heuristic.
+
+        Returns:
+            bool: True if a path exists, False otherwise.
+        """
+        rx, ry = self.node.robot_pos
+        if (rx, ry) == (tx, ty):
+            return True
+
+        grid = self.node.occupancy_prob
+        visited = set()
+        heap = []
+
+        def heuristic(x, y):
+            return abs(x - tx) + abs(y - ty)  # Manhattan distance
+
+        heapq.heappush(heap, (heuristic(rx, ry), 0, (rx, ry)))
+
+        while heap:
+            est_total, cost_so_far, (x, y) = heapq.heappop(heap)
+
+            if (x, y) == (tx, ty):
+                return True
+
+            if (x, y) in visited:
+                continue
+            visited.add((x, y))
+
+            for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]:
+                nx, ny = x + dx, y + dy
+
+                if 0 <= nx < self.grid_size and 0 <= ny < self.grid_size:
+                    if grid[ny, nx] < self.occupied_threshold:
+                        if (nx, ny) not in visited:
+                            new_cost = cost_so_far + 1
+                            est = new_cost + heuristic(nx, ny)
+                            heapq.heappush(heap, (est, new_cost, (nx, ny)))
+
+        return False  # No path found
