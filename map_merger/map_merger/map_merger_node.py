@@ -32,8 +32,9 @@ class MapMergerNode(Node):
         self.distance_threshold = 0.1  # Ignore changes greater than 10 cm
 
         self.frame_counter = {robot_id: 0 for robot_id in self.robots}  # Track frames for each robot
-        # Initialize lock for each robot's trajectory
+        # Locks for trajectory updates and drawing separately
         self.trajectory_locks = {robot_id: threading.Lock() for robot_id in self.robots}
+        self.drawing_locks = {robot_id: threading.Lock() for robot_id in self.robots}  # Separate lock for drawing
 
         # Create a service client for each robot to get all landmarks in the map
         self.agents_clients = {}
@@ -58,6 +59,9 @@ class MapMergerNode(Node):
         self.merged_map = []
         self.trajectories = {robot_id: [] for robot_id in self.robots}  # Store trajectory for each robot
         self.last_landmarks = {robot_id: [] for robot_id in self.robots}
+        self.last_valid_position = {robot_id: None for robot_id in self.robots}
+        self.spike_flags = {robot_id: False for robot_id in self.robots}  # Track if spike was detected
+        self.recovery_count = {robot_id: 0 for robot_id in self.robots}  
 
         self.get_logger().info('Map Merger Node started.')
 
@@ -74,7 +78,8 @@ class MapMergerNode(Node):
                 f'/robot_{robot_id}/robot_pose_slam',
                 lambda msg, robot_id=robot_id: self.pose_callback(msg, robot_id),
                 10
-            )
+            )   
+
 
     def timer_callback(self):
         # For each robot, request the map data every 1 second
@@ -264,21 +269,153 @@ class MapMergerNode(Node):
         self.map_publisher.publish(pc2_msg)
         self.get_logger().info(f'Merged map published with {len(self.merged_map)} points.')
 
+    # def draw_trajectory(self, robot_id):
+    #     """
+    #     Publishes the robot's trajectory (path) to RViz using Marker messages.
+    #     Each robot's trajectory is represented as a Line Strip, and the color is based on the robot ID.
+    #     """
+    #     # Ensure the trajectory has points to draw
+    #     if len(self.trajectories[robot_id]) == 0:
+    #         self.get_logger().warn(f"No trajectory points for robot {robot_id}.")
+    #         return
+        
+    #     # # Acquire lock to safely access the trajectory data
+    #     # with self.trajectory_locks[robot_id]:
+    #     # Set color based on robot ID
+    #     color = self.colors.get(robot_id, [0.5, 0.5, 0.5])  # Default to gray if robot_id is unknown
+        
+    #     # Create the Marker message for the robot's trajectory
+    #     trajectory_marker = Marker()
+    #     trajectory_marker.header.stamp = self.get_clock().now().to_msg()
+    #     trajectory_marker.header.frame_id = "base_footprint"  # Frame of reference for the robot's trajectory
+    #     trajectory_marker.ns = f"robot_{robot_id}_trajectory"  # Namespace for the robot's trajectory
+    #     trajectory_marker.id = 0
+    #     trajectory_marker.type = Marker.LINE_STRIP  # Type of marker (line strip for the path)
+    #     trajectory_marker.action = Marker.ADD
+    #     trajectory_marker.scale.x = 0.1  # Line width in RViz (larger for better visibility)
+    #     trajectory_marker.color.a = 1.0  # Opacity (1.0 for fully visible)
+    #     trajectory_marker.color.r = float(color[2]) / 255.0  # Red component
+    #     trajectory_marker.color.g = float(color[2]) / 255.0  # Green component
+    #     trajectory_marker.color.b = float(color[2]) / 255.0  # Blue component
+
+    #     # Add each trajectory point to the Marker message
+    #     for point in self.trajectories[robot_id]:
+    #         p = Point()
+    #         p.x, p.y, p.z = point[0], point[1], point[2]
+    #         trajectory_marker.points.append(p)
+
+    #     # Publish the trajectory marker
+    #     self.trajectory_publishers[robot_id].publish(trajectory_marker)
+    #     self.get_logger().info(f"Published trajectory for robot {robot_id} with {len(trajectory_marker.points)} points.")
+
+
+
+    def add_to_trajectory(self, robot_id, new_position):
+        """
+        Adds the robot's position to the trajectory if it is valid.
+        Ignores spikes but allows recovery once the robot returns to expected behavior.
+        """
+        with self.trajectory_locks[robot_id]:
+            # If no valid last position, directly add the first point
+            if self.last_valid_position[robot_id] is None:
+                self.trajectories[robot_id].append(new_position)
+                self.last_valid_position[robot_id] = new_position
+                return
+            
+            # Calculate the distance from the last valid position
+            distance = np.linalg.norm(np.array(new_position) - np.array(self.last_valid_position[robot_id]))
+
+            # Define a threshold for spike detection
+            spike_threshold = 5.0  # Adjust as needed (e.g., 5 meters)
+            if distance > spike_threshold:
+                # If the change is too large, consider this a spike
+                self.spike_flags[robot_id] = True
+                self.get_logger().info(f"Spike detected for robot {robot_id} with distance: {distance:.2f} m")
+
+                # Optionally, track the number of frames since the spike to allow for recovery
+                self.recovery_count[robot_id] += 1
+                if self.recovery_count[robot_id] > 5:  # Allow 5 frames to stabilize
+                    self.spike_flags[robot_id] = False
+                    self.recovery_count[robot_id] = 0  # Reset recovery count
+                    self.get_logger().info(f"Spike recovery complete for robot {robot_id}")
+            else:
+                # If distance is within reasonable range, add the new position
+                self.spike_flags[robot_id] = False
+                self.recovery_count[robot_id] = 0  # Reset recovery counter
+                self.trajectories[robot_id].append(new_position)
+                self.last_valid_position[robot_id] = new_position
+                self.get_logger().info(f"Updating trajectory for robot {robot_id}")
+
+            # After processing, ensure trajectory drawing
+            self.schedule_drawing(robot_id)
+
+    def schedule_drawing(self, robot_id):
+        """
+        Use a separate lock for drawing the trajectory to avoid deadlock.
+        """
+        if self.drawing_locks[robot_id].locked():
+            self.get_logger().info(f"Drawing for robot {robot_id} is already in progress.")
+            return
+
+        # Acquire drawing lock asynchronously, in a non-blocking way
+        with self.drawing_locks[robot_id]:
+            self.draw_trajectory(robot_id)
+
+    def schedule_drawing(self, robot_id):
+        """
+        Use a separate lock for drawing the trajectory to avoid deadlock.
+        """
+        if self.drawing_locks[robot_id].locked():
+            self.get_logger().info(f"Drawing for robot {robot_id} is already in progress.")
+            return
+
+        # Acquire drawing lock asynchronously, in a non-blocking way
+        with self.drawing_locks[robot_id]:
+            self.draw_trajectory(robot_id)
+
+    def is_stable(self, robot_id):
+        """
+        Check if the robot's trajectory is stable by comparing the average distance over the last N points.
+        If the change is too large (e.g., spike), enter recovery mode.
+        """
+        window_size = 5  # Number of points to check for stability
+
+        if len(self.trajectories[robot_id]) < window_size:
+            return False  # Not enough data to determine stability
+
+        total_distance = 0.0
+
+        # Compare the last 'window_size' points
+        for i in range(window_size - 1):
+            old_point = self.trajectories[robot_id][-window_size + i]
+            new_point = self.trajectories[robot_id][-window_size + i + 1]
+
+            # Compute distance between consecutive points
+            distance = np.linalg.norm(np.array(old_point) - np.array(new_point))
+            total_distance += distance
+
+        # Calculate the average distance between consecutive points
+        avg_distance = total_distance / (window_size - 1)
+
+        # If the average distance is too large, it indicates a spike and we enter recovery mode
+        recovery_threshold = 0.5  # Set a threshold for significant jumps (e.g., 50 cm)
+        if avg_distance > recovery_threshold:
+            self.recovery_flags[robot_id] = True  # Start recovery phase
+            self.get_logger().info(f"Significant jump detected for robot {robot_id}. Entering recovery mode.")
+            return False
+
+        # Stability threshold: If the average distance is smaller than the threshold, consider it stable
+        stability_threshold = 0.05  # Adjust this threshold as needed (e.g., 5 cm)
+        return avg_distance < stability_threshold
+
     def draw_trajectory(self, robot_id):
         """
         Publishes the robot's trajectory (path) to RViz using Marker messages.
         Each robot's trajectory is represented as a Line Strip, and the color is based on the robot ID.
         """
-        # Ensure the trajectory has points to draw
-        if len(self.trajectories[robot_id]) == 0:
-            self.get_logger().warn(f"No trajectory points for robot {robot_id}.")
-            return
-        
-        # # Acquire lock to safely access the trajectory data
-        # with self.trajectory_locks[robot_id]:
-        # Set color based on robot ID
+        # Define a color map based on robot ID
         color = self.colors.get(robot_id, [0.5, 0.5, 0.5])  # Default to gray if robot_id is unknown
-        
+
         # Create the Marker message for the robot's trajectory
         trajectory_marker = Marker()
         trajectory_marker.header.stamp = self.get_clock().now().to_msg()
@@ -287,11 +424,11 @@ class MapMergerNode(Node):
         trajectory_marker.id = 0
         trajectory_marker.type = Marker.LINE_STRIP  # Type of marker (line strip for the path)
         trajectory_marker.action = Marker.ADD
-        trajectory_marker.scale.x = 0.1  # Line width in RViz (larger for better visibility)
+        trajectory_marker.scale.x = 0.05  # Line width in RViz
         trajectory_marker.color.a = 1.0  # Opacity (1.0 for fully visible)
-        trajectory_marker.color.r = float(color[2]) / 255.0  # Red component
-        trajectory_marker.color.g = float(color[2]) / 255.0  # Green component
-        trajectory_marker.color.b = float(color[2]) / 255.0  # Blue component
+        trajectory_marker.color.r = float(color[2]) / 255.0 * 0.9  # Red component
+        trajectory_marker.color.g = float(color[2]) / 255.0 * 0.9  # Green component
+        trajectory_marker.color.b = float(color[2]) / 255.0 * 0.9  # Blue component
 
         # Add each trajectory point to the Marker message
         for point in self.trajectories[robot_id]:
@@ -301,55 +438,6 @@ class MapMergerNode(Node):
 
         # Publish the trajectory marker
         self.trajectory_publishers[robot_id].publish(trajectory_marker)
-        self.get_logger().info(f"Published trajectory for robot {robot_id} with {len(trajectory_marker.points)} points.")
-
-
-
-    def add_to_trajectory(self, robot_id, new_position):
-        """
-        Adds the robot's position to the trajectory if it meets the stability criteria.
-        """
-        # # Acquire lock to ensure thread safety
-        # with self.trajectory_locks[robot_id]:
-        # Add the new position to the trajectory history for this robot
-        self.trajectories[robot_id].append(new_position)
-
-        # Check if the new position is stable enough (apply smoothing logic)
-        if len(self.trajectories[robot_id]) > 1:
-            stable_position = self.apply_stability_filter(robot_id, new_position)
-            # Only update the trajectory with the stable position
-            self.trajectories[robot_id][-1] = stable_position
-
-        # Optionally: Only draw the trajectory after ensuring stability
-        if len(self.trajectories[robot_id]) % 5 == 0:  # Draw every 5th frame
-            self.draw_trajectory(robot_id)
-
-
-
-    
-    def apply_stability_filter(self, robot_id, new_position):
-        """
-        A stability filter that ignores large changes in trajectory (e.g., spikes).
-        The position must remain stable for a given number of frames to be considered valid.
-        """
-        
-        max_jump = 10   # Maximum allowable jump in trajectory
-        
-        # Get the last few positions of the robot (in global coordinates)
-        trajectory = self.trajectories[robot_id]
-
-        # If there are more positions than the window size, trim the history
-        if len(trajectory) > 1:
-            last_position = trajectory[-2]
-            # Calculate the distance between the last two points
-            distance = np.linalg.norm(np.array(last_position) - np.array(new_position))
-            
-            # If the change in position exceeds the threshold, ignore this point
-            if distance > max_jump:
-                self.get_logger().info(f"Spike detected: {distance}, using last stable position.")
-                return last_position
-
-        return new_position
 
 
 def main(args=None):
