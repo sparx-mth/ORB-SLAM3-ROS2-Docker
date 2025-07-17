@@ -5,6 +5,8 @@
  */
 #include "rgbd-slam-node.hpp"
 
+
+
 #include <opencv2/core/core.hpp>
 
 namespace ORB_SLAM3_Wrapper
@@ -35,9 +37,14 @@ namespace ORB_SLAM3_Wrapper
         visibleLandmarksPub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("visible_landmarks", 10);
         visibleLandmarksPose_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("visible_landmarks_pose", 10);
         slamInfoPub_ = this->create_publisher<slam_msgs::msg::SlamInfo>("slam_info", 10);
+
         //---- the following is published continously
         mapDataPub_ = this->create_publisher<slam_msgs::msg::MapData>("map_data", 10);
         robotPoseMapFrame_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("robot_pose_slam", 10);
+        
+        //---- the following is published when tracking is lost
+        trackingLostPublisher_ = this->create_publisher<slam_msgs::msg::TrackingLost>("tracking_lost_topic", 10);
+
 
         // Services
         getMapDataService_ = this->create_service<slam_msgs::srv::GetMap>("orb_slam3/get_map_data", std::bind(&RgbdSlamNode::getMapServer, this,
@@ -179,6 +186,10 @@ namespace ORB_SLAM3_Wrapper
 
             ++frequency_tracker_count_;
         }
+        else
+        {
+            checkTrackingState();
+        }
     }
 
     void RgbdSlamNode::publishMapPointCloud(std::shared_ptr<rmw_request_id_t> request_header,
@@ -296,4 +307,22 @@ namespace ORB_SLAM3_Wrapper
         // Publish the PoseStamped
         visibleLandmarksPose_->publish(pose_stamped);
     }
+
+    void RgbdSlamNode::checkTrackingState()
+    {
+        int currentTrackingState = interface_->getSLAM()->GetTrackingState();
+        
+        if (currentTrackingState == 3 && previousTrackingState == 2)  // Tracking lost
+        {
+            // Publish a message that tracking is lost
+            slam_msgs::msg::TrackingLost trackingLostMsg;
+            trackingLostMsg.tracking_lost = true;
+            trackingLostPublisher_->publish(trackingLostMsg);
+            RCLCPP_INFO(this->get_logger(), "Tracking lost! Published notification to topic.");
+        }
+
+        // Update previous tracking state
+        previousTrackingState = currentTrackingState;
+    }
+
 }

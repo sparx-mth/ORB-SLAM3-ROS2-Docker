@@ -33,6 +33,7 @@
 
 #include <slam_msgs/msg/map_data.hpp>
 #include <slam_msgs/msg/slam_info.hpp>
+#include <slam_msgs/msg/tracking_lost.hpp>
 #include <slam_msgs/srv/get_map.hpp>
 #include <slam_msgs/srv/get_landmarks_in_view.hpp>
 #include <slam_msgs/srv/get_all_landmarks_in_map.hpp>
@@ -87,6 +88,11 @@ namespace ORB_SLAM3_Wrapper
         void getMapPointsInViewServer(std::shared_ptr<rmw_request_id_t> request_header,
                                       std::shared_ptr<slam_msgs::srv::GetLandmarksInView::Request> request,
                                       std::shared_ptr<slam_msgs::srv::GetLandmarksInView::Response> response);
+
+        // Logic for tracking lost and notifying via topic
+        void checkTrackingState();
+
+
         /**
          * Member variables
          */
@@ -103,6 +109,9 @@ namespace ORB_SLAM3_Wrapper
         rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr visibleLandmarksPose_;
         rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr robotPoseMapFrame_;
         rclcpp::Publisher<slam_msgs::msg::SlamInfo>::SharedPtr slamInfoPub_;
+        rclcpp::Publisher<slam_msgs::msg::TrackingLost>::SharedPtr trackingLostPublisher_;
+
+
         // TF
         std::shared_ptr<tf2_ros::TransformBroadcaster> tfBroadcaster_;
         std::shared_ptr<tf2_ros::TransformListener> tfListener_;
@@ -112,6 +121,8 @@ namespace ORB_SLAM3_Wrapper
         rclcpp::Service<slam_msgs::srv::GetLandmarksInView>::SharedPtr getMapPointsService_;
         rclcpp::Service<slam_msgs::srv::GetAllLandmarksInMap>::SharedPtr mapPointsService_;
         rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr resetLocalMapSrv_;
+        
+
         // ROS Timers
         rclcpp::TimerBase::SharedPtr mapDataTimer_;
         rclcpp::CallbackGroup::SharedPtr mapDataCallbackGroup_;
@@ -126,9 +137,12 @@ namespace ORB_SLAM3_Wrapper
         bool odometry_mode_;
         bool publish_tf_;
         double frequency_tracker_count_ = 0;
+
         int map_data_publish_frequency_;
         bool do_loop_closing_;
         std::chrono::_V2::system_clock::time_point frequency_tracker_clock_;
+
+        int previousTrackingState = -1;  // Initialize to an invalid state
 
         ORB_SLAM3_Wrapper::WrapperTypeConversions typeConversion_;
         std::shared_ptr<ORB_SLAM3_Wrapper::ORBSLAM3Interface> interface_;

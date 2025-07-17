@@ -107,6 +107,11 @@ namespace ORB_SLAM3_Wrapper
             return orbAtlas_->GetAllMaps().size(); 
         };
 
+        // Getter to access mSLAM_
+        std::shared_ptr<ORB_SLAM3::System> getSLAM() const {
+            return mSLAM_;
+        }
+
     private:
         std::shared_ptr<ORB_SLAM3::System> mSLAM_;
         std::shared_ptr<WrapperTypeConversions> typeConversions_;

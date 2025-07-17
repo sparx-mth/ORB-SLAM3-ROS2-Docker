@@ -20,6 +20,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 "msg/KeyFrame.msg"
 "msg/MapPoint.msg"
 "msg/SlamInfo.msg"
+"msg/TrackingLost.msg"
 "srv/GetMap.srv"
 "srv/GetLandmarksInView.srv"
 "srv/GetAllLandmarksInMap.srv"
