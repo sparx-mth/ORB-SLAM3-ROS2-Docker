@@ -7,7 +7,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 
 robot_coordinates = {
-    0: [-5.0, -7.0, 1.0],  # corridor
+    0: [-5.0, -7.0, 0.0],  # corridor
     1: [-1.0, 0.0, 1.65],
     2: [5.0, 5.0, 1.65],
     3: [-1.0, 8.0, 1.65],

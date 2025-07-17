@@ -3,11 +3,15 @@ import rclpy
 from rclpy.node import Node
 from slam_msgs.srv import GetAllLandmarksInMap
 from sensor_msgs.msg import PointCloud2, PointField
+from geometry_msgs.msg import PoseStamped, Point
+from visualization_msgs.msg import Marker
+import std_msgs.msg
 import sensor_msgs_py.point_cloud2 as pc2
 import time
 import numpy as np
-import std_msgs.msg
+import threading
 
+from collections import Counter
 
 class MapMergerNode(Node):
     def __init__(self):
@@ -15,10 +19,21 @@ class MapMergerNode(Node):
 
         # List of robots with their initial positions
         self.robots = {
-            0: [-5.0, -7.0, 1.0], 
-            1: [-1.0, 0.0, 1.65],
-            # 2 :[5.0, 5.0, 1.65],
+            0: [-5.0, -7.0, 0.0], 
+            # 1: [-1.0, 0.0, 0.0],
+            # 2 :[5.0, 5.0,0.0],
         }
+        self.colors = {
+            0: [0, 0, 255],  # Blue (robot 0)
+            1: [0, 255, 0],  # Green (robot 1)
+            2: [255, 0, 0],  # Red (robot 2)
+        }
+
+        self.distance_threshold = 0.1  # Ignore changes greater than 10 cm
+
+        self.frame_counter = {robot_id: 0 for robot_id in self.robots}  # Track frames for each robot
+        # Initialize lock for each robot's trajectory
+        self.trajectory_locks = {robot_id: threading.Lock() for robot_id in self.robots}
 
         # Create a service client for each robot to get all landmarks in the map
         self.agents_clients = {}
@@ -29,27 +44,40 @@ class MapMergerNode(Node):
         # Create a publisher for the merged map (PointCloud2)
         self.map_publisher = self.create_publisher(PointCloud2, '/merged_map', 10)
 
+        # Create a publisher for the trajectory (Path visualization in RViz)
+        self.trajectory_publishers = {}
+        for robot_id in self.robots:
+            self.trajectory_publishers[robot_id] = self.create_publisher(Marker, f'/robot_{robot_id}/trajectory_path', 10)
+
         # Ensure the services are available
         for robot_id, client in self.agents_clients.items():
             while not client.wait_for_service(timeout_sec=30.0):
                 self.get_logger().info(f'Service for robot_{robot_id} not available, waiting...')        
-        
 
-        # To store the merged map
+        # To store the merged map and robot trajectories
         self.merged_map = []
-
+        self.trajectories = {robot_id: [] for robot_id in self.robots}  # Store trajectory for each robot
         self.last_landmarks = {robot_id: [] for robot_id in self.robots}
 
         self.get_logger().info('Map Merger Node started.')
 
-        # Create a timer that requests the map data every 1 seconds
+        # Create a timer that requests the map data every 1 second
         self.timer = self.create_timer(1.0, self.timer_callback)
 
         # Add a periodic publisher timer (e.g., every 30 seconds)
         self.periodic_pub_timer = self.create_timer(30.0, self.periodic_publish_callback)
 
+        # Subscribe to each robot's pose for tracking the path/route
+        for robot_id in self.robots:
+            self.create_subscription(
+                PoseStamped,
+                f'/robot_{robot_id}/robot_pose_slam',
+                lambda msg, robot_id=robot_id: self.pose_callback(msg, robot_id),
+                10
+            )
+
     def timer_callback(self):
-        # For each robot, request the map data every 1 seconds
+        # For each robot, request the map data every 1 second
         for robot_id in self.robots:
             self.get_all_landmarks(robot_id)
     
@@ -66,72 +94,140 @@ class MapMergerNode(Node):
         future = self.agents_clients[robot_id].call_async(request)
         future.add_done_callback(lambda future, robot_id=robot_id: self.handle_landmark_response(future, robot_id))
 
+    def pose_callback(self, msg, robot_id):
+        """
+        Callback to handle robot pose updates and store the trajectory for each robot.
+        The trajectory is then visualized in RViz as a line.
+        """
+        # Extract the robot's position (x, y, z) from the PoseStamped message
+        position = [msg.pose.position.x + self.robots[robot_id][0], msg.pose.position.y + self.robots[robot_id][1], msg.pose.position.z+ self.robots[robot_id][2]]
+        
+        # Add the new pose directly to the trajectory in global coordinates
+        self.add_to_trajectory(robot_id, position)
+
+        # # For debugging, print out the trajectory for the robot
+        # self.get_logger().info(f"Robot {robot_id} pose: {position}")
+
     def handle_landmark_response(self, future, robot_id):
         try:
             # Get the result from the service call
             response = future.result()
 
             if response:
-
                 self.get_logger().info(f'Received {len(response.landmarks.data)} landmarks from robot_{robot_id}.')
 
                 # Convert PointCloud2 data into a list of points
-
                 points = list(pc2.read_points(response.landmarks, field_names=("x", "y", "z"), skip_nans=True))
 
                 # Filter out invalid points (those with NaN values)
-
                 valid_points = self.filter_invalid_points(points)
 
                 if len(valid_points) != len(points):
-
                     self.get_logger().warn(f"Skipped {len(points) - len(valid_points)} invalid map points from robot_{robot_id}.")
 
-                # Check for significant change in the map (you could use the same method for change detection here)
-
+                # Check for significant change in the map
                 if self.is_significant_change(robot_id, valid_points):
-
                     # Transform landmarks from robot's frame to a global frame
-
                     transformed_points = self.transform_landmarks_to_global(valid_points, robot_id)
 
                     # Merge the points into the global map
-
                     self.merged_map.extend(transformed_points)
 
                     # Publish the merged map
-
                     self.publish_merged_map()
+
                     # Update the last landmarks for this robot
                     self.last_landmarks[robot_id] = valid_points
 
                 else:
-
-                    self.get_logger().info(f'No landmarks received from robot_{robot_id}.')
+                    self.get_logger().info(f'No new landmarks received from robot_{robot_id}.')
 
         except Exception as e:
-
             self.get_logger().error(f'Service call failed for robot_{robot_id}: {str(e)}')
-
 
     def filter_invalid_points(self, point_cloud):
         # Filter out invalid points (those with NaN values)
-
         valid_points = []
         for point in point_cloud:
             if not (np.isnan(point[0]) or np.isnan(point[1]) or np.isnan(point[2])):
                 valid_points.append(point)
         return valid_points
 
-    def publish_merged_map(self): 
+    def is_significant_change(self, robot_id, new_points):
+        """
+        Check if the map has changed significantly by comparing the average distance
+        between the last N points of the trajectory.
+        """
+        # Number of points to compare
+        num_points_to_compare = min(len(self.last_landmarks[robot_id]), len(new_points), 20)
+
+        if num_points_to_compare < 2:
+            return True  # Not enough points to compare, assume a significant change
+
+        total_distance = 0.0
+
+        # Compare the last 'num_points_to_compare' points
+        for i in range(num_points_to_compare):
+            old_point = self.last_landmarks[robot_id][-num_points_to_compare + i]  # Last N points
+            new_point = new_points[i]
+
+            # Convert points to numpy arrays for easy distance calculation
+            old_xyz = np.array([old_point[0], old_point[1]], dtype=np.float32)
+            new_xyz = np.array([new_point[0], new_point[1]], dtype=np.float32)
+
+            # Calculate the Euclidean distance between the old and new points
+            distance = np.linalg.norm(old_xyz - new_xyz)
+            total_distance += distance
+
+            self.get_logger().debug(f"Distance between old and new point {i}: {distance:.2f} m")
+
+        # Calculate the average distance
+        avg_distance = total_distance / num_points_to_compare
+
+        # Return True if the average distance exceeds the threshold (indicating a significant change)
+        if avg_distance > self.distance_threshold:
+            self.get_logger().info(f"Significant change detected: avg_distance = {avg_distance:.2f} m")
+            return True
+
+        return False
+
+
+    def transform_landmarks_to_global(self, map_points, robot_id):
+        # Transform the points to global coordinates based on robot's position (simple translation here)
+        robot_position = np.array(self.robots[robot_id])
+        transformed_points_with_id = []  # Now also storing robot_id
+
+        for point in map_points:
+            transformed_point_xyz = np.array([point[0], point[1], point[2]]) + robot_position
+            # Append the original robot_id to the transformed point
+            transformed_points_with_id.append([transformed_point_xyz[0], transformed_point_xyz[1], transformed_point_xyz[2], robot_id])
+        
+        return transformed_points_with_id
+
+    def remove_duplicates(self, points):
+        # Remove duplicate points by spatial hashing (e.g., within a certain distance threshold)
+        point_dict = {}
+        grid_resolution = 0.1  # 10 cm resolution for the grid
+
+        for point in points:
+            grid_key = (int(point[0] / grid_resolution), int(point[1] / grid_resolution), int(point[2] / grid_resolution))
+            if grid_key not in point_dict:
+                point_dict[grid_key] = point
+        
+        return list(point_dict.values())
+
+    def publish_merged_map(self):
         # Convert the merged map to a PointCloud2 message and publish it
-        if not self.merged_map: # Check if map is empty
+        if not self.merged_map:  # Check if map is empty
             self.get_logger().info('Merged map is empty, not publishing.')
             return
 
+        # Remove duplicates before publishing
+        self.merged_map = self.remove_duplicates(self.merged_map)
+
         header = std_msgs.msg.Header()
         header.stamp = self.get_clock().now().to_msg()
-        header.frame_id = "base_footprint" # Ensure this frame_id is correct relative to your RViz fixed_frame
+        header.frame_id = "base_footprint"  # Ensure this frame_id is correct relative to your RViz fixed_frame
         
         pc2_msg = PointCloud2()
         pc2_msg.header = header
@@ -149,97 +245,124 @@ class MapMergerNode(Node):
         pc2_msg.point_step = 16  # 3 floats (x, y, z) + 1 UINT32 (rgb)
         pc2_msg.row_step = pc2_msg.point_step * pc2_msg.width
         
-        # Define RGB values for each robot (as 8-bit RGB values)
-        # Using a list of tuples for ordered access, or keep dict if IDs are sparse
-        colors = {
-            0: [0, 0, 255],  # Blue (robot 0)
-            1: [0, 255, 0],  # Green (robot 1)
-            2: [255, 0, 0],  # Red (robot 2)
-            # Add more colors for more robots if needed
-            # 3: [255, 255, 0], # Yellow
-            # 4: [0, 255, 255], # Cyan
-        }
+        
         
         points_data = bytearray() 
 
-        # Add the points and color them based on their origin robot_id
-        for point_data in self.merged_map: # Renamed point to point_data for clarity
-            # point_data is now expected to be [x, y, z, original_robot_id]
+        for point_data in self.merged_map:
             x, y, z = point_data[0], point_data[1], point_data[2]
-            original_robot_id = point_data[3] # Extract the robot_id for this specific point
+            original_robot_id = point_data[3]  # Extract the robot_id
 
-            # Get the RGB values for the specific robot that generated this point
-            rgb = colors.get(original_robot_id, [128, 128, 128]) # Default to grey if ID not found
-            
-            # Pack the RGB values into a single 32-bit integer: 0xAARRGGBB
+            rgb = self.colors.get(original_robot_id, [128, 128, 128])  # Default to grey if ID not found
             rgb_value = (0xFF << 24) | (rgb[0] << 16) | (rgb[1] << 8) | rgb[2]
             
-            # Pack the x, y, z as float32 and rgb_value as uint32
             packed_point = struct.pack('<fffI', x, y, z, rgb_value)
             points_data.extend(packed_point)
 
-        pc2_msg.data = bytes(points_data) # Convert bytearray to bytes for the message
+        pc2_msg.data = bytes(points_data)  # Convert bytearray to bytes for the message
         
-        # Publish the message
         self.map_publisher.publish(pc2_msg)
         self.get_logger().info(f'Merged map published with {len(self.merged_map)} points.')
 
-
-    def is_significant_change(self, robot_id, new_points):
-        # This remains largely the same, as it's a local check for each robot's map stream.
-        if not self.last_landmarks[robot_id]: 
-            return True  
-
-        distance_threshold = 0.2  
-
-        num_points_to_compare = min(len(self.last_landmarks[robot_id]), len(new_points), 5) 
-
-        if num_points_to_compare == 0: 
-            return len(self.last_landmarks[robot_id]) != len(new_points)
-
-        for i in range(num_points_to_compare):
-            old_point = self.last_landmarks[robot_id][i]
-            new_point = new_points[i]
-            try:
-                old_xyz = np.array([old_point[0], old_point[1], old_point[2]], dtype=np.float32)
-                new_xyz = np.array([new_point[0], new_point[1], new_point[2]], dtype=np.float32)
-            except Exception as e:
-                raise ValueError(f"Could not extract 3D coordinates from points: old_point={old_point}, new_point={new_point}") from e
-            distance = np.linalg.norm(old_xyz - new_xyz)
-            if distance > distance_threshold:
-                return True
+    def draw_trajectory(self, robot_id):
+        """
+        Publishes the robot's trajectory (path) to RViz using Marker messages.
+        Each robot's trajectory is represented as a Line Strip, and the color is based on the robot ID.
+        """
+        # Ensure the trajectory has points to draw
+        if len(self.trajectories[robot_id]) == 0:
+            self.get_logger().warn(f"No trajectory points for robot {robot_id}.")
+            return
         
-        if abs(len(self.last_landmarks[robot_id]) - len(new_points)) > 0.1 * len(self.last_landmarks[robot_id]) : 
-             return True
-
-        return False
-
-    def transform_landmarks_to_global(self, map_points, robot_id):
-        # Transform the points to global coordinates based on robot's position (simple translation here)
-        robot_position = np.array(self.robots[robot_id])
-        transformed_points_with_id = [] # Now also storing robot_id
-
-        for point in map_points:
-            transformed_point_xyz = np.array([point[0], point[1], point[2]]) + robot_position
-            # Append the original robot_id to the transformed point
-            transformed_points_with_id.append([transformed_point_xyz[0], transformed_point_xyz[1], transformed_point_xyz[2], robot_id])
+        # # Acquire lock to safely access the trajectory data
+        # with self.trajectory_locks[robot_id]:
+        # Set color based on robot ID
+        color = self.colors.get(robot_id, [0.5, 0.5, 0.5])  # Default to gray if robot_id is unknown
         
-        return transformed_points_with_id
+        # Create the Marker message for the robot's trajectory
+        trajectory_marker = Marker()
+        trajectory_marker.header.stamp = self.get_clock().now().to_msg()
+        trajectory_marker.header.frame_id = "base_footprint"  # Frame of reference for the robot's trajectory
+        trajectory_marker.ns = f"robot_{robot_id}_trajectory"  # Namespace for the robot's trajectory
+        trajectory_marker.id = 0
+        trajectory_marker.type = Marker.LINE_STRIP  # Type of marker (line strip for the path)
+        trajectory_marker.action = Marker.ADD
+        trajectory_marker.scale.x = 0.1  # Line width in RViz (larger for better visibility)
+        trajectory_marker.color.a = 1.0  # Opacity (1.0 for fully visible)
+        trajectory_marker.color.r = float(color[2]) / 255.0  # Red component
+        trajectory_marker.color.g = float(color[2]) / 255.0  # Green component
+        trajectory_marker.color.b = float(color[2]) / 255.0  # Blue component
+
+        # Add each trajectory point to the Marker message
+        for point in self.trajectories[robot_id]:
+            p = Point()
+            p.x, p.y, p.z = point[0], point[1], point[2]
+            trajectory_marker.points.append(p)
+
+        # Publish the trajectory marker
+        self.trajectory_publishers[robot_id].publish(trajectory_marker)
+        self.get_logger().info(f"Published trajectory for robot {robot_id} with {len(trajectory_marker.points)} points.")
+
+
+
+    def add_to_trajectory(self, robot_id, new_position):
+        """
+        Adds the robot's position to the trajectory if it meets the stability criteria.
+        """
+        # # Acquire lock to ensure thread safety
+        # with self.trajectory_locks[robot_id]:
+        # Add the new position to the trajectory history for this robot
+        self.trajectories[robot_id].append(new_position)
+
+        # Check if the new position is stable enough (apply smoothing logic)
+        if len(self.trajectories[robot_id]) > 1:
+            stable_position = self.apply_stability_filter(robot_id, new_position)
+            # Only update the trajectory with the stable position
+            self.trajectories[robot_id][-1] = stable_position
+
+        # Optionally: Only draw the trajectory after ensuring stability
+        if len(self.trajectories[robot_id]) % 5 == 0:  # Draw every 5th frame
+            self.draw_trajectory(robot_id)
+
+
+
+    
+    def apply_stability_filter(self, robot_id, new_position):
+        """
+        A stability filter that ignores large changes in trajectory (e.g., spikes).
+        The position must remain stable for a given number of frames to be considered valid.
+        """
+        
+        max_jump = 10   # Maximum allowable jump in trajectory
+        
+        # Get the last few positions of the robot (in global coordinates)
+        trajectory = self.trajectories[robot_id]
+
+        # If there are more positions than the window size, trim the history
+        if len(trajectory) > 1:
+            last_position = trajectory[-2]
+            # Calculate the distance between the last two points
+            distance = np.linalg.norm(np.array(last_position) - np.array(new_position))
+            
+            # If the change in position exceeds the threshold, ignore this point
+            if distance > max_jump:
+                self.get_logger().info(f"Spike detected: {distance}, using last stable position.")
+                return last_position
+
+        return new_position
+
 
 def main(args=None):
     rclpy.init(args=args)
     node = MapMergerNode()
-    
+
     try:
-        # Spin the node so the callback is called
         rclpy.spin(node)
     except KeyboardInterrupt:
         pass
     finally:
-        # Shutdown the node
         node.destroy_node()
         rclpy.shutdown()
-
 
 if __name__ == '__main__':
     main()
