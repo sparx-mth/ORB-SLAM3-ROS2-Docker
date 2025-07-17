@@ -2,6 +2,7 @@ import numpy as np
 import math
 import sensor_msgs_py.point_cloud2 as pc2
 
+
 class MapBuilder:
     """
     MapBuilder is responsible for constructing and maintaining a probabilistic 2D occupancy grid map
@@ -35,6 +36,11 @@ class MapBuilder:
         if self.node.current_pose is None:
             return
 
+        # During SLAM correction mode, continue updating the map
+        # Only skip updates during complete SLAM loss
+        if self.node.state == "SLAM_LOST":
+            return
+
         robot_world_x = self.node.current_pose.position.x
         robot_world_y = self.node.current_pose.position.y
 
@@ -43,6 +49,11 @@ class MapBuilder:
         except (AssertionError, Exception) as e:
             # ORB-SLAM3 might send malformed clouds when tracking is lost
             return
+
+        # Monitor point cloud count for SLAM loss detection
+        point_count = len(points)
+        self.node.monitor_point_cloud_count(point_count)
+
         cell_points = {}
 
         for x, y, z in points:
@@ -95,11 +106,19 @@ class MapBuilder:
         """
         decay_factor = 0.99
 
-        for y in range(self.node.grid_size):
-            for x in range(self.node.grid_size):
-                if self.node.update_count[y, x] < self.node.freeze_update_count:
-                    old_prob = self.node.occupancy_prob[y, x]
-                    self.node.occupancy_prob[y, x] = 0.5 + (old_prob - 0.5) * decay_factor
+        # Use temporal map if SLAM is lost
+        if self.node.using_temporal_map:
+            for y in range(self.node.grid_size):
+                for x in range(self.node.grid_size):
+                    if self.node.temporal_update_count[y, x] < self.node.freeze_update_count:
+                        old_prob = self.node.temporal_occupancy_prob[y, x]
+                        self.node.temporal_occupancy_prob[y, x] = 0.5 + (old_prob - 0.5) * decay_factor
+        else:
+            for y in range(self.node.grid_size):
+                for x in range(self.node.grid_size):
+                    if self.node.update_count[y, x] < self.node.freeze_update_count:
+                        old_prob = self.node.occupancy_prob[y, x]
+                        self.node.occupancy_prob[y, x] = 0.5 + (old_prob - 0.5) * decay_factor
 
     def bresenham_line(self, start_x, start_y, end_x, end_y):
         """
@@ -171,7 +190,14 @@ class MapBuilder:
                 if not (0 <= x < self.node.grid_size and 0 <= y < self.node.grid_size):
                     break
 
-                if self.node.occupancy_prob[y, x] > self.node.occupied_threshold and self.node.update_count[y, x] > 3:
-                    break
+                # Use temporal map if SLAM is lost
+                if self.node.using_temporal_map:
+                    if self.node.temporal_occupancy_prob[y, x] > self.node.occupied_threshold and \
+                            self.node.temporal_update_count[y, x] > 3:
+                        break
+                else:
+                    if self.node.occupancy_prob[y, x] > self.node.occupied_threshold and self.node.update_count[
+                        y, x] > 3:
+                        break
 
                 self.update_cell_probability(x, y, self.node.free_prob_decrement)

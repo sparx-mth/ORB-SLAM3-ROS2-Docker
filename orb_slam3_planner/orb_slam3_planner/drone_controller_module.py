@@ -2,6 +2,7 @@ import math
 import numpy as np
 from geometry_msgs.msg import Twist
 
+
 class DroneController:
     """
     DroneController is responsible for commanding the robot's movement,
@@ -21,18 +22,20 @@ class DroneController:
         self.cmd_pub = node.cmd_pub  # Publisher to /cmd_vel
         self.get_logger().info("DroneController initialized")
 
-    def move_toward_target(self):
+    def move_toward_waypoint(self, waypoint):
         """
-        Move the robot towards the currently assigned target while maintaining heading alignment.
-        If significant angular correction is needed, the robot will rotate in place before moving forward.
+        Move the robot towards a specific waypoint on the path.
+
+        Args:
+            waypoint (tuple): (x, y) grid coordinates of the waypoint
         """
-        if not self.node.target or not self.node.robot_pos:
+        if not self.node.robot_pos:
             return
 
         rx, ry = self.node.robot_pos
-        tx, ty = self.node.target
+        wx, wy = waypoint
 
-        target_angle = math.atan2(ty - ry, tx - rx)
+        target_angle = math.atan2(wy - ry, wx - rx)
         angle_diff = self.node.normalize_angle(target_angle - self.node.robot_angle)
 
         speed = self.get_adaptive_speed()
@@ -97,6 +100,9 @@ class DroneController:
         robot_width_cells = 1
         check_distance = self.node.safe_distance
 
+        # Use temporal map if SLAM is lost
+        prob_grid = self.node.temporal_occupancy_prob if self.node.using_temporal_map else self.node.occupancy_prob
+
         for dist in range(1, check_distance + 1):
             width_at_dist = max(1, robot_width_cells - dist // 3)
 
@@ -106,7 +112,7 @@ class DroneController:
                 check_y = int(ry + dist * math.sin(check_angle))
 
                 if 0 <= check_x < self.node.grid_size and 0 <= check_y < self.node.grid_size:
-                    if self.node.occupancy_prob[check_y, check_x] > self.node.occupied_threshold:
+                    if prob_grid[check_y, check_x] > self.node.occupied_threshold:
                         return True
 
         return False
@@ -126,12 +132,15 @@ class DroneController:
         check_radius = 5
         total_cells = 0
 
+        # Use temporal map if SLAM is lost
+        prob_grid = self.node.temporal_occupancy_prob if self.node.using_temporal_map else self.node.occupancy_prob
+
         for dx in range(-check_radius, check_radius + 1):
             for dy in range(-check_radius, check_radius + 1):
                 nx, ny = rx + dx, ry + dy
                 if 0 <= nx < self.node.grid_size and 0 <= ny < self.node.grid_size:
                     total_cells += 1
-                    if self.node.occupancy_prob[ny, nx] > self.node.occupied_threshold:
+                    if prob_grid[ny, nx] > self.node.occupied_threshold:
                         obstacle_count += 1
 
         return obstacle_count / total_cells if total_cells > 0 else 0.0

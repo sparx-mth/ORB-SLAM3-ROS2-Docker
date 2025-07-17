@@ -46,21 +46,10 @@ class AutonomousExplorerNode(Node):
         self.occupancy_prob = np.full((self.grid_size, self.grid_size), 0.5, dtype=np.float32)
         self.update_count = np.zeros((self.grid_size, self.grid_size), dtype=np.int32)
 
-        # Temporary map (used during SLAM loss)
-        self.temp_occupancy_prob = None
-        self.temp_update_count = None
-        self.using_temp_map = False
-
-        # Last known pose before SLAM lost
-        self.last_known_pose_before_lost = None
-
-        # Map status service client
-        status_service_name = f'/{self.robot_namespace}/orb_slam3/map_status'
-        self.map_status_client = self.create_client(GetMapStatus, status_service_name)
-
-        self.last_known_pose_before_lost = None
-        self.last_known_angle_before_lost = None
-
+        # Temporal map for SLAM loss recovery
+        self.temporal_occupancy_prob = None
+        self.temporal_update_count = None
+        self.using_temporal_map = False
 
         self.height_min = 0.1
         self.height_max = 2.0
@@ -80,13 +69,13 @@ class AutonomousExplorerNode(Node):
         # ======================
         # Motion Parameters
         # ======================
-        self.linear_speed = 0.6
+        self.linear_speed = 0.4
         self.angular_speed = 0.5
         self.safe_distance = 5
 
         self.adaptive_speed = True
         self.min_linear_speed = 0.3
-        self.max_linear_speed = 0.8
+        self.max_linear_speed = 0.6
 
         # ======================
         # Frontier Planning Parameters
@@ -108,18 +97,45 @@ class AutonomousExplorerNode(Node):
         self.stuck_counter = 0
         self.last_robot_pos = None
 
+        # A* path following
+        self.current_path = []
+        self.path_index = 0
+        self.waypoint_tolerance = 2  # cells
+
         # ======================
         # Goal Timeout
         # ======================
         self.target_start_time = None
-        self.target_timeout = 60.0  # seconds to reach a goal
+        self.target_timeout = 30.0  # seconds to reach a goal
 
         # ======================
         # SLAM Tracking Defense
         # ======================
         self.last_pose_time = None
-        self.pose_timeout = 2.0  # seconds without pose = tracking lost
+        self.last_valid_pose = None
+        self.pose_timeout = 4.0  # seconds without pose = tracking lost
         self.recovery_spin_time = 8.0  # seconds to spin when lost
+        self.slam_lost_start_time = None
+        self.recovery_attempts = 0
+        self.max_recovery_attempts = 3
+
+        # Position jump detection
+        self.max_position_jump = 5.0  # meters
+        self.last_robot_world_pos = None
+
+        # Point cloud monitoring
+        self.recent_point_counts = []
+        self.point_count_window = 5
+        self.min_point_ratio = 0.3  # Minimum ratio compared to average
+
+        # SLAM correction mode
+        self.slam_correction_mode = False
+        self.correction_start_time = None
+        self.correction_spin_time = 5.0  # seconds to spin for correction
+        self.last_correction_pose = None
+        self.correction_stable_count = 0
+        self.correction_stable_threshold = 5  # iterations without change
+        self.position_stability_threshold = 0.1  # meters
 
         # ======================
         # ROS2 Setup
@@ -144,82 +160,6 @@ class AutonomousExplorerNode(Node):
 
         self.get_logger().info(f"Autonomous Explorer Node started for namespace: {self.robot_namespace}")
 
-    def start_temporary_map(self):
-        """
-        Switch to a temporary map and freeze main map updates.
-        This is called when SLAM tracking is lost.
-        """
-        self.get_logger().warn("Switching to temporary map for exploration during SLAM loss")
-
-        # Save last known pose and orientation before tracking loss
-        if self.current_pose:
-            self.last_known_pose_before_lost = self.current_pose
-            self.last_known_angle_before_lost = self.robot_angle
-        else:
-            self.get_logger().warn("No current pose to save before SLAM loss")
-
-        # Copy current map state to temporary buffers
-        self.temp_occupancy_prob = np.copy(self.occupancy_prob)
-        self.temp_update_count = np.copy(self.update_count)
-        self.using_temp_map = True
-
-    def restore_main_map(self):
-        """
-        Restore the main map after SLAM has recovered and re-localized.
-        """
-        self.get_logger().info("Restoring main map after SLAM recovery")
-
-        # Clear temp buffers
-        self.temp_occupancy_prob = None
-        self.temp_update_count = None
-        self.using_temp_map = False
-
-        # Recompute robot position if it jumped
-        if self.last_known_pose_before_lost:
-            old_pose = self.last_known_pose_before_lost.position
-            new_pose = self.current_pose.position if self.current_pose else None
-
-            if new_pose:
-                dx = new_pose.x - old_pose.x
-                dy = new_pose.y - old_pose.y
-                distance = math.sqrt(dx ** 2 + dy ** 2)
-
-                if distance > 1.0:  # Large jump? Possibly due to relocalization
-                    self.get_logger().info(f"Robot relocated by {distance:.2f} meters after recovery")
-
-        # Clear last-known state
-        self.last_known_pose_before_lost = None
-        self.last_known_angle_before_lost = None
-        self.robot_pos = None  # Force re-update
-
-    def get_active_occupancy_prob(self):
-        return self.temp_occupancy_prob if self.using_temp_map else self.occupancy_prob
-
-    def get_active_update_count(self):
-        return self.temp_update_count if self.using_temp_map else self.update_count
-
-    def check_slam_map_status(self):
-        """
-        Call the ORB-SLAM3 map_status service to check if tracking is lost or a merge has completed.
-
-        Returns:
-            tuple(bool, bool): (is_tracking_lost, is_merge_complete)
-        """
-        if not self.map_status_client.service_is_ready():
-            self.get_logger().warn("map_status service not available yet.")
-            return None, None
-
-        request = GetMapStatus.Request()
-        future = self.map_status_client.call_async(request)
-        rclpy.spin_until_future_complete(self, future, timeout_sec=0.5)
-
-        if future.done() and future.result() is not None:
-            result = future.result()
-            return result.is_tracking_lost, result.is_merge_complete
-        else:
-            self.get_logger().warn("map_status service call failed or timed out.")
-            return None, None
-
     def update_cell_probability(self, x, y, prob_change):
         """
         Update a cell's occupancy probability using Bayesian-like updates.
@@ -232,18 +172,27 @@ class AutonomousExplorerNode(Node):
         if not (0 <= x < self.grid_size and 0 <= y < self.grid_size):
             return
 
-        grid = self.get_active_occupancy_prob()
-        updates = self.get_active_update_count()
+        # Use temporal map if SLAM is lost
+        if self.using_temporal_map:
+            old_prob = self.temporal_occupancy_prob[y, x]
 
-        old_prob = grid[y, x]
+            if prob_change > 0:
+                new_prob = old_prob + prob_change * (1 - old_prob)
+            else:
+                new_prob = old_prob + prob_change * old_prob
 
-        if prob_change > 0:
-            new_prob = old_prob + prob_change * (1 - old_prob)
+            self.temporal_occupancy_prob[y, x] = np.clip(new_prob, 0.01, 0.99)
+            self.temporal_update_count[y, x] += 1
         else:
-            new_prob = old_prob + prob_change * old_prob
+            old_prob = self.occupancy_prob[y, x]
 
-        grid[y, x] = np.clip(new_prob, 0.01, 0.99)
-        updates[y, x] += 1
+            if prob_change > 0:
+                new_prob = old_prob + prob_change * (1 - old_prob)
+            else:
+                new_prob = old_prob + prob_change * old_prob
+
+            self.occupancy_prob[y, x] = np.clip(new_prob, 0.01, 0.99)
+            self.update_count[y, x] += 1
 
     def pose_callback(self, msg):
         """
@@ -252,19 +201,67 @@ class AutonomousExplorerNode(Node):
         Args:
             msg (geometry_msgs.msg.PoseStamped): The robot's current estimated pose.
         """
-        self.last_pose_time = time.time()  # Track when we last got a pose
+        current_time = time.time()
+
+        # Check for position jump
+        world_x = msg.pose.position.x
+        world_y = msg.pose.position.y
+
+        if self.last_robot_world_pos is not None:
+            distance_jumped = math.sqrt(
+                (world_x - self.last_robot_world_pos[0]) ** 2 +
+                (world_y - self.last_robot_world_pos[1]) ** 2
+            )
+
+            if distance_jumped > self.max_position_jump:
+                # Check if jump is to origin (complete tracking loss) or elsewhere (localization error)
+                distance_from_origin = math.sqrt(world_x ** 2 + world_y ** 2)
+
+                if distance_from_origin < 0.5:  # Jump to near origin indicates tracking loss
+                    self.get_logger().error(f"SLAM tracking lost! Jump to origin detected: {distance_jumped:.2f}m")
+                    self.enter_slam_lost_state()
+                    return
+                else:
+                    # Jump to non-origin indicates localization error
+                    self.get_logger().warn(
+                        f"SLAM localization jump detected: {distance_jumped:.2f}m to ({world_x:.2f}, {world_y:.2f})")
+                    if not self.slam_correction_mode:
+                        self.enter_slam_correction_mode()
+                    # Don't update position during correction mode
+                    return
+
+        # If in correction mode, check for position stability
+        if self.slam_correction_mode:
+            if self.last_correction_pose is not None:
+                pose_change = math.sqrt(
+                    (world_x - self.last_correction_pose[0]) ** 2 +
+                    (world_y - self.last_correction_pose[1]) ** 2
+                )
+
+                if pose_change < self.position_stability_threshold:
+                    self.correction_stable_count += 1
+                    if self.correction_stable_count >= self.correction_stable_threshold:
+                        self.get_logger().info("SLAM position stabilized, exiting correction mode")
+                        self.exit_slam_correction_mode()
+                else:
+                    self.correction_stable_count = 0
+                    self.get_logger().info(f"SLAM still correcting, position changed by {pose_change:.3f}m")
+
+            self.last_correction_pose = (world_x, world_y)
+
+        self.last_robot_world_pos = (world_x, world_y)
+        self.last_pose_time = current_time
 
         # If we were in SLAM_LOST, recover
         if self.state == "SLAM_LOST":
             self.get_logger().info("SLAM tracking recovered!")
+            self.exit_slam_lost_state()
             self.state = "EXPLORING"
 
         self.current_pose = msg.pose
+        self.last_valid_pose = msg.pose
 
         # Convert to grid coordinates
-        world_x = msg.pose.position.x
-        world_y = msg.pose.position.y
-
         grid_x = int((world_x + self.map_range) / self.cell_size)
         grid_y = int((world_y + self.map_range) / self.cell_size)
 
@@ -292,60 +289,140 @@ class AutonomousExplorerNode(Node):
 
         if time_since_pose > self.pose_timeout and self.state != "SLAM_LOST":
             self.get_logger().error(f"SLAM tracking lost! No pose for {time_since_pose:.1f}s")
-            self.state = "SLAM_LOST"
-            self.slam_lost_start_time = time.time()
-            # Immediately stop
-            twist = Twist()
-            self.cmd_pub.publish(twist)
+            self.enter_slam_lost_state()
+
+    def enter_slam_correction_mode(self):
+        """Enter SLAM correction mode to help SLAM correct localization error"""
+        self.slam_correction_mode = True
+        self.correction_start_time = time.time()
+        self.last_correction_pose = None
+        self.correction_stable_count = 0
+
+        # Store current state to resume later
+        self.pre_correction_state = self.state
+        self.pre_correction_target = self.target
+        self.pre_correction_path = self.current_path
+        self.pre_correction_path_index = self.path_index
+
+        self.state = "SLAM_CORRECTION"
+
+        # Immediately stop
+        twist = Twist()
+        self.cmd_pub.publish(twist)
+
+        self.get_logger().warn("Entered SLAM_CORRECTION mode to fix localization")
+
+    def exit_slam_correction_mode(self):
+        """Exit SLAM correction mode and resume previous activity"""
+        self.slam_correction_mode = False
+        self.correction_start_time = None
+        self.last_correction_pose = None
+        self.correction_stable_count = 0
+
+        # Restore previous state
+        self.state = self.pre_correction_state
+        self.target = self.pre_correction_target
+        self.current_path = self.pre_correction_path
+        self.path_index = self.pre_correction_path_index
+
+        self.get_logger().info("Exited SLAM_CORRECTION mode, resuming exploration")
+
+    def enter_slam_lost_state(self):
+        """Enter SLAM lost state and create temporal map"""
+        if self.state == "SLAM_LOST":
+            return
+
+        self.state = "SLAM_LOST"
+        self.slam_lost_start_time = time.time()
+        self.recovery_attempts = 0
+
+        # Create temporal map as copy of current map
+        self.temporal_occupancy_prob = self.occupancy_prob.copy()
+        self.temporal_update_count = self.update_count.copy()
+        self.using_temporal_map = True
+
+        # Immediately stop
+        twist = Twist()
+        self.cmd_pub.publish(twist)
+
+        self.get_logger().warn("Entered SLAM_LOST state, created temporal map")
+
+    def exit_slam_lost_state(self):
+        """Exit SLAM lost state and discard temporal map"""
+        self.using_temporal_map = False
+        self.temporal_occupancy_prob = None
+        self.temporal_update_count = None
+        self.recovery_attempts = 0
+        self.get_logger().info("Exited SLAM_LOST state, discarded temporal map")
+
+    def monitor_point_cloud_count(self, point_count):
+        """Monitor point cloud counts to detect sudden drops"""
+        self.recent_point_counts.append(point_count)
+
+        if len(self.recent_point_counts) > self.point_count_window:
+            self.recent_point_counts.pop(0)
+
+        if len(self.recent_point_counts) == self.point_count_window:
+            avg_count = np.mean(self.recent_point_counts[:-1])
+            if avg_count > 0 and point_count < avg_count * self.min_point_ratio:
+                self.get_logger().error(f"Point cloud drop detected: {point_count} vs avg {avg_count:.0f}")
+                self.enter_slam_lost_state()
 
     def control_loop(self):
         """
         Main control loop: executes exploration state machine and sends movement commands.
         """
-        lost, merged = self.check_slam_map_status()
 
-        if lost and self.state != "SLAM_LOST":
-            self.get_logger().warn("SLAM tracking lost — switching to temporary map")
-            self.state = "SLAM_LOST"
-            self.start_temporary_map()
+        # Handle SLAM correction mode
+        if self.state == "SLAM_CORRECTION":
+            time_correcting = time.time() - self.correction_start_time
 
-        elif merged and self.state == "SLAM_LOST":
-            self.get_logger().info("Map merge complete — restoring original map")
-            self.state = "EXPLORING"
-            self.restore_main_map()
+            if time_correcting < self.correction_spin_time:
+                # Spin slowly to help SLAM correct its localization
+                twist = Twist()
+                twist.angular.z = self.angular_speed * 0.3  # Slower than recovery spin
+                self.cmd_pub.publish(twist)
 
-        # # Handle SLAM lost state
-        # if self.state == "SLAM_LOST":
-        #     time_lost = time.time() - self.slam_lost_start_time
-        #
-        #     if time_lost < self.recovery_spin_time:
-        #         # Spin slowly to find features
-        #         twist = Twist()
-        #         twist.angular.z = self.angular_speed * 0.4
-        #         self.cmd_pub.publish(twist)
-        #         self.get_logger().info(f"SLAM lost: spinning to recover ({time_lost:.1f}s)")
-        #     else:
-        #         # Stop and wait for manual intervention
-        #         self.controller.stop_robot()
-        #         self.get_logger().error("SLAM recovery failed. Manual restart required.")
-        #     return
+                remaining_time = self.correction_spin_time - time_correcting
+                self.get_logger().info(f"SLAM correction: spinning slowly ({remaining_time:.1f}s remaining)")
+            else:
+                # Timeout - accept current position and continue
+                self.get_logger().warn("SLAM correction timeout, accepting current position")
+                self.exit_slam_correction_mode()
+            return
+
+        # Handle SLAM lost state
+        if self.state == "SLAM_LOST":
+            time_lost = time.time() - self.slam_lost_start_time
+
+            if self.recovery_attempts < self.max_recovery_attempts:
+                if time_lost < self.recovery_spin_time:
+                    # Spin slowly to find features
+                    twist = Twist()
+                    twist.angular.z = self.angular_speed * 0.4
+                    self.cmd_pub.publish(twist)
+                    self.get_logger().info(f"SLAM lost: spinning to recover ({time_lost:.1f}s)")
+                else:
+                    # Try backing up and spinning again
+                    self.recovery_attempts += 1
+                    self.slam_lost_start_time = time.time()
+
+                    # Back up for 2 seconds
+                    twist = Twist()
+                    twist.linear.x = -self.linear_speed * 0.5
+                    self.cmd_pub.publish(twist)
+                    # time.sleep(2.0)
+
+                    self.get_logger().info(f"Recovery attempt {self.recovery_attempts}/{self.max_recovery_attempts}")
+            else:
+                # Stop and wait for manual intervention
+                self.controller.stop_robot()
+                self.get_logger().error("SLAM recovery failed. Manual restart required.")
+            return
 
         if not self.robot_pos:
-            if self.using_temp_map and self.last_known_pose_before_lost:
-                self.robot_angle = self.last_known_angle_before_lost
-                world_x = self.last_known_pose_before_lost.position.x
-                world_y = self.last_known_pose_before_lost.position.y
-                grid_x = int((world_x + self.map_range) / self.cell_size)
-                grid_y = int((world_y + self.map_range) / self.cell_size)
-                if 0 <= grid_x < self.grid_size and 0 <= grid_y < self.grid_size:
-                    self.robot_pos = (grid_x, grid_y)
-                    self.get_logger().warn(f"Using last known robot position: ({grid_x}, {grid_y})")
-                else:
-                    self.controller.stop_robot()
-                    return
-            else:
-                self.controller.stop_robot()
-                return
+            self.controller.stop_robot()
+            return
 
         if self.controller.is_stuck():
             self.get_logger().warn("Robot stuck. Switching to RECOVERY.")
@@ -374,18 +451,28 @@ class AutonomousExplorerNode(Node):
             self.target = self.planner.find_nearest_frontier()
 
             if self.target:
-                self.state = "MOVING_TO_TARGET"
-                self.target_start_time = time.time()  # Start timer
-                self.get_logger().info(f"New target: {self.target}")
-                goal_msg = Point()
-                goal_msg.x = float(self.target[0])
-                goal_msg.y = float(self.target[1])
-                self.goal_pub.publish(goal_msg)
+                # Plan path with A*
+                path = self.planner.plan_path(self.robot_pos, self.target)
+                if path and len(path) > 1:
+                    self.current_path = path
+                    self.path_index = 1  # Skip current position
+                    self.state = "MOVING_TO_TARGET"
+                    self.target_start_time = time.time()
+                    self.get_logger().info(f"New target: {self.target}, path length: {len(path)}")
+
+                    # Publish the final goal
+                    goal_msg = Point()
+                    goal_msg.x = float(self.target[0])
+                    goal_msg.y = float(self.target[1])
+                    self.goal_pub.publish(goal_msg)
+                else:
+                    self.get_logger().warn(f"No path found to target {self.target}")
+                    self.target = None
             else:
                 self.controller.turn_to_explore()
 
         elif self.state == "MOVING_TO_TARGET":
-            if not self.target:
+            if not self.target or not self.current_path:
                 self.state = "EXPLORING"
                 return
 
@@ -396,34 +483,63 @@ class AutonomousExplorerNode(Node):
             # Check timeout
             if self.target_start_time and (time.time() - self.target_start_time) > self.target_timeout:
                 self.get_logger().warn(f"Goal timeout! Abandoning target after {self.target_timeout}s")
-                self.visited_targets.add((self.target[0], self.target[1]))  # Mark as visited to avoid retrying
+                self.visited_targets.add((self.target[0], self.target[1]))
                 self.target = None
+                self.current_path = []
                 self.target_start_time = None
                 self.state = "EXPLORING"
                 return
 
             rx, ry = self.robot_pos
-            tx, ty = self.target
-            distance = math.sqrt((tx - rx) ** 2 + (ty - ry) ** 2)
 
-            if distance < self.exploration_radius:
+            # Check if we reached the final target
+            tx, ty = self.target
+            distance_to_target = math.sqrt((tx - rx) ** 2 + (ty - ry) ** 2)
+
+            if distance_to_target < self.exploration_radius:
                 self.get_logger().info("Reached target.")
                 self.visited_targets.add((tx, ty))
                 self.state = "EXPLORING"
                 self.target = None
-                self.target_start_time = None  # Reset timer
-                # self.controller.stop_robot()
+                self.current_path = []
+                self.target_start_time = None
+                self.controller.turn_to_explore()
                 return
 
-            if self.controller.check_collision_ahead():
-                self.get_logger().warn("Obstacle ahead! Halting.")
-                twist = Twist()
-                twist.linear.x = -self.linear_speed * 1.0
-                # twist.angular.z = -self.angular_speed * 1.5
-                self.cmd_pub.publish(twist)
-                return
+            # Follow the path
+            if self.path_index < len(self.current_path):
+                waypoint = self.current_path[self.path_index]
+                wx, wy = waypoint
 
-            self.controller.move_toward_target()
+                # Check distance to current waypoint
+                distance_to_waypoint = math.sqrt((wx - rx) ** 2 + (wy - ry) ** 2)
+
+                if distance_to_waypoint < self.waypoint_tolerance:
+                    # Reached waypoint, move to next
+                    self.path_index += 1
+                    if self.path_index >= len(self.current_path):
+                        # Path completed but haven't reached target, replan
+                        self.get_logger().info("Path completed, replanning...")
+                        self.state = "EXPLORING"
+                        return
+                else:
+                    # Move toward current waypoint
+                    if self.controller.check_collision_ahead():
+                        # Obstacle detected, replan path
+                        self.get_logger().warn("Obstacle on path! Replanning...")
+                        new_path = self.planner.plan_path(self.robot_pos, self.target)
+                        if new_path and len(new_path) > 1:
+                            self.current_path = new_path
+                            self.path_index = 1
+                        else:
+                            self.get_logger().warn("No alternate path found!")
+                            self.state = "EXPLORING"
+                            return
+                    else:
+                        self.controller.move_toward_waypoint(waypoint)
+            else:
+                # Path index out of bounds, replan
+                self.state = "EXPLORING"
 
     def normalize_angle(self, angle):
         """
@@ -449,6 +565,10 @@ class AutonomousExplorerNode(Node):
         msg.info.height = self.grid_size
         msg.info.origin.position.x = -self.map_range
         msg.info.origin.position.y = -self.map_range
+
+        # Use temporal map if SLAM is lost
+        prob_grid = self.temporal_occupancy_prob if self.using_temporal_map else self.occupancy_prob
+        count_grid = self.temporal_update_count if self.using_temporal_map else self.update_count
 
         ros_grid = []
         for y in range(self.grid_size):
@@ -478,13 +598,15 @@ class AutonomousExplorerNode(Node):
         if not (0 <= x < self.grid_size and 0 <= y < self.grid_size):
             return -1
 
-        grid = self.get_active_occupancy_prob()
-        updates = self.get_active_update_count()
+        # Use temporal map if SLAM is lost
+        if self.using_temporal_map:
+            prob = self.temporal_occupancy_prob[y, x]
+            updates = self.temporal_update_count[y, x]
+        else:
+            prob = self.occupancy_prob[y, x]
+            updates = self.update_count[y, x]
 
-        prob = grid[y, x]
-        count = updates[y, x]
-
-        if count < 2:
+        if updates < 2:
             return -1
         if prob > self.occupied_threshold:
             return 1
