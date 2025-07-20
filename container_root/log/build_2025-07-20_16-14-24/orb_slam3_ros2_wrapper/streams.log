@@ -1,0 +1,37 @@
+[1.155s] Invoking command in '/root/build/orb_slam3_ros2_wrapper': AMENT_PREFIX_PATH=/root/install/slam_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/root/install/slam_msgs:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble LD_LIBRARY_PATH=/root/install/slam_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/root/install/slam_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --build /root/build/orb_slam3_ros2_wrapper -- -j12 -l12
+[1.296s] [ 15%] Built target gtest_main
+[1.314s] [ 30%] Built target gtest
+[1.320s] [35m[1mConsolidate compiler generated dependencies of target rgbd[0m
+[1.373s] [35m[1mConsolidate compiler generated dependencies of target typeconversionTests[0m
+[1.427s] [ 76%] Built target rgbd
+[1.443s] [100%] Built target typeconversionTests
+[1.470s] Invoked command in '/root/build/orb_slam3_ros2_wrapper' returned '0': AMENT_PREFIX_PATH=/root/install/slam_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/root/install/slam_msgs:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble LD_LIBRARY_PATH=/root/install/slam_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/root/install/slam_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --build /root/build/orb_slam3_ros2_wrapper -- -j12 -l12
+[1.475s] Invoking command in '/root/build/orb_slam3_ros2_wrapper': AMENT_PREFIX_PATH=/root/install/slam_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/root/install/slam_msgs:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble LD_LIBRARY_PATH=/root/install/slam_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/root/install/slam_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --install /root/build/orb_slam3_ros2_wrapper
+[1.487s] -- Install configuration: "Release"
+[1.488s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/lib/orb_slam3_ros2_wrapper/rgbd
+[1.488s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/launch
+[1.488s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/launch/rgbd.launch.py
+[1.488s] -- Installing: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/launch/multi_robot.launch.py
+[1.489s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/launch/unirobot.launch.py
+[1.489s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params
+[1.490s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/rgbd-ros-params.yaml
+[1.490s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/zed2i_kratos.yaml
+[1.490s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/zed2i.yaml
+[1.490s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/gazebo_rgbd.yaml
+[1.490s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/orbbec_astra.yaml
+[1.491s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/ament_index/resource_index/package_run_dependencies/orb_slam3_ros2_wrapper
+[1.491s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/ament_index/resource_index/parent_prefix_path/orb_slam3_ros2_wrapper
+[1.491s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/environment/ament_prefix_path.sh
+[1.491s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/environment/ament_prefix_path.dsv
+[1.491s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/environment/path.sh
+[1.491s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/environment/path.dsv
+[1.492s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/local_setup.bash
+[1.492s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/local_setup.sh
+[1.492s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/local_setup.zsh
+[1.492s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/local_setup.dsv
+[1.492s] -- Installing: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/package.dsv
+[1.492s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/ament_index/resource_index/packages/orb_slam3_ros2_wrapper
+[1.492s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/cmake/orb_slam3_ros2_wrapperConfig.cmake
+[1.493s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/cmake/orb_slam3_ros2_wrapperConfig-version.cmake
+[1.493s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/package.xml
+[1.496s] Invoked command in '/root/build/orb_slam3_ros2_wrapper' returned '0': AMENT_PREFIX_PATH=/root/install/slam_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/root/install/slam_msgs:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble LD_LIBRARY_PATH=/root/install/slam_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/root/install/slam_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --install /root/build/orb_slam3_ros2_wrapper

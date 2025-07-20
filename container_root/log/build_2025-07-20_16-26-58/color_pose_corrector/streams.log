@@ -1,0 +1,24 @@
+[2.145s] Invoking command in '/root/colcon_ws/src/color_pose_corrector': PYTHONPATH=/root/build/color_pose_corrector/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/root/install/color_pose_corrector/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/color_pose_corrector build --build-base /root/build/color_pose_corrector/build install --record /root/build/color_pose_corrector/install.log --single-version-externally-managed install_data
+[2.973s] running egg_info
+[2.978s] writing ../../../build/color_pose_corrector/color_pose_corrector.egg-info/PKG-INFO
+[2.978s] writing dependency_links to ../../../build/color_pose_corrector/color_pose_corrector.egg-info/dependency_links.txt
+[2.978s] writing entry points to ../../../build/color_pose_corrector/color_pose_corrector.egg-info/entry_points.txt
+[2.978s] writing requirements to ../../../build/color_pose_corrector/color_pose_corrector.egg-info/requires.txt
+[2.978s] writing top-level names to ../../../build/color_pose_corrector/color_pose_corrector.egg-info/top_level.txt
+[2.988s] reading manifest file '../../../build/color_pose_corrector/color_pose_corrector.egg-info/SOURCES.txt'
+[2.990s] writing manifest file '../../../build/color_pose_corrector/color_pose_corrector.egg-info/SOURCES.txt'
+[2.991s] running build
+[2.992s] running build_py
+[2.993s] copying color_pose_corrector/color_finder.py -> /root/build/color_pose_corrector/build/lib/color_pose_corrector
+[2.995s] running install
+[2.997s] running install_lib
+[3.001s] copying /root/build/color_pose_corrector/build/lib/color_pose_corrector/color_finder.py -> /root/install/color_pose_corrector/lib/python3.10/site-packages/color_pose_corrector
+[3.005s] byte-compiling /root/install/color_pose_corrector/lib/python3.10/site-packages/color_pose_corrector/color_finder.py to color_finder.cpython-310.pyc
+[3.008s] running install_data
+[3.008s] running install_egg_info
+[3.015s] removing '/root/install/color_pose_corrector/lib/python3.10/site-packages/color_pose_corrector-0.0.0-py3.10.egg-info' (and everything under it)
+[3.016s] Copying ../../../build/color_pose_corrector/color_pose_corrector.egg-info to /root/install/color_pose_corrector/lib/python3.10/site-packages/color_pose_corrector-0.0.0-py3.10.egg-info
+[3.018s] running install_scripts
+[3.098s] Installing color_finder script to /root/install/color_pose_corrector/lib/color_pose_corrector
+[3.099s] writing list of installed files to '/root/build/color_pose_corrector/install.log'
+[4.786s] Invoked command in '/root/colcon_ws/src/color_pose_corrector' returned '0': PYTHONPATH=/root/build/color_pose_corrector/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/root/install/color_pose_corrector/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/color_pose_corrector build --build-base /root/build/color_pose_corrector/build install --record /root/build/color_pose_corrector/install.log --single-version-externally-managed install_data

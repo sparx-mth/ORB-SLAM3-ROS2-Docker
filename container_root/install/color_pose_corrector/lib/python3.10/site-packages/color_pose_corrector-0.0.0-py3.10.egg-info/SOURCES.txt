@@ -1,0 +1,16 @@
+package.xml
+setup.cfg
+setup.py
+../../../build/color_pose_corrector/color_pose_corrector.egg-info/PKG-INFO
+../../../build/color_pose_corrector/color_pose_corrector.egg-info/SOURCES.txt
+../../../build/color_pose_corrector/color_pose_corrector.egg-info/dependency_links.txt
+../../../build/color_pose_corrector/color_pose_corrector.egg-info/entry_points.txt
+../../../build/color_pose_corrector/color_pose_corrector.egg-info/requires.txt
+../../../build/color_pose_corrector/color_pose_corrector.egg-info/top_level.txt
+../../../build/color_pose_corrector/color_pose_corrector.egg-info/zip-safe
+color_pose_corrector/__init__.py
+color_pose_corrector/color_finder.py
+resource/color_pose_corrector
+test/test_copyright.py
+test/test_flake8.py
+test/test_pep257.py

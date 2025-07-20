@@ -1,0 +1,33 @@
+[0.644s] Invoking command in '/root/build/orb_slam3_map_generator': AMENT_PREFIX_PATH=/root/install/slam_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/root/install/slam_msgs:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble LD_LIBRARY_PATH=/root/install/slam_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/root/install/slam_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --build /root/build/orb_slam3_map_generator -- -j12 -l12
+[1.172s] [35m[1mConsolidate compiler generated dependencies of target get_landmarks_simulator[0m
+[1.172s] [35m[1mConsolidate compiler generated dependencies of target depth_image_to_pcl[0m
+[1.173s] [35m[1mConsolidate compiler generated dependencies of target pointcloud_stitcher[0m
+[1.173s] [ 33%] Built target depth_image_to_pcl
+[1.174s] [ 66%] Built target get_landmarks_simulator
+[1.174s] [100%] Built target pointcloud_stitcher
+[1.187s] Invoked command in '/root/build/orb_slam3_map_generator' returned '0': AMENT_PREFIX_PATH=/root/install/slam_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/root/install/slam_msgs:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble LD_LIBRARY_PATH=/root/install/slam_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/root/install/slam_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --build /root/build/orb_slam3_map_generator -- -j12 -l12
+[1.187s] Invoking command in '/root/build/orb_slam3_map_generator': AMENT_PREFIX_PATH=/root/install/slam_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/root/install/slam_msgs:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble LD_LIBRARY_PATH=/root/install/slam_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/root/install/slam_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --install /root/build/orb_slam3_map_generator
+[1.201s] -- Install configuration: "Release"
+[1.202s] -- Up-to-date: /root/install/orb_slam3_map_generator/lib/orb_slam3_map_generator/pointcloud_stitcher
+[1.203s] -- Up-to-date: /root/install/orb_slam3_map_generator/lib/orb_slam3_map_generator/depth_image_to_pcl
+[1.203s] -- Up-to-date: /root/install/orb_slam3_map_generator/lib/orb_slam3_map_generator/get_landmarks_simulator
+[1.204s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/launch
+[1.204s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/launch/map_generator.launch.py
+[1.204s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/param
+[1.205s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/param/map_generator_params.yaml
+[1.205s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/ament_index/resource_index/package_run_dependencies/orb_slam3_map_generator
+[1.205s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/ament_index/resource_index/parent_prefix_path/orb_slam3_map_generator
+[1.205s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/environment/ament_prefix_path.sh
+[1.205s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/environment/ament_prefix_path.dsv
+[1.205s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/environment/path.sh
+[1.206s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/environment/path.dsv
+[1.206s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/local_setup.bash
+[1.206s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/local_setup.sh
+[1.207s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/local_setup.zsh
+[1.207s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/local_setup.dsv
+[1.207s] -- Installing: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/package.dsv
+[1.207s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/ament_index/resource_index/packages/orb_slam3_map_generator
+[1.208s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/cmake/orb_slam3_map_generatorConfig.cmake
+[1.208s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/cmake/orb_slam3_map_generatorConfig-version.cmake
+[1.208s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/package.xml
+[1.213s] Invoked command in '/root/build/orb_slam3_map_generator' returned '0': AMENT_PREFIX_PATH=/root/install/slam_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/root/install/slam_msgs:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble LD_LIBRARY_PATH=/root/install/slam_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/root/install/slam_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --install /root/build/orb_slam3_map_generator

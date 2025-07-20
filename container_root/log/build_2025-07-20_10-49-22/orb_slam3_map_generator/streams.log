@@ -1,0 +1,109 @@
+[0.321s] Invoking command in '/root/build/orb_slam3_map_generator': AMENT_PREFIX_PATH=/root/install/slam_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/root/install/slam_msgs:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble LD_LIBRARY_PATH=/root/install/slam_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/root/install/slam_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --build /root/build/orb_slam3_map_generator -- -j12 -l12
+[0.576s] [0mBuild type: Release[0m
+[0.576s] -- Found ament_cmake_auto: 1.3.11 (/opt/ros/humble/share/ament_cmake_auto/cmake)
+[0.577s] -- Found rclcpp: 16.0.12 (/opt/ros/humble/share/rclcpp/cmake)
+[0.577s] -- Found rosidl_generator_c: 3.1.6 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.577s] -- Found rosidl_adapter: 3.1.6 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[0.578s] -- Found rosidl_generator_cpp: 3.1.6 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[0.578s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.578s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.595s] -- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)
+[0.597s] -- Found rmw_cyclonedds_cpp: 1.3.4 (/opt/ros/humble/share/rmw_cyclonedds_cpp/cmake)
+[0.617s] -- Using RMW implementation 'rmw_cyclonedds_cpp' as default
+[0.669s] -- Found sensor_msgs: 4.9.0 (/opt/ros/humble/share/sensor_msgs/cmake)
+[0.702s] -- Found cv_bridge: 3.2.1 (/opt/ros/humble/share/cv_bridge/cmake)
+[0.709s] -- Found message_filters: 4.3.7 (/opt/ros/humble/share/message_filters/cmake)
+[0.722s] -- Found tf2_ros: 0.25.13 (/opt/ros/humble/share/tf2_ros/cmake)
+[0.883s] -- Found tf2_eigen: 0.25.13 (/opt/ros/humble/share/tf2_eigen/cmake)
+[0.888s] -- Found tf2_geometry_msgs: 0.25.13 (/opt/ros/humble/share/tf2_geometry_msgs/cmake)
+[0.893s] -- Found eigen3_cmake_module: 0.1.1 (/opt/ros/humble/share/eigen3_cmake_module/cmake)
+[0.895s] -- Ensuring Eigen3 include directory is part of orocos-kdl CMake target
+[0.897s] -- Found slam_msgs: 1.0.0 (/root/install/slam_msgs/share/slam_msgs/cmake)
+[0.919s] -- Found nav_msgs: 4.9.0 (/opt/ros/humble/share/nav_msgs/cmake)
+[0.944s] -- Found std_srvs: 4.9.0 (/opt/ros/humble/share/std_srvs/cmake)
+[0.959s] -- Found image_transport: 3.1.12 (/opt/ros/humble/share/image_transport/cmake)
+[0.995s] -- Found tf2_sensor_msgs: 0.25.13 (/opt/ros/humble/share/tf2_sensor_msgs/cmake)
+[1.000s] -- Found pcl_ros: 2.4.5 (/opt/ros/humble/share/pcl_ros/cmake)
+[1.044s] -- Eigen found (include: /usr/include/eigen3, version: 3.4.0)
+[1.093s] -- FLANN found (include: /usr/include, lib: /usr/lib/x86_64-linux-gnu/libflann_cpp.so)
+[1.500s] -- OpenNI found (version: 1.5.4.0, include: /usr/include/ni, lib: /usr/lib/libOpenNI.so;libusb::libusb)
+[1.507s] -- OpenNI2 found (version: 2.2.0.33, include: /usr/include/openni2, lib: /usr/lib/x86_64-linux-gnu/libOpenNI2.so;libusb::libusb)
+[1.666s] -- Eigen found (include: /usr/include/eigen3, version: 3.4.0)
+[1.673s] -- OpenNI found (version: 1.5.4.0, include: /usr/include/ni, lib: /usr/lib/libOpenNI.so;libusb::libusb)
+[1.680s] -- OpenNI2 found (version: 2.2.0.33, include: /usr/include/openni2, lib: /usr/lib/x86_64-linux-gnu/libOpenNI2.so;libusb::libusb)
+[1.827s] -- Found Qhull version 8.0.2
+[1.982s] -- OpenNI found (version: 1.5.4.0, include: /usr/include/ni, lib: /usr/lib/libOpenNI.so;libusb::libusb)
+[2.136s] [33mCMake Warning (dev) at CMakeLists.txt:40 (find_package):
+[2.136s]   Policy CMP0074 is not set: find_package uses <PackageName>_ROOT variables.
+[2.136s]   Run "cmake --help-policy CMP0074" for policy details.  Use the cmake_policy
+[2.136s]   command to set the policy and suppress this warning.
+[2.136s] 
+[2.136s]   CMake variable PCL_ROOT is set to:
+[2.137s] 
+[2.137s]     /usr
+[2.137s] 
+[2.137s]   For compatibility, CMake is ignoring the variable.
+[2.137s] This warning is for project developers.  Use -Wno-dev to suppress it.
+[2.137s] [0m
+[2.286s] -- Configuring done
+[2.514s] -- Generating done
+[2.548s] -- Build files have been written to: /root/build/orb_slam3_map_generator
+[2.585s] [35m[1mConsolidate compiler generated dependencies of target depth_image_to_pcl[0m
+[2.586s] [35m[1mConsolidate compiler generated dependencies of target pointcloud_stitcher[0m
+[2.586s] [35m[1mConsolidate compiler generated dependencies of target get_landmarks_simulator[0m
+[2.618s] [ 16%] [32mBuilding CXX object CMakeFiles/depth_image_to_pcl.dir/src/depth_image_to_pcl.cpp.o[0m
+[2.621s] [ 33%] [32mBuilding CXX object CMakeFiles/get_landmarks_simulator.dir/src/get_landmarks_simulator.cpp.o[0m
+[2.629s] [ 50%] [32mBuilding CXX object CMakeFiles/pointcloud_stitcher.dir/src/stitch_pcl.cpp.o[0m
+[9.383s] [01m[K/root/colcon_ws/src/orb_slam3_map_generator/src/get_landmarks_simulator.cpp:[m[K In member function ‘[01m[Kvoid MapPointsNode::handleGetLandmarksInView(std::shared_ptr<slam_msgs::srv::GetLandmarksInView_Request_<std::allocator<void> > >, std::shared_ptr<slam_msgs::srv::GetLandmarksInView_Response_<std::allocator<void> > >)[m[K’:
+[9.383s] [01m[K/root/colcon_ws/src/orb_slam3_map_generator/src/get_landmarks_simulator.cpp:157:20:[m[K [01;35m[Kwarning: [m[Kunused variable ‘[01m[Kdz[m[K’ [[01;35m[K-Wunused-variable[m[K]
+[9.383s]   157 |             double [01;35m[Kdz[m[K = map_point.position.z - pose_z;
+[9.383s]       |                    [01;35m[K^~[m[K
+[15.585s] [01m[K/root/colcon_ws/src/orb_slam3_map_generator/src/stitch_pcl.cpp:[m[K In constructor ‘[01m[KDepthPointcloudStitcher::DepthPointcloudStitcher()[m[K’:
+[15.585s] [01m[K/root/colcon_ws/src/orb_slam3_map_generator/src/stitch_pcl.cpp:346:12:[m[K [01;35m[Kwarning: [m[K‘[01m[KDepthPointcloudStitcher::buffer_duration_[m[K’ will be initialized after [[01;35m[K-Wreorder[m[K]
+[15.585s]   346 |    double [01;35m[Kbuffer_duration_[m[K;
+[15.585s]       |           [01;35m[K^~~~~~~~~~~~~~~~[m[K
+[15.586s] 
+[15.586s] [01m[K/root/colcon_ws/src/orb_slam3_map_generator/src/stitch_pcl.cpp:340:21:[m[K [01;35m[Kwarning: [m[K  ‘[01m[Ktf2_ros::Buffer DepthPointcloudStitcher::tf_buffer_[m[K’ [[01;35m[K-Wreorder[m[K]
+[15.586s]   340 | s::Buffer [01;35m[Ktf_buffer_[m[K;
+[15.586s]       |           [01;35m[K^~~~~~~~~~[m[K
+[15.586s] 
+[15.586s] [01m[K/root/colcon_ws/src/orb_slam3_map_generator/src/stitch_pcl.cpp:28:5:[m[K [01;35m[Kwarning: [m[K  when initialized here [[01;35m[K-Wreorder[m[K]
+[15.586s]    28 |     [01;35m[KDepthPointcloudStitcher[m[K()
+[15.586s]       |     [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~[m[K
+[95.552s] [ 66%] [32m[1mLinking CXX executable get_landmarks_simulator[0m
+[99.700s] [ 66%] Built target get_landmarks_simulator
+[101.780s] [ 83%] [32m[1mLinking CXX executable pointcloud_stitcher[0m
+[102.632s] [ 83%] Built target pointcloud_stitcher
+[102.954s] [100%] [32m[1mLinking CXX executable depth_image_to_pcl[0m
+[103.360s] /usr/bin/ld: warning: libopencv_imgcodecs.so.4.5d, needed by /opt/ros/humble/lib/libcv_bridge.so, may conflict with libopencv_imgcodecs.so.4.4
+[103.366s] /usr/bin/ld: warning: libopencv_core.so.4.5d, needed by /opt/ros/humble/lib/libcv_bridge.so, may conflict with libopencv_core.so.4.4
+[103.796s] [100%] Built target depth_image_to_pcl
+[103.819s] Invoked command in '/root/build/orb_slam3_map_generator' returned '0': AMENT_PREFIX_PATH=/root/install/slam_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/root/install/slam_msgs:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble LD_LIBRARY_PATH=/root/install/slam_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/root/install/slam_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --build /root/build/orb_slam3_map_generator -- -j12 -l12
+[103.825s] Invoking command in '/root/build/orb_slam3_map_generator': AMENT_PREFIX_PATH=/root/install/slam_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/root/install/slam_msgs:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble LD_LIBRARY_PATH=/root/install/slam_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/root/install/slam_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --install /root/build/orb_slam3_map_generator
+[103.836s] -- Install configuration: "Release"
+[103.838s] -- Installing: /root/install/orb_slam3_map_generator/lib/orb_slam3_map_generator/pointcloud_stitcher
+[103.840s] -- Set runtime path of "/root/install/orb_slam3_map_generator/lib/orb_slam3_map_generator/pointcloud_stitcher" to ""
+[103.841s] -- Installing: /root/install/orb_slam3_map_generator/lib/orb_slam3_map_generator/depth_image_to_pcl
+[103.842s] -- Set runtime path of "/root/install/orb_slam3_map_generator/lib/orb_slam3_map_generator/depth_image_to_pcl" to ""
+[103.843s] -- Installing: /root/install/orb_slam3_map_generator/lib/orb_slam3_map_generator/get_landmarks_simulator
+[103.845s] -- Set runtime path of "/root/install/orb_slam3_map_generator/lib/orb_slam3_map_generator/get_landmarks_simulator" to ""
+[103.845s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/launch
+[103.845s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/launch/map_generator.launch.py
+[103.845s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/param
+[103.846s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/param/map_generator_params.yaml
+[103.846s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/ament_index/resource_index/package_run_dependencies/orb_slam3_map_generator
+[103.846s] -- Installing: /root/install/orb_slam3_map_generator/share/ament_index/resource_index/parent_prefix_path/orb_slam3_map_generator
+[103.847s] -- Installing: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/environment/ament_prefix_path.sh
+[103.848s] -- Installing: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/environment/ament_prefix_path.dsv
+[103.848s] -- Installing: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/environment/path.sh
+[103.848s] -- Installing: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/environment/path.dsv
+[103.849s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/local_setup.bash
+[103.849s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/local_setup.sh
+[103.849s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/local_setup.zsh
+[103.849s] -- Installing: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/local_setup.dsv
+[103.849s] -- Installing: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/package.dsv
+[103.850s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/ament_index/resource_index/packages/orb_slam3_map_generator
+[103.850s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/cmake/orb_slam3_map_generatorConfig.cmake
+[103.851s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/cmake/orb_slam3_map_generatorConfig-version.cmake
+[103.851s] -- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/package.xml
+[103.855s] Invoked command in '/root/build/orb_slam3_map_generator' returned '0': AMENT_PREFIX_PATH=/root/install/slam_msgs:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/root/install/slam_msgs:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble LD_LIBRARY_PATH=/root/install/slam_msgs/lib:${LD_LIBRARY_PATH} PYTHONPATH=/root/install/slam_msgs/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --install /root/build/orb_slam3_map_generator

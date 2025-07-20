@@ -1,0 +1,561 @@
+[0.000000] (-) TimerEvent: {}
+[0.000971] (color_pose_corrector) JobQueued: {'identifier': 'color_pose_corrector', 'dependencies': OrderedDict()}
+[0.001943] (slam_msgs) JobQueued: {'identifier': 'slam_msgs', 'dependencies': OrderedDict()}
+[0.002409] (map_merger) JobQueued: {'identifier': 'map_merger', 'dependencies': OrderedDict([('slam_msgs', '/root/install/slam_msgs')])}
+[0.002788] (orb_slam3_map_generator) JobQueued: {'identifier': 'orb_slam3_map_generator', 'dependencies': OrderedDict([('slam_msgs', '/root/install/slam_msgs')])}
+[0.002911] (orb_slam3_planner) JobQueued: {'identifier': 'orb_slam3_planner', 'dependencies': OrderedDict([('slam_msgs', '/root/install/slam_msgs')])}
+[0.003016] (orb_slam3_ros2_wrapper) JobQueued: {'identifier': 'orb_slam3_ros2_wrapper', 'dependencies': OrderedDict([('slam_msgs', '/root/install/slam_msgs')])}
+[0.003062] (slam_msgs) JobStarted: {'identifier': 'slam_msgs'}
+[0.079471] (color_pose_corrector) JobStarted: {'identifier': 'color_pose_corrector'}
+[0.095242] (-) TimerEvent: {}
+[0.103812] (slam_msgs) JobProgress: {'identifier': 'slam_msgs', 'progress': 'cmake'}
+[0.106256] (slam_msgs) JobProgress: {'identifier': 'slam_msgs', 'progress': 'build'}
+[0.108532] (slam_msgs) Command: {'cmd': ['/usr/bin/cmake', '--build', '/root/build/slam_msgs', '--', '-j12', '-l12'], 'cwd': '/root/build/slam_msgs', 'env': OrderedDict([('HOSTNAME', 'LP-Boston-12214'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/root/install/slam_msgs/lib:/root/colcon_ws/install/slam_msgs/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/root'), ('CYCLONEDDS_URI', '/root/.ros/cyclonedds.xml'), ('OLDPWD', '/'), ('ROS_PYTHON_VERSION', '3'), ('COLCON_PREFIX_PATH', '/root/install:/root/colcon_ws/install'), ('ROS_DISTRO', 'humble'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('TERM', 'xterm'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'), ('XDG_RUNTIME_DIR', '/tmp/runtime-root'), ('DISPLAY', ':1'), ('LANG', 'C.UTF-8'), ('RMW_IMPLEMENTATION', 'rmw_cyclonedds_cpp'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('ROS_DOMAIN_ID', '55'), ('AMENT_PREFIX_PATH', '/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_planner:/root/install/orb_slam3_map_generator:/root/install/map_merger:/root/install/slam_msgs:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble'), ('PWD', '/root/build/slam_msgs'), ('LC_ALL', 'C.UTF-8'), ('RCUTILS_COLORIZED_OUTPUT', '1'), ('PYTHONPATH', '/root/install/orb_slam3_planner/lib/python3.10/site-packages:/root/install/map_merger/lib/python3.10/site-packages:/root/install/slam_msgs/local/lib/python3.10/dist-packages:/root/install/color_pose_corrector/lib/python3.10/site-packages:/root/colcon_ws/build/orb_slam3_planner:/root/colcon_ws/install/orb_slam3_planner/lib/python3.10/site-packages:/root/colcon_ws/build/map_merger:/root/colcon_ws/install/map_merger/lib/python3.10/site-packages:/root/colcon_ws/install/slam_msgs/local/lib/python3.10/dist-packages:/root/colcon_ws/install/color_pose_corrector/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('CMAKE_PREFIX_PATH', '/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_map_generator:/root/install/slam_msgs:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/install/orb_slam3_planner:/root/install/map_merger:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble')]), 'shell': False}
+[0.195376] (-) TimerEvent: {}
+[0.290446] (slam_msgs) StdoutLine: {'line': b'[  1%] Built target slam_msgs__cpp\n'}
+[0.295491] (-) TimerEvent: {}
+[0.395961] (-) TimerEvent: {}
+[0.397796] (slam_msgs) StdoutLine: {'line': b'[  1%] Built target ament_cmake_python_copy_slam_msgs\n'}
+[0.486880] (slam_msgs) StdoutLine: {'line': b'[ 12%] Built target slam_msgs__rosidl_typesupport_introspection_cpp\n'}
+[0.496101] (-) TimerEvent: {}
+[0.596697] (-) TimerEvent: {}
+[0.698097] (-) TimerEvent: {}
+[0.798962] (-) TimerEvent: {}
+[0.900170] (-) TimerEvent: {}
+[1.001189] (-) TimerEvent: {}
+[1.102033] (-) TimerEvent: {}
+[1.202616] (-) TimerEvent: {}
+[1.303147] (-) TimerEvent: {}
+[1.316255] (slam_msgs) StdoutLine: {'line': b'running egg_info\n'}
+[1.318821] (slam_msgs) StdoutLine: {'line': b'writing slam_msgs.egg-info/PKG-INFO\n'}
+[1.319202] (slam_msgs) StdoutLine: {'line': b'writing dependency_links to slam_msgs.egg-info/dependency_links.txt\n'}
+[1.320009] (slam_msgs) StdoutLine: {'line': b'writing top-level names to slam_msgs.egg-info/top_level.txt\n'}
+[1.332073] (slam_msgs) StdoutLine: {'line': b"reading manifest file 'slam_msgs.egg-info/SOURCES.txt'\n"}
+[1.332398] (slam_msgs) StdoutLine: {'line': b"writing manifest file 'slam_msgs.egg-info/SOURCES.txt'\n"}
+[1.404036] (-) TimerEvent: {}
+[1.433802] (slam_msgs) StdoutLine: {'line': b'[ 12%] Built target ament_cmake_python_build_slam_msgs_egg\n'}
+[1.504236] (-) TimerEvent: {}
+[1.531497] (slam_msgs) StdoutLine: {'line': b'[ 24%] Built target slam_msgs__rosidl_typesupport_fastrtps_cpp\n'}
+[1.604456] (-) TimerEvent: {}
+[1.631016] (slam_msgs) StdoutLine: {'line': b'[ 35%] Built target slam_msgs__rosidl_typesupport_cpp\n'}
+[1.704577] (-) TimerEvent: {}
+[1.709699] (slam_msgs) StdoutLine: {'line': b'[ 47%] Built target slam_msgs__rosidl_generator_c\n'}
+[1.802405] (slam_msgs) StdoutLine: {'line': b'[ 58%] Built target slam_msgs__rosidl_typesupport_fastrtps_c\n'}
+[1.804731] (-) TimerEvent: {}
+[1.882267] (slam_msgs) StdoutLine: {'line': b'[ 70%] Built target slam_msgs__rosidl_typesupport_c\n'}
+[1.904975] (-) TimerEvent: {}
+[1.973234] (slam_msgs) StdoutLine: {'line': b'[ 82%] Built target slam_msgs__rosidl_typesupport_introspection_c\n'}
+[2.005344] (-) TimerEvent: {}
+[2.045446] (slam_msgs) StdoutLine: {'line': b'[ 82%] Built target slam_msgs\n'}
+[2.105337] (-) TimerEvent: {}
+[2.121530] (slam_msgs) StdoutLine: {'line': b'[ 83%] Built target slam_msgs__py\n'}
+[2.205452] (-) TimerEvent: {}
+[2.212773] (slam_msgs) StdoutLine: {'line': b'[ 93%] Built target slam_msgs__rosidl_generator_py\n'}
+[2.221163] (color_pose_corrector) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'egg_info', '--egg-base', '../../../build/color_pose_corrector', 'build', '--build-base', '/root/build/color_pose_corrector/build', 'install', '--record', '/root/build/color_pose_corrector/install.log', '--single-version-externally-managed', 'install_data'], 'cwd': '/root/colcon_ws/src/color_pose_corrector', 'env': {'HOSTNAME': 'LP-Boston-12214', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/root/install/slam_msgs/lib:/root/colcon_ws/install/slam_msgs/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib', 'HOME': '/root', 'CYCLONEDDS_URI': '/root/.ros/cyclonedds.xml', 'OLDPWD': '/', 'ROS_PYTHON_VERSION': '3', 'COLCON_PREFIX_PATH': '/root/install:/root/colcon_ws/install', 'ROS_DISTRO': 'humble', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'TERM': 'xterm', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'XDG_RUNTIME_DIR': '/tmp/runtime-root', 'DISPLAY': ':1', 'LANG': 'C.UTF-8', 'RMW_IMPLEMENTATION': 'rmw_cyclonedds_cpp', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'ROS_DOMAIN_ID': '55', 'AMENT_PREFIX_PATH': '/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_planner:/root/install/orb_slam3_map_generator:/root/install/map_merger:/root/install/slam_msgs:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble', 'PWD': '/root/build/color_pose_corrector', 'LC_ALL': 'C.UTF-8', 'RCUTILS_COLORIZED_OUTPUT': '1', 'PYTHONPATH': '/root/build/color_pose_corrector/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/root/install/color_pose_corrector/lib/python3.10/site-packages:/root/install/orb_slam3_planner/lib/python3.10/site-packages:/root/install/map_merger/lib/python3.10/site-packages:/root/install/slam_msgs/local/lib/python3.10/dist-packages:/root/install/color_pose_corrector/lib/python3.10/site-packages:/root/colcon_ws/build/orb_slam3_planner:/root/colcon_ws/install/orb_slam3_planner/lib/python3.10/site-packages:/root/colcon_ws/build/map_merger:/root/colcon_ws/install/map_merger/lib/python3.10/site-packages:/root/colcon_ws/install/slam_msgs/local/lib/python3.10/dist-packages:/root/colcon_ws/install/color_pose_corrector/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'COLCON': '1', 'CMAKE_PREFIX_PATH': '/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_map_generator:/root/install/slam_msgs:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs'}, 'shell': False}
+[2.292459] (slam_msgs) StdoutLine: {'line': b'[ 95%] Built target slam_msgs__rosidl_typesupport_fastrtps_c__pyext\n'}
+[2.305678] (-) TimerEvent: {}
+[2.374848] (slam_msgs) StdoutLine: {'line': b'[ 97%] Built target slam_msgs__rosidl_typesupport_c__pyext\n'}
+[2.405920] (-) TimerEvent: {}
+[2.453351] (slam_msgs) StdoutLine: {'line': b'[100%] Built target slam_msgs__rosidl_typesupport_introspection_c__pyext\n'}
+[2.499377] (slam_msgs) CommandEnded: {'returncode': 0}
+[2.501697] (slam_msgs) JobProgress: {'identifier': 'slam_msgs', 'progress': 'install'}
+[2.506123] (-) TimerEvent: {}
+[2.529866] (slam_msgs) Command: {'cmd': ['/usr/bin/cmake', '--install', '/root/build/slam_msgs'], 'cwd': '/root/build/slam_msgs', 'env': OrderedDict([('HOSTNAME', 'LP-Boston-12214'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/root/install/slam_msgs/lib:/root/colcon_ws/install/slam_msgs/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/root'), ('CYCLONEDDS_URI', '/root/.ros/cyclonedds.xml'), ('OLDPWD', '/'), ('ROS_PYTHON_VERSION', '3'), ('COLCON_PREFIX_PATH', '/root/install:/root/colcon_ws/install'), ('ROS_DISTRO', 'humble'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('TERM', 'xterm'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'), ('XDG_RUNTIME_DIR', '/tmp/runtime-root'), ('DISPLAY', ':1'), ('LANG', 'C.UTF-8'), ('RMW_IMPLEMENTATION', 'rmw_cyclonedds_cpp'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('ROS_DOMAIN_ID', '55'), ('AMENT_PREFIX_PATH', '/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_planner:/root/install/orb_slam3_map_generator:/root/install/map_merger:/root/install/slam_msgs:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble'), ('PWD', '/root/build/slam_msgs'), ('LC_ALL', 'C.UTF-8'), ('RCUTILS_COLORIZED_OUTPUT', '1'), ('PYTHONPATH', '/root/install/orb_slam3_planner/lib/python3.10/site-packages:/root/install/map_merger/lib/python3.10/site-packages:/root/install/slam_msgs/local/lib/python3.10/dist-packages:/root/install/color_pose_corrector/lib/python3.10/site-packages:/root/colcon_ws/build/orb_slam3_planner:/root/colcon_ws/install/orb_slam3_planner/lib/python3.10/site-packages:/root/colcon_ws/build/map_merger:/root/colcon_ws/install/map_merger/lib/python3.10/site-packages:/root/colcon_ws/install/slam_msgs/local/lib/python3.10/dist-packages:/root/colcon_ws/install/color_pose_corrector/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('CMAKE_PREFIX_PATH', '/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_map_generator:/root/install/slam_msgs:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/install/orb_slam3_planner:/root/install/map_merger:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble')]), 'shell': False}
+[2.556942] (slam_msgs) StdoutLine: {'line': b'-- Install configuration: ""\n'}
+[2.557395] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/ament_index/resource_index/rosidl_interfaces/slam_msgs\n'}
+[2.557781] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs\n'}
+[2.559485] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg\n'}
+[2.559739] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/slam_info.h\n'}
+[2.560117] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail\n'}
+[2.560308] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__type_support.h\n'}
+[2.560490] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__type_support.h\n'}
+[2.560648] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__type_support.h\n'}
+[2.560849] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__type_support.h\n'}
+[2.561212] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__type_support.h\n'}
+[2.561438] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__struct.h\n'}
+[2.562208] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__struct.h\n'}
+[2.563090] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__functions.c\n'}
+[2.563590] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__functions.c\n'}
+[2.563800] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__functions.h\n'}
+[2.564229] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__functions.c\n'}
+[2.564434] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__struct.h\n'}
+[2.564594] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__struct.h\n'}
+[2.564729] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__functions.h\n'}
+[2.564862] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__functions.c\n'}
+[2.565039] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__functions.h\n'}
+[2.565205] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__functions.h\n'}
+[2.565370] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__struct.h\n'}
+[2.565550] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__functions.h\n'}
+[2.565718] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__functions.c\n'}
+[2.565876] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/map_graph.h\n'}
+[2.566164] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/map_point.h\n'}
+[2.566418] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/rosidl_generator_c__visibility_control.h\n'}
+[2.566650] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/map_data.h\n'}
+[2.567099] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/key_frame.h\n'}
+[2.567455] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv\n'}
+[2.567690] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/get_all_landmarks_in_map.h\n'}
+[2.567850] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail\n'}
+[2.568395] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__struct.h\n'}
+[2.568688] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__functions.c\n'}
+[2.568913] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__type_support.h\n'}
+[2.569132] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__functions.h\n'}
+[2.569265] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__functions.h\n'}
+[2.569402] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__functions.c\n'}
+[2.569556] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__struct.h\n'}
+[2.569688] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__functions.c\n'}
+[2.569821] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__type_support.h\n'}
+[2.570013] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__type_support.h\n'}
+[2.570171] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__functions.h\n'}
+[2.570307] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__functions.h\n'}
+[2.570729] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__type_support.h\n'}
+[2.570960] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__struct.h\n'}
+[2.571224] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__functions.c\n'}
+[2.571465] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__struct.h\n'}
+[2.571643] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/get_global_point_cloud.h\n'}
+[2.571804] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/get_map.h\n'}
+[2.572031] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/get_landmarks_in_view.h\n'}
+[2.572697] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/environment/library_path.sh\n'}
+[2.572982] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/environment/library_path.dsv\n'}
+[2.573175] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/lib/libslam_msgs__rosidl_generator_c.so\n'}
+[2.573747] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs\n'}
+[2.574030] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg\n'}
+[2.574196] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/rosidl_typesupport_fastrtps_c__visibility_control.h\n'}
+[2.574366] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail\n'}
+[2.574516] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__rosidl_typesupport_fastrtps_c.h\n'}
+[2.574681] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__rosidl_typesupport_fastrtps_c.h\n'}
+[2.574846] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__rosidl_typesupport_fastrtps_c.h\n'}
+[2.575081] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__rosidl_typesupport_fastrtps_c.h\n'}
+[2.575287] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__rosidl_typesupport_fastrtps_c.h\n'}
+[2.577253] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv\n'}
+[2.578050] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail\n'}
+[2.578323] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__rosidl_typesupport_fastrtps_c.h\n'}
+[2.578744] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__rosidl_typesupport_fastrtps_c.h\n'}
+[2.579171] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__rosidl_typesupport_fastrtps_c.h\n'}
+[2.579584] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__rosidl_typesupport_fastrtps_c.h\n'}
+[2.579925] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/lib/libslam_msgs__rosidl_typesupport_fastrtps_c.so\n'}
+[2.580209] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs\n'}
+[2.580385] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg\n'}
+[2.580521] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail\n'}
+[2.580657] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__struct.hpp\n'}
+[2.580812] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__builder.hpp\n'}
+[2.580963] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__type_support.hpp\n'}
+[2.581089] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__builder.hpp\n'}
+[2.581221] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__builder.hpp\n'}
+[2.581367] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__traits.hpp\n'}
+[2.581502] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__type_support.hpp\n'}
+[2.581638] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__builder.hpp\n'}
+[2.581758] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__traits.hpp\n'}
+[2.581872] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__type_support.hpp\n'}
+[2.582453] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__struct.hpp\n'}
+[2.582661] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__traits.hpp\n'}
+[2.582815] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__type_support.hpp\n'}
+[2.583103] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__struct.hpp\n'}
+[2.583385] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__struct.hpp\n'}
+[2.583649] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__builder.hpp\n'}
+[2.583820] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__traits.hpp\n'}
+[2.584100] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__traits.hpp\n'}
+[2.584465] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__type_support.hpp\n'}
+[2.584834] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__struct.hpp\n'}
+[2.585166] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/map_point.hpp\n'}
+[2.585549] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/map_data.hpp\n'}
+[2.585769] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/map_graph.hpp\n'}
+[2.585930] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/slam_info.hpp\n'}
+[2.586226] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/key_frame.hpp\n'}
+[2.586404] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/rosidl_generator_cpp__visibility_control.hpp\n'}
+[2.586558] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv\n'}
+[2.587028] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/get_map.hpp\n'}
+[2.587460] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail\n'}
+[2.589454] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__type_support.hpp\n'}
+[2.590097] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__builder.hpp\n'}
+[2.590424] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__type_support.hpp\n'}
+[2.590678] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__type_support.hpp\n'}
+[2.591001] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__struct.hpp\n'}
+[2.591394] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__traits.hpp\n'}
+[2.591918] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__struct.hpp\n'}
+[2.592191] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__builder.hpp\n'}
+[2.592372] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__traits.hpp\n'}
+[2.592604] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__builder.hpp\n'}
+[2.592796] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__builder.hpp\n'}
+[2.593181] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__struct.hpp\n'}
+[2.593342] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__traits.hpp\n'}
+[2.593500] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__traits.hpp\n'}
+[2.593648] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__struct.hpp\n'}
+[2.593783] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__type_support.hpp\n'}
+[2.593954] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/get_all_landmarks_in_map.hpp\n'}
+[2.594130] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/get_global_point_cloud.hpp\n'}
+[2.594292] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/get_landmarks_in_view.hpp\n'}
+[2.594423] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs\n'}
+[2.594548] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg\n'}
+[2.594670] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail\n'}
+[2.594794] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/dds_fastrtps\n'}
+[2.594935] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[2.595076] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[2.595222] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[2.595359] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[2.595489] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[2.595627] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h\n'}
+[2.595756] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv\n'}
+[2.595910] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail\n'}
+[2.596117] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/dds_fastrtps\n'}
+[2.596260] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[2.596391] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[2.596552] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[2.596695] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__rosidl_typesupport_fastrtps_cpp.hpp\n'}
+[2.596853] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/lib/libslam_msgs__rosidl_typesupport_fastrtps_cpp.so\n'}
+[2.596999] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs\n'}
+[2.597122] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg\n'}
+[2.597238] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail\n'}
+[2.597361] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__type_support.c\n'}
+[2.597508] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__rosidl_typesupport_introspection_c.h\n'}
+[2.597659] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__rosidl_typesupport_introspection_c.h\n'}
+[2.597823] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__type_support.c\n'}
+[2.598095] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__type_support.c\n'}
+[2.598257] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__rosidl_typesupport_introspection_c.h\n'}
+[2.598407] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__type_support.c\n'}
+[2.598554] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__rosidl_typesupport_introspection_c.h\n'}
+[2.598733] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__type_support.c\n'}
+[2.598874] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__rosidl_typesupport_introspection_c.h\n'}
+[2.598994] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/rosidl_typesupport_introspection_c__visibility_control.h\n'}
+[2.599078] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv\n'}
+[2.599161] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail\n'}
+[2.599264] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__type_support.c\n'}
+[2.599346] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__rosidl_typesupport_introspection_c.h\n'}
+[2.599425] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__type_support.c\n'}
+[2.599500] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__type_support.c\n'}
+[2.599580] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__rosidl_typesupport_introspection_c.h\n'}
+[2.599659] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__rosidl_typesupport_introspection_c.h\n'}
+[2.599747] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__rosidl_typesupport_introspection_c.h\n'}
+[2.599827] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__type_support.c\n'}
+[2.599927] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/lib/libslam_msgs__rosidl_typesupport_introspection_c.so\n'}
+[2.600036] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/lib/libslam_msgs__rosidl_typesupport_c.so\n'}
+[2.600115] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs\n'}
+[2.600188] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg\n'}
+[2.600307] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail\n'}
+[2.600408] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__type_support.cpp\n'}
+[2.600485] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__type_support.cpp\n'}
+[2.600559] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__rosidl_typesupport_introspection_cpp.hpp\n'}
+[2.600633] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__type_support.cpp\n'}
+[2.600708] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__type_support.cpp\n'}
+[2.600789] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__rosidl_typesupport_introspection_cpp.hpp\n'}
+[2.601097] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__rosidl_typesupport_introspection_cpp.hpp\n'}
+[2.601293] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__rosidl_typesupport_introspection_cpp.hpp\n'}
+[2.601427] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__rosidl_typesupport_introspection_cpp.hpp\n'}
+[2.601559] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__type_support.cpp\n'}
+[2.601702] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv\n'}
+[2.601846] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail\n'}
+[2.602044] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__type_support.cpp\n'}
+[2.602205] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__type_support.cpp\n'}
+[2.602293] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__rosidl_typesupport_introspection_cpp.hpp\n'}
+[2.602369] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__rosidl_typesupport_introspection_cpp.hpp\n'}
+[2.602442] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__type_support.cpp\n'}
+[2.602515] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__type_support.cpp\n'}
+[2.602590] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__rosidl_typesupport_introspection_cpp.hpp\n'}
+[2.602690] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__rosidl_typesupport_introspection_cpp.hpp\n'}
+[2.602773] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/lib/libslam_msgs__rosidl_typesupport_introspection_cpp.so\n'}
+[2.602851] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/lib/libslam_msgs__rosidl_typesupport_cpp.so\n'}
+[2.603063] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/environment/pythonpath.sh\n'}
+[2.603247] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/environment/pythonpath.dsv\n'}
+[2.603395] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs-1.0.0-py3.10.egg-info\n'}
+[2.603565] (slam_msgs) StdoutLine: {'line': b'-- Installing: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs-1.0.0-py3.10.egg-info/PKG-INFO\n'}
+[2.603852] (slam_msgs) StdoutLine: {'line': b'-- Installing: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs-1.0.0-py3.10.egg-info/dependency_links.txt\n'}
+[2.604164] (slam_msgs) StdoutLine: {'line': b'-- Installing: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs-1.0.0-py3.10.egg-info/top_level.txt\n'}
+[2.604454] (slam_msgs) StdoutLine: {'line': b'-- Installing: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs-1.0.0-py3.10.egg-info/SOURCES.txt\n'}
+[2.604687] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs\n'}
+[2.604882] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/libslam_msgs__rosidl_generator_py.so\n'}
+[2.605143] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/_slam_msgs_s.ep.rosidl_typesupport_fastrtps_c.c\n'}
+[2.605376] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg\n'}
+[2.605589] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_map_graph_s.c\n'}
+[2.605813] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_slam_info.py\n'}
+[2.606076] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_slam_info_s.c\n'}
+[2.606301] (-) TimerEvent: {}
+[2.606939] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_map_point.py\n'}
+[2.607222] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_map_data.py\n'}
+[2.607833] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_map_point_s.c\n'}
+[2.608126] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_map_data_s.c\n'}
+[2.608361] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/__init__.py\n'}
+[2.608702] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_key_frame.py\n'}
+[2.608931] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_map_graph.py\n'}
+[2.609182] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_key_frame_s.c\n'}
+[2.609384] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/_slam_msgs_s.ep.rosidl_typesupport_introspection_c.c\n'}
+[2.609587] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv\n'}
+[2.609780] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv/_get_all_landmarks_in_map.py\n'}
+[2.609990] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv/_get_map_s.c\n'}
+[2.610191] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv/_get_landmarks_in_view_s.c\n'}
+[2.610380] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv/_get_map.py\n'}
+[2.610569] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv/_get_all_landmarks_in_map_s.c\n'}
+[2.610759] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv/_get_global_point_cloud.py\n'}
+[2.610943] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv/__init__.py\n'}
+[2.611124] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv/_get_global_point_cloud_s.c\n'}
+[2.611313] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv/_get_landmarks_in_view.py\n'}
+[2.611520] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/slam_msgs_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so\n'}
+[2.611703] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/_slam_msgs_s.ep.rosidl_typesupport_c.c\n'}
+[2.611906] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/slam_msgs_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so\n'}
+[2.612101] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/__init__.py\n'}
+[2.612272] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/slam_msgs_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so\n'}
+[2.706551] (-) TimerEvent: {}
+[2.712862] (slam_msgs) StdoutLine: {'line': b"Listing '/root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs'...\n"}
+[2.713430] (slam_msgs) StdoutLine: {'line': b"Listing '/root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg'...\n"}
+[2.713729] (slam_msgs) StdoutLine: {'line': b"Listing '/root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv'...\n"}
+[2.741373] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/slam_msgs_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so\n'}
+[2.742259] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/slam_msgs_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so\n'}
+[2.743068] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/slam_msgs_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so\n'}
+[2.743757] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/lib/libslam_msgs__rosidl_generator_py.so\n'}
+[2.744303] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/MapGraph.idl\n'}
+[2.744800] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/MapData.idl\n'}
+[2.745263] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/KeyFrame.idl\n'}
+[2.745681] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/MapPoint.idl\n'}
+[2.746203] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/SlamInfo.idl\n'}
+[2.746452] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetMap.idl\n'}
+[2.746675] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetLandmarksInView.idl\n'}
+[2.746899] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetAllLandmarksInMap.idl\n'}
+[2.747353] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetGlobalPointCloud.idl\n'}
+[2.747525] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/MapGraph.msg\n'}
+[2.747673] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/MapData.msg\n'}
+[2.747816] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/KeyFrame.msg\n'}
+[2.748003] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/MapPoint.msg\n'}
+[2.748178] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/SlamInfo.msg\n'}
+[2.748343] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetMap.srv\n'}
+[2.748509] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetMap_Request.msg\n'}
+[2.748686] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetMap_Response.msg\n'}
+[2.748838] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetLandmarksInView.srv\n'}
+[2.749029] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetLandmarksInView_Request.msg\n'}
+[2.749190] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetLandmarksInView_Response.msg\n'}
+[2.749573] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetAllLandmarksInMap.srv\n'}
+[2.749724] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetAllLandmarksInMap_Request.msg\n'}
+[2.749861] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetAllLandmarksInMap_Response.msg\n'}
+[2.750083] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetGlobalPointCloud.srv\n'}
+[2.750306] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetGlobalPointCloud_Request.msg\n'}
+[2.750497] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetGlobalPointCloud_Response.msg\n'}
+[2.750667] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/ament_index/resource_index/package_run_dependencies/slam_msgs\n'}
+[2.754592] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/ament_index/resource_index/parent_prefix_path/slam_msgs\n'}
+[2.755871] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/environment/ament_prefix_path.sh\n'}
+[2.756234] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/environment/ament_prefix_path.dsv\n'}
+[2.756455] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/environment/path.sh\n'}
+[2.756623] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/environment/path.dsv\n'}
+[2.756787] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/local_setup.bash\n'}
+[2.756961] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/local_setup.sh\n'}
+[2.757125] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/local_setup.zsh\n'}
+[2.757313] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/local_setup.dsv\n'}
+[2.757514] (slam_msgs) StdoutLine: {'line': b'-- Installing: /root/install/slam_msgs/share/slam_msgs/package.dsv\n'}
+[2.757674] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/ament_index/resource_index/packages/slam_msgs\n'}
+[2.757826] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/export_slam_msgs__rosidl_generator_cExport.cmake\n'}
+[2.758067] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/export_slam_msgs__rosidl_generator_cExport-noconfig.cmake\n'}
+[2.758319] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/export_slam_msgs__rosidl_typesupport_fastrtps_cExport.cmake\n'}
+[2.758488] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/export_slam_msgs__rosidl_typesupport_fastrtps_cExport-noconfig.cmake\n'}
+[2.758658] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/export_slam_msgs__rosidl_generator_cppExport.cmake\n'}
+[2.758826] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/export_slam_msgs__rosidl_typesupport_fastrtps_cppExport.cmake\n'}
+[2.759027] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/export_slam_msgs__rosidl_typesupport_fastrtps_cppExport-noconfig.cmake\n'}
+[2.759216] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgs__rosidl_typesupport_introspection_cExport.cmake\n'}
+[2.759404] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgs__rosidl_typesupport_introspection_cExport-noconfig.cmake\n'}
+[2.759575] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgs__rosidl_typesupport_cExport.cmake\n'}
+[2.759747] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgs__rosidl_typesupport_cExport-noconfig.cmake\n'}
+[2.759938] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgs__rosidl_typesupport_introspection_cppExport.cmake\n'}
+[2.760127] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgs__rosidl_typesupport_introspection_cppExport-noconfig.cmake\n'}
+[2.760324] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgs__rosidl_typesupport_cppExport.cmake\n'}
+[2.760520] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgs__rosidl_typesupport_cppExport-noconfig.cmake\n'}
+[2.760838] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/export_slam_msgs__rosidl_generator_pyExport.cmake\n'}
+[2.761086] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/export_slam_msgs__rosidl_generator_pyExport-noconfig.cmake\n'}
+[2.761246] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/rosidl_cmake-extras.cmake\n'}
+[2.761401] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/ament_cmake_export_dependencies-extras.cmake\n'}
+[2.761627] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/ament_cmake_export_include_directories-extras.cmake\n'}
+[2.761904] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/ament_cmake_export_libraries-extras.cmake\n'}
+[2.762612] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/ament_cmake_export_targets-extras.cmake\n'}
+[2.762918] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake\n'}
+[2.764956] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake\n'}
+[2.765429] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgsConfig.cmake\n'}
+[2.765690] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgsConfig-version.cmake\n'}
+[2.765856] (slam_msgs) StdoutLine: {'line': b'-- Up-to-date: /root/install/slam_msgs/share/slam_msgs/package.xml\n'}
+[2.766063] (slam_msgs) CommandEnded: {'returncode': 0}
+[2.807260] (-) TimerEvent: {}
+[2.850213] (slam_msgs) JobEnded: {'identifier': 'slam_msgs', 'rc': 0}
+[2.855670] (map_merger) JobStarted: {'identifier': 'map_merger'}
+[2.879457] (orb_slam3_map_generator) JobStarted: {'identifier': 'orb_slam3_map_generator'}
+[2.895960] (orb_slam3_planner) JobStarted: {'identifier': 'orb_slam3_planner'}
+[2.907751] (-) TimerEvent: {}
+[2.920768] (orb_slam3_ros2_wrapper) JobStarted: {'identifier': 'orb_slam3_ros2_wrapper'}
+[3.008070] (-) TimerEvent: {}
+[3.052408] (color_pose_corrector) StdoutLine: {'line': b'running egg_info\n'}
+[3.055964] (color_pose_corrector) StdoutLine: {'line': b'writing ../../../build/color_pose_corrector/color_pose_corrector.egg-info/PKG-INFO\n'}
+[3.057224] (color_pose_corrector) StdoutLine: {'line': b'writing dependency_links to ../../../build/color_pose_corrector/color_pose_corrector.egg-info/dependency_links.txt\n'}
+[3.057472] (color_pose_corrector) StdoutLine: {'line': b'writing entry points to ../../../build/color_pose_corrector/color_pose_corrector.egg-info/entry_points.txt\n'}
+[3.057635] (color_pose_corrector) StdoutLine: {'line': b'writing requirements to ../../../build/color_pose_corrector/color_pose_corrector.egg-info/requires.txt\n'}
+[3.057766] (color_pose_corrector) StdoutLine: {'line': b'writing top-level names to ../../../build/color_pose_corrector/color_pose_corrector.egg-info/top_level.txt\n'}
+[3.067332] (color_pose_corrector) StdoutLine: {'line': b"reading manifest file '../../../build/color_pose_corrector/color_pose_corrector.egg-info/SOURCES.txt'\n"}
+[3.069135] (color_pose_corrector) StdoutLine: {'line': b"writing manifest file '../../../build/color_pose_corrector/color_pose_corrector.egg-info/SOURCES.txt'\n"}
+[3.070657] (color_pose_corrector) StdoutLine: {'line': b'running build\n'}
+[3.071143] (color_pose_corrector) StdoutLine: {'line': b'running build_py\n'}
+[3.072742] (color_pose_corrector) StdoutLine: {'line': b'copying color_pose_corrector/color_finder.py -> /root/build/color_pose_corrector/build/lib/color_pose_corrector\n'}
+[3.074004] (color_pose_corrector) StdoutLine: {'line': b'running install\n'}
+[3.076014] (color_pose_corrector) StdoutLine: {'line': b'running install_lib\n'}
+[3.080637] (color_pose_corrector) StdoutLine: {'line': b'copying /root/build/color_pose_corrector/build/lib/color_pose_corrector/color_finder.py -> /root/install/color_pose_corrector/lib/python3.10/site-packages/color_pose_corrector\n'}
+[3.083828] (color_pose_corrector) StdoutLine: {'line': b'byte-compiling /root/install/color_pose_corrector/lib/python3.10/site-packages/color_pose_corrector/color_finder.py to color_finder.cpython-310.pyc\n'}
+[3.087312] (color_pose_corrector) StdoutLine: {'line': b'running install_data\n'}
+[3.087710] (color_pose_corrector) StdoutLine: {'line': b'running install_egg_info\n'}
+[3.093656] (color_pose_corrector) StdoutLine: {'line': b"removing '/root/install/color_pose_corrector/lib/python3.10/site-packages/color_pose_corrector-0.0.0-py3.10.egg-info' (and everything under it)\n"}
+[3.095668] (color_pose_corrector) StdoutLine: {'line': b'Copying ../../../build/color_pose_corrector/color_pose_corrector.egg-info to /root/install/color_pose_corrector/lib/python3.10/site-packages/color_pose_corrector-0.0.0-py3.10.egg-info\n'}
+[3.097259] (color_pose_corrector) StdoutLine: {'line': b'running install_scripts\n'}
+[3.108198] (-) TimerEvent: {}
+[3.177146] (color_pose_corrector) StdoutLine: {'line': b'Installing color_finder script to /root/install/color_pose_corrector/lib/color_pose_corrector\n'}
+[3.178391] (color_pose_corrector) StdoutLine: {'line': b"writing list of installed files to '/root/build/color_pose_corrector/install.log'\n"}
+[3.209095] (-) TimerEvent: {}
+[3.309831] (-) TimerEvent: {}
+[3.410965] (-) TimerEvent: {}
+[3.511644] (-) TimerEvent: {}
+[3.612457] (-) TimerEvent: {}
+[3.713368] (-) TimerEvent: {}
+[3.814732] (-) TimerEvent: {}
+[3.847376] (orb_slam3_map_generator) JobProgress: {'identifier': 'orb_slam3_map_generator', 'progress': 'cmake'}
+[3.850183] (orb_slam3_map_generator) JobProgress: {'identifier': 'orb_slam3_map_generator', 'progress': 'build'}
+[3.852273] (orb_slam3_map_generator) Command: {'cmd': ['/usr/bin/cmake', '--build', '/root/build/orb_slam3_map_generator', '--', '-j12', '-l12'], 'cwd': '/root/build/orb_slam3_map_generator', 'env': OrderedDict([('HOSTNAME', 'LP-Boston-12214'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/root/install/slam_msgs/lib:/root/colcon_ws/install/slam_msgs/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/root'), ('CYCLONEDDS_URI', '/root/.ros/cyclonedds.xml'), ('OLDPWD', '/'), ('ROS_PYTHON_VERSION', '3'), ('COLCON_PREFIX_PATH', '/root/install:/root/colcon_ws/install'), ('ROS_DISTRO', 'humble'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('TERM', 'xterm'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'), ('XDG_RUNTIME_DIR', '/tmp/runtime-root'), ('DISPLAY', ':1'), ('LANG', 'C.UTF-8'), ('RMW_IMPLEMENTATION', 'rmw_cyclonedds_cpp'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('ROS_DOMAIN_ID', '55'), ('AMENT_PREFIX_PATH', '/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_planner:/root/install/orb_slam3_map_generator:/root/install/map_merger:/root/install/slam_msgs:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble'), ('PWD', '/root/build/orb_slam3_map_generator'), ('LC_ALL', 'C.UTF-8'), ('RCUTILS_COLORIZED_OUTPUT', '1'), ('PYTHONPATH', '/root/install/orb_slam3_planner/lib/python3.10/site-packages:/root/install/map_merger/lib/python3.10/site-packages:/root/install/slam_msgs/local/lib/python3.10/dist-packages:/root/install/color_pose_corrector/lib/python3.10/site-packages:/root/colcon_ws/build/orb_slam3_planner:/root/colcon_ws/install/orb_slam3_planner/lib/python3.10/site-packages:/root/colcon_ws/build/map_merger:/root/colcon_ws/install/map_merger/lib/python3.10/site-packages:/root/colcon_ws/install/slam_msgs/local/lib/python3.10/dist-packages:/root/colcon_ws/install/color_pose_corrector/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('CMAKE_PREFIX_PATH', '/root/install/slam_msgs:/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_map_generator:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/install/orb_slam3_planner:/root/install/map_merger:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble')]), 'shell': False}
+[3.914953] (-) TimerEvent: {}
+[4.016018] (-) TimerEvent: {}
+[4.116988] (-) TimerEvent: {}
+[4.217568] (-) TimerEvent: {}
+[4.318215] (-) TimerEvent: {}
+[4.418995] (-) TimerEvent: {}
+[4.519707] (-) TimerEvent: {}
+[4.620842] (-) TimerEvent: {}
+[4.721500] (-) TimerEvent: {}
+[4.822681] (-) TimerEvent: {}
+[4.850020] (orb_slam3_map_generator) StdoutLine: {'line': b'[ 33%] Built target pointcloud_stitcher\n'}
+[4.853380] (orb_slam3_map_generator) StdoutLine: {'line': b'[ 66%] Built target get_landmarks_simulator\n'}
+[4.855130] (orb_slam3_map_generator) StdoutLine: {'line': b'[100%] Built target depth_image_to_pcl\n'}
+[4.856026] (orb_slam3_ros2_wrapper) JobProgress: {'identifier': 'orb_slam3_ros2_wrapper', 'progress': 'cmake'}
+[4.858622] (orb_slam3_ros2_wrapper) JobProgress: {'identifier': 'orb_slam3_ros2_wrapper', 'progress': 'build'}
+[4.859804] (orb_slam3_ros2_wrapper) Command: {'cmd': ['/usr/bin/cmake', '--build', '/root/build/orb_slam3_ros2_wrapper', '--', '-j12', '-l12'], 'cwd': '/root/build/orb_slam3_ros2_wrapper', 'env': OrderedDict([('HOSTNAME', 'LP-Boston-12214'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/root/install/slam_msgs/lib:/root/colcon_ws/install/slam_msgs/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/root'), ('CYCLONEDDS_URI', '/root/.ros/cyclonedds.xml'), ('OLDPWD', '/'), ('ROS_PYTHON_VERSION', '3'), ('COLCON_PREFIX_PATH', '/root/install:/root/colcon_ws/install'), ('ROS_DISTRO', 'humble'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('TERM', 'xterm'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'), ('XDG_RUNTIME_DIR', '/tmp/runtime-root'), ('DISPLAY', ':1'), ('LANG', 'C.UTF-8'), ('RMW_IMPLEMENTATION', 'rmw_cyclonedds_cpp'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('ROS_DOMAIN_ID', '55'), ('AMENT_PREFIX_PATH', '/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_planner:/root/install/orb_slam3_map_generator:/root/install/map_merger:/root/install/slam_msgs:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble'), ('PWD', '/root/build/orb_slam3_ros2_wrapper'), ('LC_ALL', 'C.UTF-8'), ('RCUTILS_COLORIZED_OUTPUT', '1'), ('PYTHONPATH', '/root/install/orb_slam3_planner/lib/python3.10/site-packages:/root/install/map_merger/lib/python3.10/site-packages:/root/install/slam_msgs/local/lib/python3.10/dist-packages:/root/install/color_pose_corrector/lib/python3.10/site-packages:/root/colcon_ws/build/orb_slam3_planner:/root/colcon_ws/install/orb_slam3_planner/lib/python3.10/site-packages:/root/colcon_ws/build/map_merger:/root/colcon_ws/install/map_merger/lib/python3.10/site-packages:/root/colcon_ws/install/slam_msgs/local/lib/python3.10/dist-packages:/root/colcon_ws/install/color_pose_corrector/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('CMAKE_PREFIX_PATH', '/root/install/slam_msgs:/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_map_generator:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/install/orb_slam3_planner:/root/install/map_merger:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble')]), 'shell': False}
+[4.865372] (color_pose_corrector) CommandEnded: {'returncode': 0}
+[4.893455] (color_pose_corrector) JobEnded: {'identifier': 'color_pose_corrector', 'rc': 0}
+[4.895552] (orb_slam3_map_generator) CommandEnded: {'returncode': 0}
+[4.897224] (orb_slam3_map_generator) JobProgress: {'identifier': 'orb_slam3_map_generator', 'progress': 'install'}
+[4.899114] (orb_slam3_map_generator) Command: {'cmd': ['/usr/bin/cmake', '--install', '/root/build/orb_slam3_map_generator'], 'cwd': '/root/build/orb_slam3_map_generator', 'env': OrderedDict([('HOSTNAME', 'LP-Boston-12214'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/root/install/slam_msgs/lib:/root/colcon_ws/install/slam_msgs/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/root'), ('CYCLONEDDS_URI', '/root/.ros/cyclonedds.xml'), ('OLDPWD', '/'), ('ROS_PYTHON_VERSION', '3'), ('COLCON_PREFIX_PATH', '/root/install:/root/colcon_ws/install'), ('ROS_DISTRO', 'humble'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('TERM', 'xterm'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'), ('XDG_RUNTIME_DIR', '/tmp/runtime-root'), ('DISPLAY', ':1'), ('LANG', 'C.UTF-8'), ('RMW_IMPLEMENTATION', 'rmw_cyclonedds_cpp'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('ROS_DOMAIN_ID', '55'), ('AMENT_PREFIX_PATH', '/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_planner:/root/install/orb_slam3_map_generator:/root/install/map_merger:/root/install/slam_msgs:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble'), ('PWD', '/root/build/orb_slam3_map_generator'), ('LC_ALL', 'C.UTF-8'), ('RCUTILS_COLORIZED_OUTPUT', '1'), ('PYTHONPATH', '/root/install/orb_slam3_planner/lib/python3.10/site-packages:/root/install/map_merger/lib/python3.10/site-packages:/root/install/slam_msgs/local/lib/python3.10/dist-packages:/root/install/color_pose_corrector/lib/python3.10/site-packages:/root/colcon_ws/build/orb_slam3_planner:/root/colcon_ws/install/orb_slam3_planner/lib/python3.10/site-packages:/root/colcon_ws/build/map_merger:/root/colcon_ws/install/map_merger/lib/python3.10/site-packages:/root/colcon_ws/install/slam_msgs/local/lib/python3.10/dist-packages:/root/colcon_ws/install/color_pose_corrector/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('CMAKE_PREFIX_PATH', '/root/install/slam_msgs:/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_map_generator:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/install/orb_slam3_planner:/root/install/map_merger:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble')]), 'shell': False}
+[4.923665] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Install configuration: "Release"\n'}
+[4.924438] (-) TimerEvent: {}
+[4.926830] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/lib/orb_slam3_map_generator/pointcloud_stitcher\n'}
+[4.928462] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/lib/orb_slam3_map_generator/depth_image_to_pcl\n'}
+[4.928786] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/lib/orb_slam3_map_generator/get_landmarks_simulator\n'}
+[4.930316] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/launch\n'}
+[4.931018] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/launch/map_generator.launch.py\n'}
+[4.931302] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/param\n'}
+[4.931476] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/param/map_generator_params.yaml\n'}
+[4.931628] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/share/ament_index/resource_index/package_run_dependencies/orb_slam3_map_generator\n'}
+[4.931864] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/share/ament_index/resource_index/parent_prefix_path/orb_slam3_map_generator\n'}
+[4.932103] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/environment/ament_prefix_path.sh\n'}
+[4.932323] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/environment/ament_prefix_path.dsv\n'}
+[4.932567] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/environment/path.sh\n'}
+[4.932798] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/environment/path.dsv\n'}
+[4.933087] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/local_setup.bash\n'}
+[4.933346] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/local_setup.sh\n'}
+[4.933546] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/local_setup.zsh\n'}
+[4.933727] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/local_setup.dsv\n'}
+[4.934602] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Installing: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/package.dsv\n'}
+[4.936343] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/share/ament_index/resource_index/packages/orb_slam3_map_generator\n'}
+[4.936685] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/cmake/orb_slam3_map_generatorConfig.cmake\n'}
+[4.936946] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/cmake/orb_slam3_map_generatorConfig-version.cmake\n'}
+[4.937583] (orb_slam3_map_generator) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_map_generator/share/orb_slam3_map_generator/package.xml\n'}
+[4.943040] (orb_slam3_map_generator) CommandEnded: {'returncode': 0}
+[4.999689] (orb_slam3_map_generator) JobEnded: {'identifier': 'orb_slam3_map_generator', 'rc': 0}
+[5.024574] (-) TimerEvent: {}
+[5.125064] (-) TimerEvent: {}
+[5.149316] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'[ 46%] Built target rgbd\n'}
+[5.225374] (-) TimerEvent: {}
+[5.235183] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'[ 61%] Built target gtest\n'}
+[5.314962] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'[ 76%] Built target gtest_main\n'}
+[5.326214] (-) TimerEvent: {}
+[5.426834] (-) TimerEvent: {}
+[5.448865] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'[100%] Built target typeconversionTests\n'}
+[5.496232] (orb_slam3_ros2_wrapper) CommandEnded: {'returncode': 0}
+[5.497273] (orb_slam3_ros2_wrapper) JobProgress: {'identifier': 'orb_slam3_ros2_wrapper', 'progress': 'install'}
+[5.497417] (orb_slam3_ros2_wrapper) Command: {'cmd': ['/usr/bin/cmake', '--install', '/root/build/orb_slam3_ros2_wrapper'], 'cwd': '/root/build/orb_slam3_ros2_wrapper', 'env': OrderedDict([('HOSTNAME', 'LP-Boston-12214'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/root/install/slam_msgs/lib:/root/colcon_ws/install/slam_msgs/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/root'), ('CYCLONEDDS_URI', '/root/.ros/cyclonedds.xml'), ('OLDPWD', '/'), ('ROS_PYTHON_VERSION', '3'), ('COLCON_PREFIX_PATH', '/root/install:/root/colcon_ws/install'), ('ROS_DISTRO', 'humble'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('TERM', 'xterm'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'), ('XDG_RUNTIME_DIR', '/tmp/runtime-root'), ('DISPLAY', ':1'), ('LANG', 'C.UTF-8'), ('RMW_IMPLEMENTATION', 'rmw_cyclonedds_cpp'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('ROS_DOMAIN_ID', '55'), ('AMENT_PREFIX_PATH', '/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_planner:/root/install/orb_slam3_map_generator:/root/install/map_merger:/root/install/slam_msgs:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble'), ('PWD', '/root/build/orb_slam3_ros2_wrapper'), ('LC_ALL', 'C.UTF-8'), ('RCUTILS_COLORIZED_OUTPUT', '1'), ('PYTHONPATH', '/root/install/orb_slam3_planner/lib/python3.10/site-packages:/root/install/map_merger/lib/python3.10/site-packages:/root/install/slam_msgs/local/lib/python3.10/dist-packages:/root/install/color_pose_corrector/lib/python3.10/site-packages:/root/colcon_ws/build/orb_slam3_planner:/root/colcon_ws/install/orb_slam3_planner/lib/python3.10/site-packages:/root/colcon_ws/build/map_merger:/root/colcon_ws/install/map_merger/lib/python3.10/site-packages:/root/colcon_ws/install/slam_msgs/local/lib/python3.10/dist-packages:/root/colcon_ws/install/color_pose_corrector/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('CMAKE_PREFIX_PATH', '/root/install/slam_msgs:/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_map_generator:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/install/orb_slam3_planner:/root/install/map_merger:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble')]), 'shell': False}
+[5.527427] (-) TimerEvent: {}
+[5.531693] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Install configuration: "Release"\n'}
+[5.533984] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/lib/orb_slam3_ros2_wrapper/rgbd\n'}
+[5.535067] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/launch\n'}
+[5.535540] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/launch/rgbd.launch.py\n'}
+[5.535700] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Installing: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/launch/multi_robot.launch.py\n'}
+[5.535820] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/launch/unirobot.launch.py\n'}
+[5.535948] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params\n'}
+[5.536219] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/rgbd-ros-params.yaml\n'}
+[5.536408] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/zed2i_kratos.yaml\n'}
+[5.536882] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/zed2i.yaml\n'}
+[5.537118] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/gazebo_rgbd.yaml\n'}
+[5.537301] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/orbbec_astra.yaml\n'}
+[5.537530] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/ament_index/resource_index/package_run_dependencies/orb_slam3_ros2_wrapper\n'}
+[5.537751] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/ament_index/resource_index/parent_prefix_path/orb_slam3_ros2_wrapper\n'}
+[5.538503] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/environment/ament_prefix_path.sh\n'}
+[5.538816] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/environment/ament_prefix_path.dsv\n'}
+[5.539079] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/environment/path.sh\n'}
+[5.539276] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/environment/path.dsv\n'}
+[5.539484] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/local_setup.bash\n'}
+[5.539743] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/local_setup.sh\n'}
+[5.540151] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/local_setup.zsh\n'}
+[5.540482] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/local_setup.dsv\n'}
+[5.540680] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Installing: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/package.dsv\n'}
+[5.540866] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/ament_index/resource_index/packages/orb_slam3_ros2_wrapper\n'}
+[5.541163] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/cmake/orb_slam3_ros2_wrapperConfig.cmake\n'}
+[5.541394] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/cmake/orb_slam3_ros2_wrapperConfig-version.cmake\n'}
+[5.541604] (orb_slam3_ros2_wrapper) StdoutLine: {'line': b'-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/package.xml\n'}
+[5.544010] (orb_slam3_ros2_wrapper) CommandEnded: {'returncode': 0}
+[5.614702] (orb_slam3_ros2_wrapper) JobEnded: {'identifier': 'orb_slam3_ros2_wrapper', 'rc': 0}
+[5.627627] (-) TimerEvent: {}
+[5.728167] (-) TimerEvent: {}
+[5.828870] (-) TimerEvent: {}
+[5.929824] (-) TimerEvent: {}
+[6.032622] (-) TimerEvent: {}
+[6.122241] (map_merger) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'egg_info', '--egg-base', '../../../build/map_merger', 'build', '--build-base', '/root/build/map_merger/build', 'install', '--record', '/root/build/map_merger/install.log', '--single-version-externally-managed', 'install_data'], 'cwd': '/root/colcon_ws/src/map_merger', 'env': {'HOSTNAME': 'LP-Boston-12214', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/root/install/slam_msgs/lib:/root/colcon_ws/install/slam_msgs/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib', 'HOME': '/root', 'CYCLONEDDS_URI': '/root/.ros/cyclonedds.xml', 'OLDPWD': '/', 'ROS_PYTHON_VERSION': '3', 'COLCON_PREFIX_PATH': '/root/install:/root/colcon_ws/install', 'ROS_DISTRO': 'humble', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'TERM': 'xterm', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'XDG_RUNTIME_DIR': '/tmp/runtime-root', 'DISPLAY': ':1', 'LANG': 'C.UTF-8', 'RMW_IMPLEMENTATION': 'rmw_cyclonedds_cpp', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'ROS_DOMAIN_ID': '55', 'AMENT_PREFIX_PATH': '/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_planner:/root/install/orb_slam3_map_generator:/root/install/map_merger:/root/install/slam_msgs:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble', 'PWD': '/root/build/map_merger', 'LC_ALL': 'C.UTF-8', 'RCUTILS_COLORIZED_OUTPUT': '1', 'PYTHONPATH': '/root/build/map_merger/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/root/install/map_merger/lib/python3.10/site-packages:/root/install/orb_slam3_planner/lib/python3.10/site-packages:/root/install/map_merger/lib/python3.10/site-packages:/root/install/slam_msgs/local/lib/python3.10/dist-packages:/root/install/color_pose_corrector/lib/python3.10/site-packages:/root/colcon_ws/build/orb_slam3_planner:/root/colcon_ws/install/orb_slam3_planner/lib/python3.10/site-packages:/root/colcon_ws/build/map_merger:/root/colcon_ws/install/map_merger/lib/python3.10/site-packages:/root/colcon_ws/install/slam_msgs/local/lib/python3.10/dist-packages:/root/colcon_ws/install/color_pose_corrector/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'COLCON': '1', 'CMAKE_PREFIX_PATH': '/root/install/slam_msgs:/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_map_generator:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs'}, 'shell': False}
+[6.136457] (orb_slam3_planner) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'egg_info', '--egg-base', '../../../build/orb_slam3_planner', 'build', '--build-base', '/root/build/orb_slam3_planner/build', 'install', '--record', '/root/build/orb_slam3_planner/install.log', '--single-version-externally-managed', 'install_data'], 'cwd': '/root/colcon_ws/src/orb_slam3_planner', 'env': {'HOSTNAME': 'LP-Boston-12214', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/root/install/slam_msgs/lib:/root/colcon_ws/install/slam_msgs/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib', 'HOME': '/root', 'CYCLONEDDS_URI': '/root/.ros/cyclonedds.xml', 'OLDPWD': '/', 'ROS_PYTHON_VERSION': '3', 'COLCON_PREFIX_PATH': '/root/install:/root/colcon_ws/install', 'ROS_DISTRO': 'humble', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'TERM': 'xterm', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'XDG_RUNTIME_DIR': '/tmp/runtime-root', 'DISPLAY': ':1', 'LANG': 'C.UTF-8', 'RMW_IMPLEMENTATION': 'rmw_cyclonedds_cpp', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'ROS_DOMAIN_ID': '55', 'AMENT_PREFIX_PATH': '/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_planner:/root/install/orb_slam3_map_generator:/root/install/map_merger:/root/install/slam_msgs:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/slam_msgs:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble', 'PWD': '/root/build/orb_slam3_planner', 'LC_ALL': 'C.UTF-8', 'RCUTILS_COLORIZED_OUTPUT': '1', 'PYTHONPATH': '/root/build/orb_slam3_planner/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/root/install/orb_slam3_planner/lib/python3.10/site-packages:/root/install/orb_slam3_planner/lib/python3.10/site-packages:/root/install/map_merger/lib/python3.10/site-packages:/root/install/slam_msgs/local/lib/python3.10/dist-packages:/root/install/color_pose_corrector/lib/python3.10/site-packages:/root/colcon_ws/build/orb_slam3_planner:/root/colcon_ws/install/orb_slam3_planner/lib/python3.10/site-packages:/root/colcon_ws/build/map_merger:/root/colcon_ws/install/map_merger/lib/python3.10/site-packages:/root/colcon_ws/install/slam_msgs/local/lib/python3.10/dist-packages:/root/colcon_ws/install/color_pose_corrector/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'COLCON': '1', 'CMAKE_PREFIX_PATH': '/root/install/slam_msgs:/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_map_generator:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs'}, 'shell': False}
+[6.140945] (-) TimerEvent: {}
+[6.242321] (-) TimerEvent: {}
+[6.344598] (-) TimerEvent: {}
+[6.445455] (-) TimerEvent: {}
+[6.547324] (-) TimerEvent: {}
+[6.647715] (-) TimerEvent: {}
+[6.748342] (-) TimerEvent: {}
+[6.849023] (-) TimerEvent: {}
+[6.912549] (map_merger) StdoutLine: {'line': b'running egg_info\n'}
+[6.915020] (map_merger) StdoutLine: {'line': b'writing ../../../build/map_merger/map_merger.egg-info/PKG-INFO\n'}
+[6.915649] (map_merger) StdoutLine: {'line': b'writing dependency_links to ../../../build/map_merger/map_merger.egg-info/dependency_links.txt\n'}
+[6.916088] (map_merger) StdoutLine: {'line': b'writing entry points to ../../../build/map_merger/map_merger.egg-info/entry_points.txt\n'}
+[6.916390] (map_merger) StdoutLine: {'line': b'writing requirements to ../../../build/map_merger/map_merger.egg-info/requires.txt\n'}
+[6.916671] (map_merger) StdoutLine: {'line': b'writing top-level names to ../../../build/map_merger/map_merger.egg-info/top_level.txt\n'}
+[6.923095] (map_merger) StdoutLine: {'line': b"reading manifest file '../../../build/map_merger/map_merger.egg-info/SOURCES.txt'\n"}
+[6.925994] (map_merger) StdoutLine: {'line': b"writing manifest file '../../../build/map_merger/map_merger.egg-info/SOURCES.txt'\n"}
+[6.927063] (map_merger) StdoutLine: {'line': b'running build\n'}
+[6.927776] (map_merger) StdoutLine: {'line': b'running build_py\n'}
+[6.929602] (map_merger) StdoutLine: {'line': b'running install\n'}
+[6.931663] (map_merger) StdoutLine: {'line': b'running install_lib\n'}
+[6.935085] (map_merger) StdoutLine: {'line': b'running install_data\n'}
+[6.935677] (map_merger) StdoutLine: {'line': b'running install_egg_info\n'}
+[6.942714] (map_merger) StdoutLine: {'line': b"removing '/root/install/map_merger/lib/python3.10/site-packages/map_merger-0.0.0-py3.10.egg-info' (and everything under it)\n"}
+[6.944218] (map_merger) StdoutLine: {'line': b'Copying ../../../build/map_merger/map_merger.egg-info to /root/install/map_merger/lib/python3.10/site-packages/map_merger-0.0.0-py3.10.egg-info\n'}
+[6.945078] (orb_slam3_planner) StdoutLine: {'line': b'running egg_info\n'}
+[6.946542] (map_merger) StdoutLine: {'line': b'running install_scripts\n'}
+[6.946874] (orb_slam3_planner) StdoutLine: {'line': b'writing ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/PKG-INFO\n'}
+[6.947416] (orb_slam3_planner) StdoutLine: {'line': b'writing dependency_links to ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/dependency_links.txt\n'}
+[6.947762] (orb_slam3_planner) StdoutLine: {'line': b'writing entry points to ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/entry_points.txt\n'}
+[6.948161] (orb_slam3_planner) StdoutLine: {'line': b'writing requirements to ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/requires.txt\n'}
+[6.948451] (orb_slam3_planner) StdoutLine: {'line': b'writing top-level names to ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/top_level.txt\n'}
+[6.948979] (-) TimerEvent: {}
+[6.954304] (orb_slam3_planner) StdoutLine: {'line': b"reading manifest file '../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/SOURCES.txt'\n"}
+[6.957565] (orb_slam3_planner) StdoutLine: {'line': b"writing manifest file '../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/SOURCES.txt'\n"}
+[6.958528] (orb_slam3_planner) StdoutLine: {'line': b'running build\n'}
+[6.958992] (orb_slam3_planner) StdoutLine: {'line': b'running build_py\n'}
+[6.960304] (orb_slam3_planner) StdoutLine: {'line': b'running install\n'}
+[6.961433] (orb_slam3_planner) StdoutLine: {'line': b'running install_lib\n'}
+[6.967565] (orb_slam3_planner) StdoutLine: {'line': b'running install_data\n'}
+[6.967971] (orb_slam3_planner) StdoutLine: {'line': b'running install_egg_info\n'}
+[6.974108] (orb_slam3_planner) StdoutLine: {'line': b"removing '/root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner-0.0.1-py3.10.egg-info' (and everything under it)\n"}
+[6.974833] (orb_slam3_planner) StdoutLine: {'line': b'Copying ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info to /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner-0.0.1-py3.10.egg-info\n'}
+[6.977803] (orb_slam3_planner) StdoutLine: {'line': b'running install_scripts\n'}
+[7.023296] (map_merger) StdoutLine: {'line': b'Installing map_merger_node script to /root/install/map_merger/lib/map_merger\n'}
+[7.024720] (map_merger) StdoutLine: {'line': b"writing list of installed files to '/root/build/map_merger/install.log'\n"}
+[7.049180] (-) TimerEvent: {}
+[7.056698] (orb_slam3_planner) StdoutLine: {'line': b'Installing autonomous_explorer_node script to /root/install/orb_slam3_planner/lib/orb_slam3_planner\n'}
+[7.057175] (orb_slam3_planner) StdoutLine: {'line': b'Installing autonomous_explorer_visualizer script to /root/install/orb_slam3_planner/lib/orb_slam3_planner\n'}
+[7.057483] (orb_slam3_planner) StdoutLine: {'line': b'Installing landmark_publisher_node script to /root/install/orb_slam3_planner/lib/orb_slam3_planner\n'}
+[7.059052] (orb_slam3_planner) StdoutLine: {'line': b"writing list of installed files to '/root/build/orb_slam3_planner/install.log'\n"}
+[7.149484] (-) TimerEvent: {}
+[7.162834] (map_merger) CommandEnded: {'returncode': 0}
+[7.188840] (map_merger) JobEnded: {'identifier': 'map_merger', 'rc': 0}
+[7.198490] (orb_slam3_planner) CommandEnded: {'returncode': 0}
+[7.222336] (orb_slam3_planner) JobEnded: {'identifier': 'orb_slam3_planner', 'rc': 0}
+[7.224079] (-) EventReactorShutdown: {}

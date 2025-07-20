@@ -1,0 +1,339 @@
+[0.056s] Invoking command in '/root/build/slam_msgs': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble /usr/bin/cmake --build /root/build/slam_msgs -- -j12 -l12
+[0.173s] [35m[1mConsolidate compiler generated dependencies of target slam_msgs__rosidl_generator_c[0m
+[0.186s] [  1%] Built target slam_msgs__cpp
+[0.217s] [ 12%] Built target slam_msgs__rosidl_generator_c
+[0.237s] [ 12%] Built target ament_cmake_python_copy_slam_msgs
+[0.241s] [35m[1mConsolidate compiler generated dependencies of target slam_msgs__rosidl_typesupport_cpp[0m
+[0.246s] [35m[1mConsolidate compiler generated dependencies of target slam_msgs__rosidl_typesupport_fastrtps_cpp[0m
+[0.255s] [35m[1mConsolidate compiler generated dependencies of target slam_msgs__rosidl_typesupport_introspection_cpp[0m
+[0.268s] [35m[1mConsolidate compiler generated dependencies of target slam_msgs__rosidl_typesupport_introspection_c[0m
+[0.268s] [35m[1mConsolidate compiler generated dependencies of target slam_msgs__rosidl_typesupport_fastrtps_c[0m
+[0.268s] [35m[1mConsolidate compiler generated dependencies of target slam_msgs__rosidl_typesupport_c[0m
+[0.290s] [ 24%] Built target slam_msgs__rosidl_typesupport_cpp
+[0.310s] [ 35%] Built target slam_msgs__rosidl_typesupport_introspection_c
+[0.312s] [ 47%] Built target slam_msgs__rosidl_typesupport_introspection_cpp
+[0.319s] [ 58%] Built target slam_msgs__rosidl_typesupport_c
+[0.321s] [ 82%] Built target slam_msgs__rosidl_typesupport_fastrtps_cpp
+[0.322s] [ 82%] Built target slam_msgs__rosidl_typesupport_fastrtps_c
+[0.369s] [ 82%] Built target slam_msgs
+[0.420s] [ 83%] Built target slam_msgs__py
+[0.455s] [35m[1mConsolidate compiler generated dependencies of target slam_msgs__rosidl_generator_py[0m
+[0.500s] [ 93%] Built target slam_msgs__rosidl_generator_py
+[0.527s] [35m[1mConsolidate compiler generated dependencies of target slam_msgs__rosidl_typesupport_introspection_c__pyext[0m
+[0.529s] [35m[1mConsolidate compiler generated dependencies of target slam_msgs__rosidl_typesupport_fastrtps_c__pyext[0m
+[0.530s] [35m[1mConsolidate compiler generated dependencies of target slam_msgs__rosidl_typesupport_c__pyext[0m
+[0.560s] [ 95%] Built target slam_msgs__rosidl_typesupport_introspection_c__pyext
+[0.561s] [ 97%] Built target slam_msgs__rosidl_typesupport_fastrtps_c__pyext
+[0.564s] [100%] Built target slam_msgs__rosidl_typesupport_c__pyext
+[0.830s] running egg_info
+[0.832s] writing slam_msgs.egg-info/PKG-INFO
+[0.832s] writing dependency_links to slam_msgs.egg-info/dependency_links.txt
+[0.833s] writing top-level names to slam_msgs.egg-info/top_level.txt
+[0.838s] reading manifest file 'slam_msgs.egg-info/SOURCES.txt'
+[0.840s] writing manifest file 'slam_msgs.egg-info/SOURCES.txt'
+[0.909s] [100%] Built target ament_cmake_python_build_slam_msgs_egg
+[0.942s] Invoked command in '/root/build/slam_msgs' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble /usr/bin/cmake --build /root/build/slam_msgs -- -j12 -l12
+[0.965s] Invoking command in '/root/build/slam_msgs': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble /usr/bin/cmake --install /root/build/slam_msgs
+[0.982s] -- Install configuration: ""
+[0.983s] -- Up-to-date: /root/install/slam_msgs/share/ament_index/resource_index/rosidl_interfaces/slam_msgs
+[0.983s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs
+[0.983s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg
+[0.983s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/slam_info.h
+[0.984s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail
+[0.984s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__type_support.h
+[0.984s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__type_support.h
+[0.984s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__type_support.h
+[0.985s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__type_support.h
+[0.985s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__type_support.h
+[0.985s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__struct.h
+[0.985s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__struct.h
+[0.985s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__functions.c
+[0.985s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__functions.c
+[0.986s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__functions.h
+[0.986s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__functions.c
+[0.986s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__struct.h
+[0.986s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__struct.h
+[0.986s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__functions.h
+[0.986s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__functions.c
+[0.986s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__functions.h
+[0.986s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__functions.h
+[0.986s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__struct.h
+[0.987s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__functions.h
+[0.987s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__functions.c
+[0.987s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/map_graph.h
+[0.987s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/map_point.h
+[0.987s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/rosidl_generator_c__visibility_control.h
+[0.988s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/map_data.h
+[0.988s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/key_frame.h
+[0.988s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv
+[0.988s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/get_all_landmarks_in_map.h
+[0.989s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail
+[0.989s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__struct.h
+[0.989s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__functions.c
+[0.989s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__type_support.h
+[0.989s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__functions.h
+[0.990s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__functions.h
+[0.990s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__functions.c
+[0.990s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__struct.h
+[0.990s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__functions.c
+[0.990s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__type_support.h
+[0.991s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__type_support.h
+[0.991s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__functions.h
+[0.991s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__functions.h
+[0.991s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__type_support.h
+[0.991s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__struct.h
+[0.992s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__functions.c
+[0.992s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__struct.h
+[0.993s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/get_global_point_cloud.h
+[0.994s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/get_map.h
+[0.994s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/get_landmarks_in_view.h
+[0.994s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/environment/library_path.sh
+[0.994s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/environment/library_path.dsv
+[0.994s] -- Up-to-date: /root/install/slam_msgs/lib/libslam_msgs__rosidl_generator_c.so
+[0.995s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs
+[0.995s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg
+[0.995s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/rosidl_typesupport_fastrtps_c__visibility_control.h
+[0.995s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail
+[0.995s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__rosidl_typesupport_fastrtps_c.h
+[0.996s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__rosidl_typesupport_fastrtps_c.h
+[0.997s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__rosidl_typesupport_fastrtps_c.h
+[0.997s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__rosidl_typesupport_fastrtps_c.h
+[0.997s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__rosidl_typesupport_fastrtps_c.h
+[0.997s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv
+[0.997s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail
+[0.997s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__rosidl_typesupport_fastrtps_c.h
+[0.998s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__rosidl_typesupport_fastrtps_c.h
+[0.998s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__rosidl_typesupport_fastrtps_c.h
+[0.998s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__rosidl_typesupport_fastrtps_c.h
+[0.998s] -- Up-to-date: /root/install/slam_msgs/lib/libslam_msgs__rosidl_typesupport_fastrtps_c.so
+[0.998s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs
+[0.999s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg
+[1.000s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail
+[1.000s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__struct.hpp
+[1.000s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__builder.hpp
+[1.000s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__type_support.hpp
+[1.000s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__builder.hpp
+[1.000s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__builder.hpp
+[1.000s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__traits.hpp
+[1.001s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__type_support.hpp
+[1.001s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__builder.hpp
+[1.001s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__traits.hpp
+[1.001s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__type_support.hpp
+[1.001s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__struct.hpp
+[1.002s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__traits.hpp
+[1.002s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__type_support.hpp
+[1.003s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__struct.hpp
+[1.003s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__struct.hpp
+[1.003s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__builder.hpp
+[1.003s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__traits.hpp
+[1.004s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__traits.hpp
+[1.004s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__type_support.hpp
+[1.004s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__struct.hpp
+[1.004s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/map_point.hpp
+[1.004s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/map_data.hpp
+[1.004s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/map_graph.hpp
+[1.005s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/slam_info.hpp
+[1.005s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/key_frame.hpp
+[1.005s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/rosidl_generator_cpp__visibility_control.hpp
+[1.005s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv
+[1.005s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/get_map.hpp
+[1.005s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail
+[1.005s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__type_support.hpp
+[1.006s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__builder.hpp
+[1.006s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__type_support.hpp
+[1.006s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__type_support.hpp
+[1.006s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__struct.hpp
+[1.006s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__traits.hpp
+[1.007s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__struct.hpp
+[1.007s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__builder.hpp
+[1.008s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__traits.hpp
+[1.008s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__builder.hpp
+[1.008s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__builder.hpp
+[1.008s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__struct.hpp
+[1.008s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__traits.hpp
+[1.009s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__traits.hpp
+[1.009s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__struct.hpp
+[1.009s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__type_support.hpp
+[1.010s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/get_all_landmarks_in_map.hpp
+[1.010s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/get_global_point_cloud.hpp
+[1.010s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/get_landmarks_in_view.hpp
+[1.010s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs
+[1.010s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg
+[1.011s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail
+[1.011s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/dds_fastrtps
+[1.011s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__rosidl_typesupport_fastrtps_cpp.hpp
+[1.011s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__rosidl_typesupport_fastrtps_cpp.hpp
+[1.011s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__rosidl_typesupport_fastrtps_cpp.hpp
+[1.011s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__rosidl_typesupport_fastrtps_cpp.hpp
+[1.012s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__rosidl_typesupport_fastrtps_cpp.hpp
+[1.012s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h
+[1.012s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv
+[1.012s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail
+[1.012s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/dds_fastrtps
+[1.013s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__rosidl_typesupport_fastrtps_cpp.hpp
+[1.013s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__rosidl_typesupport_fastrtps_cpp.hpp
+[1.013s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__rosidl_typesupport_fastrtps_cpp.hpp
+[1.013s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__rosidl_typesupport_fastrtps_cpp.hpp
+[1.013s] -- Up-to-date: /root/install/slam_msgs/lib/libslam_msgs__rosidl_typesupport_fastrtps_cpp.so
+[1.014s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs
+[1.014s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg
+[1.014s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail
+[1.014s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__type_support.c
+[1.014s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__rosidl_typesupport_introspection_c.h
+[1.015s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__rosidl_typesupport_introspection_c.h
+[1.015s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__type_support.c
+[1.015s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__type_support.c
+[1.016s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__rosidl_typesupport_introspection_c.h
+[1.016s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__type_support.c
+[1.017s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__rosidl_typesupport_introspection_c.h
+[1.017s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__type_support.c
+[1.017s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__rosidl_typesupport_introspection_c.h
+[1.017s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/rosidl_typesupport_introspection_c__visibility_control.h
+[1.017s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv
+[1.017s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail
+[1.018s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__type_support.c
+[1.018s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__rosidl_typesupport_introspection_c.h
+[1.018s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__type_support.c
+[1.018s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__type_support.c
+[1.018s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__rosidl_typesupport_introspection_c.h
+[1.019s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__rosidl_typesupport_introspection_c.h
+[1.019s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__rosidl_typesupport_introspection_c.h
+[1.020s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__type_support.c
+[1.020s] -- Up-to-date: /root/install/slam_msgs/lib/libslam_msgs__rosidl_typesupport_introspection_c.so
+[1.020s] -- Up-to-date: /root/install/slam_msgs/lib/libslam_msgs__rosidl_typesupport_c.so
+[1.020s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs
+[1.020s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg
+[1.020s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail
+[1.020s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__type_support.cpp
+[1.021s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__type_support.cpp
+[1.021s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__rosidl_typesupport_introspection_cpp.hpp
+[1.021s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__type_support.cpp
+[1.021s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__type_support.cpp
+[1.021s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_graph__rosidl_typesupport_introspection_cpp.hpp
+[1.021s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/slam_info__rosidl_typesupport_introspection_cpp.hpp
+[1.021s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/key_frame__rosidl_typesupport_introspection_cpp.hpp
+[1.022s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_point__rosidl_typesupport_introspection_cpp.hpp
+[1.022s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/msg/detail/map_data__type_support.cpp
+[1.022s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv
+[1.022s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail
+[1.022s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__type_support.cpp
+[1.022s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__type_support.cpp
+[1.023s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__rosidl_typesupport_introspection_cpp.hpp
+[1.023s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__rosidl_typesupport_introspection_cpp.hpp
+[1.023s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_all_landmarks_in_map__type_support.cpp
+[1.023s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_global_point_cloud__type_support.cpp
+[1.023s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_landmarks_in_view__rosidl_typesupport_introspection_cpp.hpp
+[1.023s] -- Up-to-date: /root/install/slam_msgs/include/slam_msgs/slam_msgs/srv/detail/get_map__rosidl_typesupport_introspection_cpp.hpp
+[1.023s] -- Up-to-date: /root/install/slam_msgs/lib/libslam_msgs__rosidl_typesupport_introspection_cpp.so
+[1.024s] -- Up-to-date: /root/install/slam_msgs/lib/libslam_msgs__rosidl_typesupport_cpp.so
+[1.024s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/environment/pythonpath.sh
+[1.024s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/environment/pythonpath.dsv
+[1.024s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs-1.0.0-py3.10.egg-info
+[1.024s] -- Installing: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs-1.0.0-py3.10.egg-info/PKG-INFO
+[1.024s] -- Installing: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs-1.0.0-py3.10.egg-info/dependency_links.txt
+[1.024s] -- Installing: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs-1.0.0-py3.10.egg-info/top_level.txt
+[1.025s] -- Installing: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs-1.0.0-py3.10.egg-info/SOURCES.txt
+[1.025s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs
+[1.025s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/libslam_msgs__rosidl_generator_py.so
+[1.025s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/_slam_msgs_s.ep.rosidl_typesupport_fastrtps_c.c
+[1.025s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg
+[1.025s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_map_graph_s.c
+[1.025s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_slam_info.py
+[1.026s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_slam_info_s.c
+[1.026s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_map_point.py
+[1.026s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_map_data.py
+[1.026s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_map_point_s.c
+[1.026s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_map_data_s.c
+[1.026s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/__init__.py
+[1.026s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_key_frame.py
+[1.026s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_map_graph.py
+[1.026s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg/_key_frame_s.c
+[1.027s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/_slam_msgs_s.ep.rosidl_typesupport_introspection_c.c
+[1.027s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv
+[1.027s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv/_get_all_landmarks_in_map.py
+[1.027s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv/_get_map_s.c
+[1.027s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv/_get_landmarks_in_view_s.c
+[1.027s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv/_get_map.py
+[1.027s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv/_get_all_landmarks_in_map_s.c
+[1.027s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv/_get_global_point_cloud.py
+[1.027s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv/__init__.py
+[1.028s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv/_get_global_point_cloud_s.c
+[1.028s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv/_get_landmarks_in_view.py
+[1.028s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/slam_msgs_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so
+[1.028s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/_slam_msgs_s.ep.rosidl_typesupport_c.c
+[1.028s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/slam_msgs_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so
+[1.028s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/__init__.py
+[1.028s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/slam_msgs_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so
+[1.113s] Listing '/root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs'...
+[1.113s] Listing '/root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/msg'...
+[1.113s] Listing '/root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/srv'...
+[1.125s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/slam_msgs_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so
+[1.126s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/slam_msgs_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so
+[1.128s] -- Up-to-date: /root/install/slam_msgs/local/lib/python3.10/dist-packages/slam_msgs/slam_msgs_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so
+[1.129s] -- Up-to-date: /root/install/slam_msgs/lib/libslam_msgs__rosidl_generator_py.so
+[1.129s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/MapGraph.idl
+[1.129s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/MapData.idl
+[1.130s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/KeyFrame.idl
+[1.130s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/MapPoint.idl
+[1.130s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/SlamInfo.idl
+[1.130s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetMap.idl
+[1.130s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetLandmarksInView.idl
+[1.130s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetAllLandmarksInMap.idl
+[1.131s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetGlobalPointCloud.idl
+[1.131s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/MapGraph.msg
+[1.131s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/MapData.msg
+[1.131s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/KeyFrame.msg
+[1.131s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/MapPoint.msg
+[1.132s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/msg/SlamInfo.msg
+[1.132s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetMap.srv
+[1.132s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetMap_Request.msg
+[1.132s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetMap_Response.msg
+[1.132s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetLandmarksInView.srv
+[1.132s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetLandmarksInView_Request.msg
+[1.133s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetLandmarksInView_Response.msg
+[1.133s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetAllLandmarksInMap.srv
+[1.133s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetAllLandmarksInMap_Request.msg
+[1.134s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetAllLandmarksInMap_Response.msg
+[1.134s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetGlobalPointCloud.srv
+[1.134s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetGlobalPointCloud_Request.msg
+[1.135s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/srv/GetGlobalPointCloud_Response.msg
+[1.135s] -- Up-to-date: /root/install/slam_msgs/share/ament_index/resource_index/package_run_dependencies/slam_msgs
+[1.135s] -- Up-to-date: /root/install/slam_msgs/share/ament_index/resource_index/parent_prefix_path/slam_msgs
+[1.135s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/environment/ament_prefix_path.sh
+[1.135s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/environment/ament_prefix_path.dsv
+[1.135s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/environment/path.sh
+[1.135s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/environment/path.dsv
+[1.136s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/local_setup.bash
+[1.136s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/local_setup.sh
+[1.136s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/local_setup.zsh
+[1.136s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/local_setup.dsv
+[1.136s] -- Installing: /root/install/slam_msgs/share/slam_msgs/package.dsv
+[1.136s] -- Up-to-date: /root/install/slam_msgs/share/ament_index/resource_index/packages/slam_msgs
+[1.136s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/export_slam_msgs__rosidl_generator_cExport.cmake
+[1.137s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/export_slam_msgs__rosidl_generator_cExport-noconfig.cmake
+[1.137s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/export_slam_msgs__rosidl_typesupport_fastrtps_cExport.cmake
+[1.137s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/export_slam_msgs__rosidl_typesupport_fastrtps_cExport-noconfig.cmake
+[1.137s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/export_slam_msgs__rosidl_generator_cppExport.cmake
+[1.138s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/export_slam_msgs__rosidl_typesupport_fastrtps_cppExport.cmake
+[1.138s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/export_slam_msgs__rosidl_typesupport_fastrtps_cppExport-noconfig.cmake
+[1.139s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgs__rosidl_typesupport_introspection_cExport.cmake
+[1.139s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgs__rosidl_typesupport_introspection_cExport-noconfig.cmake
+[1.140s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgs__rosidl_typesupport_cExport.cmake
+[1.140s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgs__rosidl_typesupport_cExport-noconfig.cmake
+[1.141s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgs__rosidl_typesupport_introspection_cppExport.cmake
+[1.141s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgs__rosidl_typesupport_introspection_cppExport-noconfig.cmake
+[1.142s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgs__rosidl_typesupport_cppExport.cmake
+[1.142s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgs__rosidl_typesupport_cppExport-noconfig.cmake
+[1.142s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/export_slam_msgs__rosidl_generator_pyExport.cmake
+[1.142s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/export_slam_msgs__rosidl_generator_pyExport-noconfig.cmake
+[1.142s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/rosidl_cmake-extras.cmake
+[1.143s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/ament_cmake_export_dependencies-extras.cmake
+[1.143s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/ament_cmake_export_include_directories-extras.cmake
+[1.143s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/ament_cmake_export_libraries-extras.cmake
+[1.143s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/ament_cmake_export_targets-extras.cmake
+[1.143s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake
+[1.143s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake
+[1.144s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgsConfig.cmake
+[1.144s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/cmake/slam_msgsConfig-version.cmake
+[1.144s] -- Up-to-date: /root/install/slam_msgs/share/slam_msgs/package.xml
+[1.147s] Invoked command in '/root/build/slam_msgs' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble /usr/bin/cmake --install /root/build/slam_msgs

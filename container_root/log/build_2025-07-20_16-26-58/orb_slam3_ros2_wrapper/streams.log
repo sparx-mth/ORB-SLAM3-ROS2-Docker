@@ -1,0 +1,35 @@
+[1.943s] Invoking command in '/root/build/orb_slam3_ros2_wrapper': CMAKE_PREFIX_PATH=/root/install/slam_msgs:/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_map_generator:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/install/orb_slam3_planner:/root/install/map_merger:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble /usr/bin/cmake --build /root/build/orb_slam3_ros2_wrapper -- -j12 -l12
+[2.228s] [ 46%] Built target rgbd
+[2.313s] [ 61%] Built target gtest
+[2.393s] [ 76%] Built target gtest_main
+[2.527s] [100%] Built target typeconversionTests
+[2.575s] Invoked command in '/root/build/orb_slam3_ros2_wrapper' returned '0': CMAKE_PREFIX_PATH=/root/install/slam_msgs:/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_map_generator:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/install/orb_slam3_planner:/root/install/map_merger:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble /usr/bin/cmake --build /root/build/orb_slam3_ros2_wrapper -- -j12 -l12
+[2.576s] Invoking command in '/root/build/orb_slam3_ros2_wrapper': CMAKE_PREFIX_PATH=/root/install/slam_msgs:/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_map_generator:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/install/orb_slam3_planner:/root/install/map_merger:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble /usr/bin/cmake --install /root/build/orb_slam3_ros2_wrapper
+[2.610s] -- Install configuration: "Release"
+[2.612s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/lib/orb_slam3_ros2_wrapper/rgbd
+[2.613s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/launch
+[2.614s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/launch/rgbd.launch.py
+[2.614s] -- Installing: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/launch/multi_robot.launch.py
+[2.614s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/launch/unirobot.launch.py
+[2.614s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params
+[2.614s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/rgbd-ros-params.yaml
+[2.615s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/zed2i_kratos.yaml
+[2.615s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/zed2i.yaml
+[2.615s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/gazebo_rgbd.yaml
+[2.615s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/orbbec_astra.yaml
+[2.616s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/ament_index/resource_index/package_run_dependencies/orb_slam3_ros2_wrapper
+[2.616s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/ament_index/resource_index/parent_prefix_path/orb_slam3_ros2_wrapper
+[2.617s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/environment/ament_prefix_path.sh
+[2.617s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/environment/ament_prefix_path.dsv
+[2.617s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/environment/path.sh
+[2.617s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/environment/path.dsv
+[2.618s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/local_setup.bash
+[2.618s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/local_setup.sh
+[2.618s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/local_setup.zsh
+[2.618s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/local_setup.dsv
+[2.619s] -- Installing: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/package.dsv
+[2.619s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/ament_index/resource_index/packages/orb_slam3_ros2_wrapper
+[2.619s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/cmake/orb_slam3_ros2_wrapperConfig.cmake
+[2.619s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/cmake/orb_slam3_ros2_wrapperConfig-version.cmake
+[2.620s] -- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/package.xml
+[2.623s] Invoked command in '/root/build/orb_slam3_ros2_wrapper' returned '0': CMAKE_PREFIX_PATH=/root/install/slam_msgs:/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_map_generator:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs:/root/install/orb_slam3_planner:/root/install/map_merger:/root/install/color_pose_corrector:/root/colcon_ws/install/orb_slam3_planner:/root/colcon_ws/install/map_merger:/root/colcon_ws/install/color_pose_corrector:/opt/ros/humble /usr/bin/cmake --install /root/build/orb_slam3_ros2_wrapper

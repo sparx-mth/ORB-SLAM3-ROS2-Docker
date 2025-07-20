@@ -1,0 +1,31 @@
+[ 46%] Built target rgbd
+[ 61%] Built target gtest
+[ 76%] Built target gtest_main
+[100%] Built target typeconversionTests
+-- Install configuration: "Release"
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/lib/orb_slam3_ros2_wrapper/rgbd
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/launch
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/launch/rgbd.launch.py
+-- Installing: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/launch/multi_robot.launch.py
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/launch/unirobot.launch.py
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/rgbd-ros-params.yaml
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/zed2i_kratos.yaml
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/zed2i.yaml
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/gazebo_rgbd.yaml
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/params/orbbec_astra.yaml
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/ament_index/resource_index/package_run_dependencies/orb_slam3_ros2_wrapper
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/ament_index/resource_index/parent_prefix_path/orb_slam3_ros2_wrapper
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/environment/ament_prefix_path.sh
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/environment/ament_prefix_path.dsv
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/environment/path.sh
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/environment/path.dsv
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/local_setup.bash
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/local_setup.sh
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/local_setup.zsh
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/local_setup.dsv
+-- Installing: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/package.dsv
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/ament_index/resource_index/packages/orb_slam3_ros2_wrapper
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/cmake/orb_slam3_ros2_wrapperConfig.cmake
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/cmake/orb_slam3_ros2_wrapperConfig-version.cmake
+-- Up-to-date: /root/install/orb_slam3_ros2_wrapper/share/orb_slam3_ros2_wrapper/package.xml

@@ -1,0 +1,35 @@
+running egg_info
+creating ../../../build/color_pose_corrector/color_pose_corrector.egg-info
+writing ../../../build/color_pose_corrector/color_pose_corrector.egg-info/PKG-INFO
+writing dependency_links to ../../../build/color_pose_corrector/color_pose_corrector.egg-info/dependency_links.txt
+writing entry points to ../../../build/color_pose_corrector/color_pose_corrector.egg-info/entry_points.txt
+writing requirements to ../../../build/color_pose_corrector/color_pose_corrector.egg-info/requires.txt
+writing top-level names to ../../../build/color_pose_corrector/color_pose_corrector.egg-info/top_level.txt
+writing manifest file '../../../build/color_pose_corrector/color_pose_corrector.egg-info/SOURCES.txt'
+reading manifest file '../../../build/color_pose_corrector/color_pose_corrector.egg-info/SOURCES.txt'
+writing manifest file '../../../build/color_pose_corrector/color_pose_corrector.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /root/build/color_pose_corrector/build
+creating /root/build/color_pose_corrector/build/lib
+creating /root/build/color_pose_corrector/build/lib/color_pose_corrector
+copying color_pose_corrector/__init__.py -> /root/build/color_pose_corrector/build/lib/color_pose_corrector
+copying color_pose_corrector/color_finder.py -> /root/build/color_pose_corrector/build/lib/color_pose_corrector
+running install
+running install_lib
+creating /root/install/color_pose_corrector/lib/python3.10/site-packages/color_pose_corrector
+copying /root/build/color_pose_corrector/build/lib/color_pose_corrector/__init__.py -> /root/install/color_pose_corrector/lib/python3.10/site-packages/color_pose_corrector
+copying /root/build/color_pose_corrector/build/lib/color_pose_corrector/color_finder.py -> /root/install/color_pose_corrector/lib/python3.10/site-packages/color_pose_corrector
+byte-compiling /root/install/color_pose_corrector/lib/python3.10/site-packages/color_pose_corrector/__init__.py to __init__.cpython-310.pyc
+byte-compiling /root/install/color_pose_corrector/lib/python3.10/site-packages/color_pose_corrector/color_finder.py to color_finder.cpython-310.pyc
+running install_data
+creating /root/install/color_pose_corrector/share/ament_index
+creating /root/install/color_pose_corrector/share/ament_index/resource_index
+creating /root/install/color_pose_corrector/share/ament_index/resource_index/packages
+copying resource/color_pose_corrector -> /root/install/color_pose_corrector/share/ament_index/resource_index/packages
+copying package.xml -> /root/install/color_pose_corrector/share/color_pose_corrector
+running install_egg_info
+Copying ../../../build/color_pose_corrector/color_pose_corrector.egg-info to /root/install/color_pose_corrector/lib/python3.10/site-packages/color_pose_corrector-0.0.0-py3.10.egg-info
+running install_scripts
+Installing color_finder script to /root/install/color_pose_corrector/lib/color_pose_corrector
+writing list of installed files to '/root/build/color_pose_corrector/install.log'

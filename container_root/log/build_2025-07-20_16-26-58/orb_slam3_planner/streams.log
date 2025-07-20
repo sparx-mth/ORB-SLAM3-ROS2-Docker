@@ -1,0 +1,23 @@
+[3.243s] Invoking command in '/root/colcon_ws/src/orb_slam3_planner': CMAKE_PREFIX_PATH=/root/install/slam_msgs:/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_map_generator:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs PYTHONPATH=/root/build/orb_slam3_planner/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/root/install/orb_slam3_planner/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/orb_slam3_planner build --build-base /root/build/orb_slam3_planner/build install --record /root/build/orb_slam3_planner/install.log --single-version-externally-managed install_data
+[4.048s] running egg_info
+[4.050s] writing ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/PKG-INFO
+[4.050s] writing dependency_links to ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/dependency_links.txt
+[4.051s] writing entry points to ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/entry_points.txt
+[4.051s] writing requirements to ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/requires.txt
+[4.052s] writing top-level names to ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/top_level.txt
+[4.057s] reading manifest file '../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/SOURCES.txt'
+[4.061s] writing manifest file '../../../build/orb_slam3_planner/orb_slam3_planner.egg-info/SOURCES.txt'
+[4.062s] running build
+[4.062s] running build_py
+[4.064s] running install
+[4.065s] running install_lib
+[4.071s] running install_data
+[4.071s] running install_egg_info
+[4.077s] removing '/root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner-0.0.1-py3.10.egg-info' (and everything under it)
+[4.078s] Copying ../../../build/orb_slam3_planner/orb_slam3_planner.egg-info to /root/install/orb_slam3_planner/lib/python3.10/site-packages/orb_slam3_planner-0.0.1-py3.10.egg-info
+[4.081s] running install_scripts
+[4.160s] Installing autonomous_explorer_node script to /root/install/orb_slam3_planner/lib/orb_slam3_planner
+[4.160s] Installing autonomous_explorer_visualizer script to /root/install/orb_slam3_planner/lib/orb_slam3_planner
+[4.161s] Installing landmark_publisher_node script to /root/install/orb_slam3_planner/lib/orb_slam3_planner
+[4.162s] writing list of installed files to '/root/build/orb_slam3_planner/install.log'
+[4.302s] Invoked command in '/root/colcon_ws/src/orb_slam3_planner' returned '0': CMAKE_PREFIX_PATH=/root/install/slam_msgs:/root/install/orb_slam3_ros2_wrapper:/root/install/orb_slam3_map_generator:/root/colcon_ws/install/orb_slam3_ros2_wrapper:/root/colcon_ws/install/orb_slam3_map_generator:/root/colcon_ws/install/slam_msgs PYTHONPATH=/root/build/orb_slam3_planner/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/root/install/orb_slam3_planner/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/orb_slam3_planner build --build-base /root/build/orb_slam3_planner/build install --record /root/build/orb_slam3_planner/install.log --single-version-externally-managed install_data
