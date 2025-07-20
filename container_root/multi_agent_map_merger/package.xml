@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>multi_agent_map_merger</name>
+  <version>0.1.0</version>
+  <description>Multi-agent SLAM map merger using ORB-SLAM3</description>
+  <maintainer email="daphnaas@matrix.co.il">Your Name</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>slam_msgs</depend>
+  <depend>OpenCV</depend>
+  <depend>eigen3_cmake_module</depend>
+
+  <exec_depend>ament_cmake</exec_depend>
+</package>

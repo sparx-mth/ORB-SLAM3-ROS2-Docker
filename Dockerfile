@@ -24,7 +24,8 @@ RUN apt-get install -y \
     libeigen3-dev \
     apt-transport-https \
     ca-certificates\
-    software-properties-common
+    software-properties-common \
+    tree
 
 RUN apt update
 
@@ -63,6 +64,7 @@ COPY orb_slam3_map_generator /root/colcon_ws/src/orb_slam3_map_generator
 COPY slam_msgs /root/colcon_ws/src/slam_msgs
 COPY orb_slam3_planner /root/colcon_ws/src/orb_slam3_planner
 COPY map_merger /root/colcon_ws/src/map_merger
+COPY multi_agent_map_merger /root/colcon_ws/src/multi_agent_map_merger
 
 # Build ORB-SLAM3 with its dependencies.
 RUN if [ "$USE_CI" = "true" ]; then \

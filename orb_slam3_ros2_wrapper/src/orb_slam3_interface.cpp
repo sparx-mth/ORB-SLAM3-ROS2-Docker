@@ -313,6 +313,9 @@ namespace ORB_SLAM3_Wrapper
         mapDataMsg.header.frame_id = globalFrame_;
         if (includeMapPoints)
         {
+            // If kFIDforMapPoints is empty, use the poses_id from the poseGraph
+            if (kFIDforMapPoints.empty())
+                kFIDforMapPoints = poseGraph_.poses_id;
             for (auto kFId : kFIDforMapPoints)
             {
                 slam_msgs::msg::KeyFrame pushedKf;
