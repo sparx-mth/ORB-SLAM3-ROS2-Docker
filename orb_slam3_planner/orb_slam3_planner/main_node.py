@@ -13,7 +13,6 @@ import sensor_msgs_py.point_cloud2 as pc2
 from orb_slam3_planner.map_builder_module import MapBuilder
 from orb_slam3_planner.planner_module import FrontierPlanner
 from orb_slam3_planner.drone_controller_module import DroneController
-from slam_msgs.srv import GetMapStatus
 
 
 class AutonomousExplorerNode(Node):
@@ -212,23 +211,23 @@ class AutonomousExplorerNode(Node):
                 (world_x - self.last_robot_world_pos[0]) ** 2 +
                 (world_y - self.last_robot_world_pos[1]) ** 2
             )
-
-            if distance_jumped > self.max_position_jump:
-                # Check if jump is to origin (complete tracking loss) or elsewhere (localization error)
-                distance_from_origin = math.sqrt(world_x ** 2 + world_y ** 2)
-
-                if distance_from_origin < 0.5:  # Jump to near origin indicates tracking loss
-                    self.get_logger().error(f"SLAM tracking lost! Jump to origin detected: {distance_jumped:.2f}m")
-                    self.enter_slam_lost_state()
-                    return
-                else:
-                    # Jump to non-origin indicates localization error
-                    self.get_logger().warn(
-                        f"SLAM localization jump detected: {distance_jumped:.2f}m to ({world_x:.2f}, {world_y:.2f})")
-                    if not self.slam_correction_mode:
-                        self.enter_slam_correction_mode()
-                    # Don't update position during correction mode
-                    return
+            #
+            # if distance_jumped > self.max_position_jump:
+            #     # Check if jump is to origin (complete tracking loss) or elsewhere (localization error)
+            #     distance_from_origin = math.sqrt(world_x ** 2 + world_y ** 2)
+            #
+            #     if distance_from_origin < 0.5:  # Jump to near origin indicates tracking loss
+            #         self.get_logger().error(f"SLAM tracking lost! Jump to origin detected: {distance_jumped:.2f}m")
+            #         self.enter_slam_lost_state()
+            #         return
+            #     else:
+            #         # Jump to non-origin indicates localization error
+            #         self.get_logger().warn(
+            #             f"SLAM localization jump detected: {distance_jumped:.2f}m to ({world_x:.2f}, {world_y:.2f})")
+            #         if not self.slam_correction_mode:
+            #             self.enter_slam_correction_mode()
+            #         # Don't update position during correction mode
+            #         return
 
         # If in correction mode, check for position stability
         if self.slam_correction_mode:
