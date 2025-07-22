@@ -92,15 +92,15 @@ def generate_launch_description():
     #     )
     # )
 
-    # multi_robot_visualizer
-    launch_nodes.append(
-        Node(
-            package='orb_slam3_planner',
-            executable='multi_robot_visualizer',
-            name='multi_robot_visualizer',
-            output='screen'
-        )
-    )
+    # # multi_robot_visualizer
+    # launch_nodes.append(
+    #     Node(
+    #         package='orb_slam3_planner',
+    #         executable='multi_robot_visualizer',
+    #         name='multi_robot_visualizer',
+    #         output='screen'
+    #     )
+    # )
 
     # robot_calibration_tool
     launch_nodes.append(
@@ -140,5 +140,16 @@ def generate_launch_description():
             output='screen'
         )
     )
+
+    # multi_robot_map_merger
+    launch_nodes.append(
+        Node(
+            package='orb_slam3_planner',
+            executable='multi_robot_map_merger',
+            name='multi_robot_map_merger',
+            output='screen'
+        )
+    )
+
 
     return LaunchDescription(launch_nodes)
