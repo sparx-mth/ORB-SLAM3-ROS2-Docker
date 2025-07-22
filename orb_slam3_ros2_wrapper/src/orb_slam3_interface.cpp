@@ -626,4 +626,71 @@ namespace ORB_SLAM3_Wrapper
             return false;
         }
     }
+
+    void ORBSLAM3Interface::setAgentID(const std::string& id) {
+        agentID_ = id;
+    }
+
+
+    void ORBSLAM3Interface::fillKeyFrameFullDataMsgs(std::vector<slam_msgs::msg::KeyFrameFullData> &outMsgs)
+    {
+        std::lock_guard<std::mutex> lock(mapDataMutex_);
+
+        for (const auto& [kfId, kfPtr] : allKFs_)
+        {
+            if (!kfPtr || kfPtr->isBad())
+                continue;
+
+            slam_msgs::msg::KeyFrameFullData msg;
+            msg.id = kfId;
+            msg.agent_id = agentID_;   
+            msg.camera_id = "0";       // TODO: Handle multiple cameras in the future.
+
+            // Pose
+            Sophus::SE3f Tcw = kfPtr->GetPose();
+            Eigen::Vector3f t = Tcw.translation();
+            Eigen::Quaternionf q(Tcw.unit_quaternion());
+            msg.pose.position.x = t.x();
+            msg.pose.position.y = t.y();
+            msg.pose.position.z = t.z();
+            msg.pose.orientation.x = q.x();
+            msg.pose.orientation.y = q.y();
+            msg.pose.orientation.z = q.z();
+            msg.pose.orientation.w = q.w();
+
+            // Descriptors
+            msg.descriptors = typeConversions_->cvMatToDescriptorMsg(kfPtr->mDescriptors);
+
+            // Keypoints
+            for (const auto& kp : kfPtr->mvKeysUn)
+            {
+                vision_msgs::msg::KeyPoint2D kpMsg;
+                kpMsg.x = kp.pt.x;
+                kpMsg.y = kp.pt.y;
+                kpMsg.size = kp.size;
+                kpMsg.angle = kp.angle;
+                kpMsg.response = kp.response;
+                kpMsg.octave = kp.octave;
+                kpMsg.class_id = kp.class_id;
+                msg.keypoints.push_back(kpMsg);
+            }
+
+            // Word points
+            for (const auto& mp : kfPtr->GetMapPoints())
+            {
+                if (!mp || mp->isBad())
+                    continue;
+
+                Eigen::Vector3f Xw = mp->GetWorldPos();
+                geometry_msgs::msg::Point pt;
+                pt.x = Xw.x();
+                pt.y = Xw.y();
+                pt.z = Xw.z();
+                msg.word_pts.push_back(pt);
+            }
+
+            outMsgs.push_back(msg);
+        }
+    }
+
 }

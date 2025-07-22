@@ -95,6 +95,8 @@ namespace ORB_SLAM3_Wrapper
 
         bool trackRGBD(const sensor_msgs::msg::Image::SharedPtr msgRGB, const sensor_msgs::msg::Image::SharedPtr msgD, Sophus::SE3f &Tcw);
 
+        void fillKeyFrameFullDataMsgs(std::vector<slam_msgs::msg::KeyFrameFullData> &outMsgs);
+
         std::shared_ptr<WrapperTypeConversions> getTypeConversionPtr()
         {
             return typeConversions_;
@@ -111,6 +113,9 @@ namespace ORB_SLAM3_Wrapper
         std::shared_ptr<ORB_SLAM3::System> getSLAM() const {
             return mSLAM_;
         }
+
+        void setAgentID(const std::string& id);
+
 
     private:
         std::shared_ptr<ORB_SLAM3::System> mSLAM_;
@@ -140,6 +145,8 @@ namespace ORB_SLAM3_Wrapper
         std::string globalFrame_;
         std::string odomFrame_;
         std::string robotFrame_;
+        std::string agentID_;
+
 
         TimeProfiler* time_profiler_;
     };

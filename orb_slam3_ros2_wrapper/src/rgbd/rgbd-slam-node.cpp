@@ -45,6 +45,10 @@ namespace ORB_SLAM3_Wrapper
         //---- the following is published when tracking is lost
         trackingLostPublisher_ = this->create_publisher<slam_msgs::msg::TrackingLost>("tracking_lost_topic", 10);
 
+        // ----- the following is used to publish full data needed for multi agents map merging
+        keyframeFullDataPub_ = this->create_publisher<slam_msgs::msg::KeyFrameFullData>("keyframe_full_data", 10);
+
+
 
         // Services
         getMapDataService_ = this->create_service<slam_msgs::srv::GetMap>("orb_slam3/get_map_data", std::bind(&RgbdSlamNode::getMapServer, this,
@@ -117,13 +121,23 @@ namespace ORB_SLAM3_Wrapper
         this->declare_parameter("do_loop_closing", rclcpp::ParameterValue(true));
         this->get_parameter("do_loop_closing", do_loop_closing_);
 
+        
         // Timers
         mapDataCallbackGroup_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
         mapDataTimer_ = this->create_wall_timer(std::chrono::milliseconds(map_data_publish_frequency_), std::bind(&RgbdSlamNode::publishMapData, this), mapDataCallbackGroup_);
+        mapFullDataTimer_ = this->create_wall_timer(std::chrono::milliseconds(map_data_publish_frequency_), std::bind(&RgbdSlamNode::publishKeyFrameFullData, this), mapDataCallbackGroup_);
 
         interface_ = std::make_shared<ORB_SLAM3_Wrapper::ORBSLAM3Interface>(strVocFile, strSettingsFile,
                                                                             sensor, bUseViewer, do_loop_closing_, initial_pose, global_frame_, odom_frame_id_, robot_base_frame_id_);
-
+        
+        // Get namespace and agent id
+        std::string agent_id = this->get_namespace();
+        if (!agent_id.empty() && agent_id[0] == '/')
+            agent_id.erase(0, 1); 
+        
+        // Pass to ORBSLAM3Interface
+        interface_->setAgentID(agent_id);
+        
         frequency_tracker_count_ = 0;
         frequency_tracker_clock_ = std::chrono::high_resolution_clock::now();
 
@@ -251,6 +265,14 @@ namespace ORB_SLAM3_Wrapper
             slam_msgs::msg::MapData mapDataMsg;
             interface_->mapDataToMsg(mapDataMsg, true, false);
             mapDataPub_->publish(mapDataMsg);
+
+            // Publish KeyFrameFullData messages
+            std::vector<slam_msgs::msg::KeyFrameFullData> keyframeMsgs;
+            interface_->fillKeyFrameFullDataMsgs(keyframeMsgs);
+            for (const auto& kf : keyframeMsgs)
+            {
+                kfFullDataPub_->publish(kf);
+            }
             slamInfoMsg.num_maps = interface_->getNumberOfMaps();
             slamInfoMsg.num_keyframes_in_current_map = mapDataMsg.graph.poses_id.size();
             slamInfoMsg.tracking_frequency = tracking_freq;

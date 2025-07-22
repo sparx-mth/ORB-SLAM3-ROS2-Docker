@@ -4,6 +4,6 @@ string camera_id 0
 
 geometry_msgs/Pose pose
 slam_msgs/DescriptorMatrix descriptors
-vision_msgs/KeyPoint2DArray keypoints
+slam_msgs/KeyPoint2D[] keypoints
 
 geometry_msgs/Point[] word_pts

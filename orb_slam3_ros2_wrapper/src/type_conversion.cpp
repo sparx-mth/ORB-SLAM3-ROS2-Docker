@@ -299,4 +299,24 @@ namespace ORB_SLAM3_Wrapper
         auto affine_map_to_pose = affineMapToRef.cast<float>() * point;
         return affine_map_to_pose;
     }
+    
+    slam_msgs::msg::DescriptorMatrix WrapperTypeConversions::cvMatToDescriptorMsg(const cv::Mat& mat, int rows, int cols)
+    {
+        slam_msgs::msg::DescriptorMatrix msg;
+        msg.rows = rows;
+        msg.cols = cols;
+        msg.type = mat.type();
+        msg.data.assign(mat.datastart, mat.dataend);
+        return msg;
+    }
+
+    cv::Mat WrapperTypeConversions::descriptorMsgToCvMat(const slam_msgs::msg::DescriptorMatrix& msg)
+    {
+        cv::Mat mat(msg.rows, msg.cols, msg.type);
+        std::memcpy(mat.data, msg.data.data(), msg.data.size());
+        return mat;
+    }
+
+
+
 }

@@ -1,47 +1,159 @@
 #include "multi_agent_map_merger/map_merger_slam_base_node.hpp"
+#include "multi_agent_map_merger/map_visualizer.hpp"
+#include "ORBmatcher.h"
+#include "Thirdparty/DBoW2/DBoW2/ORBVocabulary.h"
 
 using std::placeholders::_1;
-using std::placeholders::_2;
 
 MapMergerSlamBaseNode::MapMergerSlamBaseNode(const std::vector<std::string>& agent_names)
     : Node("map_merger_slam_base_node"), agent_names_(agent_names)
 {
+    std::string vocab_path;
+    this->declare_parameter("vocabulary_path", "");
+    this->get_parameter("vocabulary_path", vocab_path);
+
+    vocabulary_ = std::make_shared<ORB_SLAM3::ORBVocabulary>();
+    if (!vocabulary_->loadFromTextFile(vocab_path)) {
+        RCLCPP_FATAL(this->get_logger(), "Failed to load ORB vocabulary from %s", vocab_path.c_str());
+        throw std::runtime_error("Vocabulary loading failed");
+    }
+
+    // Load agent colors from parameter
+    std::unordered_map<std::string, std::array<float, 3>> agent_colors;
     for (const auto& name : agent_names_) {
-        std::string service = "/" + name + "/orb_slam3/get_map_data";
-        map_clients_[name] = this->create_client<slam_msgs::srv::GetMap>(service);
+        std::vector<double> color;
+        std::string param_name = name + "_color";
+        this->declare_parameter(param_name, std::vector<double>{1.0, 1.0, 1.0});
+        this->get_parameter(param_name, color);
+        agent_colors[name] = {static_cast<float>(color[0]), static_cast<float>(color[1]), static_cast<float>(color[2])};
+    }
+
+    // Load refined point color
+    std::vector<double> refined_color_vec{1.0, 1.0, 0.0}; // yellow default
+    this->declare_parameter("refined_point_color", refined_color_vec);
+    this->get_parameter("refined_point_color", refined_color_vec);
+    std::array<float, 3> refined_color = {
+        static_cast<float>(refined_color_vec[0]),
+        static_cast<float>(refined_color_vec[1]),
+        static_cast<float>(refined_color_vec[2])
+    };
+
+    map_visualizer_ = std::make_unique<ORB_SLAM3_Wrapper::MapVisualizer>(this->shared_from_this(), agent_colors, refined_color);
+    global_map_ = std::make_shared<ORB_SLAM3::Map>();
+
+    for (const auto& name : agent_names_) {
+        std::string topic = "/" + name + "/keyframe_full_data";
+        auto sub = this->create_subscription<slam_msgs::msg::KeyFrameFullData>(
+            topic,
+            rclcpp::QoS(10),
+            [this, name](const slam_msgs::msg::KeyFrameFullData::SharedPtr msg) {
+                received_keyframes_[name].push_back(*msg);
+            });
+        keyframe_subs_[name] = sub;
+
+        Eigen::Affine3f initial_transform;
+        if (getInitialTransform(name, initial_transform)) {
+            agent_initial_poses_[name] = initial_transform;
+            RCLCPP_INFO(this->get_logger(), "Loaded initial transform for agent %s", name.c_str());
+        }
     }
 
     merge_timer_ = this->create_wall_timer(
         std::chrono::seconds(5),
         std::bind(&MapMergerSlamBaseNode::tryMergeMaps, this));
 
+    map_pub_ = this->create_publisher<slam_msgs::msg::MapData>("/merged_map", 10);
+
     RCLCPP_INFO(this->get_logger(), "Map merger initialized with %zu agents.", agent_names_.size());
+}
+
+ORB_SLAM3::KeyFrame* MapMergerSlamBaseNode::convertMsgToKeyFrame(const slam_msgs::msg::KeyFrameFullData& msg)
+{
+    Sophus::SE3f Tcw(
+        Eigen::Quaternionf(msg.pose.orientation.w, msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z),
+        Eigen::Vector3f(msg.pose.position.x, msg.pose.position.y, msg.pose.position.z));
+
+    cv::Mat descriptors = typeConversions_.descriptorMsgToCvMat(msg.descriptors);
+    std::vector<cv::KeyPoint> keypoints;
+    for (const auto& kp_msg : msg.keypoints.keypoints)
+    {
+        keypoints.emplace_back(
+            kp_msg.x, kp_msg.y, kp_msg.size, kp_msg.angle,
+            kp_msg.response, kp_msg.octave, kp_msg.class_id);
+    }
+
+    std::vector<Eigen::Vector3f> wordPoints;
+    for (const auto& pt : msg.word_pts)
+    {
+        wordPoints.emplace_back(pt.x, pt.y, pt.z);
+    }
+
+    auto* kf = ORB_SLAM3::KeyFrame::FromSerialized(msg.id, Tcw, keypoints, descriptors, wordPoints);
+    if (kf && vocabulary_)
+        kf->SetVocabulary(vocabulary_);
+    if (kf)
+        kf->ComputeBoW();
+    return kf;
+}
+
+std::vector<ORB_SLAM3::MapPoint*> MapMergerSlamBaseNode::matchKeyFramesWithORB(
+    ORB_SLAM3::KeyFrame* kf1,
+    ORB_SLAM3::KeyFrame* kf2)
+{
+    ORB_SLAM3::ORBmatcher matcher(true);
+    std::vector<ORB_SLAM3::MapPoint*> vpMatched12;
+    matcher.SearchByBoW(kf1, kf2, vpMatched12);
+    return vpMatched12;
+}
+
+bool MapMergerSlamBaseNode::estimateSim3(
+    ORB_SLAM3::KeyFrame* kf1,
+    ORB_SLAM3::KeyFrame* kf2,
+    const std::vector<ORB_SLAM3::MapPoint*>& matches,
+    Sophus::Sim3f& sim3_out)
+{
+    ORB_SLAM3::Sim3Solver solver(kf1, kf2, matches, true, {});
+    std::vector<bool> vbInliers;
+    return solver.iterate(100, vbInliers, sim3_out);
+}
+
+void MapMergerSlamBaseNode::mergeMaps(
+    const std::string& nameA,
+    const std::vector<slam_msgs::msg::KeyFrameFullData>& mapA,
+    const std::string& nameB,
+    const std::vector<slam_msgs::msg::KeyFrameFullData>& mapB,
+    const Sophus::Sim3f& sim3_AB)
+{
+    for (const auto& kfB_msg : mapB)
+    {
+        ORB_SLAM3::KeyFrame* kfB = convertMsgToKeyFrame(kfB_msg);
+        if (!kfB) continue;
+
+        Sophus::SE3f Tcw_transformed = Sophus::SE3f(sim3_AB.rotationMatrix(), sim3_AB.translation()) * kfB->GetPose();
+        kfB->SetPose(Tcw_transformed);
+
+        for (ORB_SLAM3::MapPoint* mp : kfB->GetMapPoints()) {
+            if (!mp || mp->isBad()) continue;
+            Eigen::Vector3f Pw_trans = sim3_AB * mp->GetWorldPos();
+            mp->SetWorldPos(Pw_trans);
+
+            geometry_msgs::msg::Point refined;
+            refined.x = Pw_trans.x();
+            refined.y = Pw_trans.y();
+            refined.z = Pw_trans.z();
+            refined_map_points_.insert(refined);
+        }
+
+        // Optional: add kfB to global_map_ if needed
+    }
+
+    RCLCPP_INFO(this->get_logger(), "Merged %s into %s", nameB.c_str(), nameA.c_str());
 }
 
 void MapMergerSlamBaseNode::tryMergeMaps()
 {
-    maps_by_agent_.clear();
-
-    for (const auto& name : agent_names_) {
-        auto client = map_clients_[name];
-        if (!client->wait_for_service(std::chrono::seconds(2))) {
-            RCLCPP_WARN(this->get_logger(), "Service not available for %s", name.c_str());
-            continue;
-        }
-
-        auto request = std::make_shared<slam_msgs::srv::GetMap::Request>();
-        auto future = client->async_send_request(request);
-
-        if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), future) ==
-            rclcpp::FutureReturnCode::SUCCESS)
-        {
-            auto response = future.get();
-            maps_by_agent_[name] = response->map;
-        }
-    }
-
     std::vector<std::string> agent_names;
-    for (const auto& [name, _] : maps_by_agent_)
+    for (const auto& [name, _] : received_keyframes_)
         agent_names.push_back(name);
 
     for (size_t i = 0; i < agent_names.size(); ++i) {
@@ -49,34 +161,25 @@ void MapMergerSlamBaseNode::tryMergeMaps()
             const auto& nameA = agent_names[i];
             const auto& nameB = agent_names[j];
 
-            const auto& mapA = maps_by_agent_[nameA];
-            const auto& mapB = maps_by_agent_[nameB];
+            const auto& mapA = received_keyframes_[nameA];
+            const auto& mapB = received_keyframes_[nameB];
 
-            // Loop over all keyframes in both maps
-            for (const auto& kfA_msg : mapA.keyframes) {
-                for (const auto& kfB_msg : mapB.keyframes) {
-
-                    // TODO: convert kfA_msg and kfB_msg into ORB_SLAM3::KeyFrame* objects
+            for (const auto& kfA_msg : mapA) {
+                for (const auto& kfB_msg : mapB) {
                     ORB_SLAM3::KeyFrame* kfA = convertMsgToKeyFrame(kfA_msg);
                     ORB_SLAM3::KeyFrame* kfB = convertMsgToKeyFrame(kfB_msg);
-
                     if (!kfA || !kfB) continue;
 
-                    auto vpMatched12 = matchKeyFramesWithORB(kfA, kfB);
-
-                    int n_matches = std::count_if(vpMatched12.begin(), vpMatched12.end(),
-                                                  [](auto* mp){ return mp != nullptr; });
-
+                    auto matches = matchKeyFramesWithORB(kfA, kfB);
+                    int n_matches = std::count_if(matches.begin(), matches.end(), [](auto* mp){ return mp != nullptr; });
                     if (n_matches < 20) continue;
 
-                    Sim3Solver solver(kfA, kfB, vpMatched12, true, {});
-                    std::vector<bool> vbInliers;
                     Sophus::Sim3f sim3;
-                    bool success = solver.iterate(100, vbInliers, sim3);
-
-                    if (success) {
+                    if (estimateSim3(kfA, kfB, matches, sim3)) {
                         RCLCPP_INFO(this->get_logger(), "Found Sim3 match between %s and %s", nameA.c_str(), nameB.c_str());
-                        mergeMaps(nameA, mapA, nameB, mapB);  // You can apply sim3 inside here
+                        mergeMaps(nameA, mapA, nameB, mapB, sim3);
+
+                        map_visualizer_->updateData(received_keyframes_, refined_map_points_);
                         return;
                     }
                 }
@@ -86,65 +189,3 @@ void MapMergerSlamBaseNode::tryMergeMaps()
 
     RCLCPP_INFO(this->get_logger(), "No successful map merges detected this cycle.");
 }
-
-
-bool MapMergerSlamBaseNode::detectOverlap(const slam_msgs::msg::MapData& mapA,
-                                          const slam_msgs::msg::MapData& mapB)
-{
-    for (const auto& lmA : mapA.landmarks) {
-        for (const auto& lmB : mapB.landmarks) {
-            float dx = lmA.position.x - lmB.position.x;
-            float dy = lmA.position.y - lmB.position.y;
-            float dz = lmA.position.z - lmB.position.z;
-            float dist = std::sqrt(dx * dx + dy * dy + dz * dz);
-            if (dist < 0.3)
-                return true;
-        }
-    }
-    return false;
-}
-
-void MapMergerSlamBaseNode::mergeMaps(
-    std::shared_ptr<ORB_SLAM3::Map> mapA,
-    std::shared_ptr<ORB_SLAM3::Map> mapB,
-    const Sophus::Sim3f& sim3_AB)
-{
-    RCLCPP_INFO(this->get_logger(), "Merging mapB into mapA using estimated Sim3...");
-
-    // 1. Transform all keyframes from mapB to mapA coordinate frame
-    for (ORB_SLAM3::KeyFrame* kfB : mapB->GetAllKeyFrames())
-    {
-        Sophus::SE3f Tcw_B = kfB->GetPose();
-        Sophus::SE3f Tcw_A = sim3_AB * Tcw_B;
-        kfB->SetPose(Tcw_A);
-        kfB->ChangeMap(mapA.get());
-        mapA->AddKeyFrame(kfB);
-    }
-
-    // 2. Transform and move MapPoints from mapB to mapA
-    for (ORB_SLAM3::MapPoint* mpB : mapB->GetAllMapPoints())
-    {
-        if (!mpB || mpB->isBad()) continue;
-
-        Eigen::Vector3f Pw_B = mpB->GetWorldPos();
-        Eigen::Vector3f Pw_A = sim3_AB * Pw_B;
-
-        mpB->SetWorldPos(Pw_A);
-        mpB->ChangeMap(mapA.get());
-        mapA->AddMapPoint(mpB);
-    }
-
-    // 3. Update covisibility connections for merged KeyFrames
-    for (ORB_SLAM3::KeyFrame* kf : mapA->GetAllKeyFrames())
-    {
-        kf->UpdateConnections();
-    }
-
-    // 4. Optional: run global bundle adjustment
-    RCLCPP_INFO(this->get_logger(), "Running global bundle adjustment...");
-    ORB_SLAM3::Optimizer::GlobalBundleAdjustemnt(
-        mapA.get(), 10, true, nullptr, nullptr);
-
-    RCLCPP_INFO(this->get_logger(), "Map merge complete.");
-}
-

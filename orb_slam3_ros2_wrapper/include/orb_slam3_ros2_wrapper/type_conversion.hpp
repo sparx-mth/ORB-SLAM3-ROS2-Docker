@@ -23,6 +23,10 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 
+#include "slam_msgs/msg/descriptor_matrix.hpp"
+#include "slam_msgs/msg/key_frame_full_data.hpp"
+
+
 #include "MapPoint.h"
 
 namespace ORB_SLAM3_Wrapper
@@ -124,7 +128,25 @@ namespace ORB_SLAM3_Wrapper
          */
         template <typename T>
         T transformPointWithReference(Eigen::Affine3f &referencePose, Eigen::Vector3f &s);
+
+        // **************************************ROS MESSAGE CONVERSIONS*************************************
+        /**
+         * @brief Converts a cv::Mat to a slam_msgs::msg::DescriptorMatrix message.
+         * @param mat The cv::Mat to convert.
+         * @param rows The number of rows in the matrix.
+         * @param cols The number of columns in the matrix.
+         * @return The corresponding slam_msgs::msg::DescriptorMatrix message.
+         */
+        slam_msgs::msg::DescriptorMatrix cvMatToDescriptorMsg(const cv::Mat& mat, int rows, int cols);
+        /**
+         * @brief Converts a slam_msgs::msg::DescriptorMatrix message to a cv::Mat.
+         * @param msg The slam_msgs::msg::DescriptorMatrix message to convert.
+         * @return The corresponding cv::Mat.
+         */
+        cv::Mat descriptorMsgToCvMat(const slam_msgs::msg::DescriptorMatrix& msg);
+
     };
+
 }
 
 #endif
