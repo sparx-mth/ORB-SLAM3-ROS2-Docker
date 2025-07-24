@@ -45,7 +45,7 @@ class MultiRobotMapBuilder(Node):
         self.free_prob_decrement = -0.05
         self.occupied_threshold = 0.75
         self.free_threshold = 0.35
-        self.freeze_update_count = 24
+        self.freeze_update_count = 10
 
         # ======================
         # Sensor Parameters (from main_node)
