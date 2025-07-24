@@ -4,14 +4,12 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import PointCloud2
 from geometry_msgs.msg import PoseStamped
-from slam_msgs.srv import GetAllLandmarksInMap
 import sensor_msgs_py.point_cloud2 as pc2
 import numpy as np
 import open3d as o3d
 import threading
 import time
 from collections import deque
-import copy
 from scipy.spatial.transform import Rotation as R
 
 
@@ -25,8 +23,6 @@ class ImprovedMultiRobotVisualizer(Node):
 
         # Data storage
         self.robot_poses = {rid: None for rid in robot_configs.keys()}
-        self.robot_landmarks = {rid: np.empty((0, 3)) for rid in robot_configs.keys()}
-        self.raw_landmarks = {rid: np.empty((0, 3)) for rid in robot_configs.keys()}
         self.trajectories = {rid: deque(maxlen=trajectory_length) for rid in robot_configs.keys()}
 
         # Transformation matrices
@@ -51,7 +47,7 @@ class ImprovedMultiRobotVisualizer(Node):
 
         self.get_logger().info(f'Initializing Improved Multi-Robot Visualizer for robots: {list(robot_configs.keys())}')
 
-        # Subscribe to topics
+        # Subscribe to robot poses only
         for robot_id in robot_configs.keys():
             # Pose subscription
             self.create_subscription(
@@ -61,38 +57,13 @@ class ImprovedMultiRobotVisualizer(Node):
                 10
             )
 
-            # Real-time landmarks
-            self.create_subscription(
-                PointCloud2,
-                f'/robot_{robot_id}/orb_slam3/landmarks',
-                self.landmarks_callback_factory(robot_id),
-                10
-            )
-
-            # Raw landmarks
-            self.create_subscription(
-                PointCloud2,
-                f'/robot_{robot_id}/orb_slam3/landmarks_raw',
-                self.raw_landmarks_callback_factory(robot_id),
-                10
-            )
-
-        # Subscribe to merged map from multi_robot_map_merger
+        # Subscribe ONLY to merged map from multi_robot_map_merger
         self.create_subscription(
             PointCloud2,
             '/merged_map',
             self.merged_map_callback,
             10
         )
-
-        # Service clients for getting full maps
-        self.landmark_clients = {}
-        for robot_id in robot_configs.keys():
-            service_name = f'/robot_{robot_id}/orb_slam3/get_all_landmarks_in_map'
-            self.landmark_clients[robot_id] = self.create_client(GetAllLandmarksInMap, service_name)
-
-        # Timer to request full maps periodically
-        self.map_request_timer = self.create_timer(2.0, self.request_full_maps)
 
         # Launch visualizer
         self.vis_thread = threading.Thread(target=self.visualizer_loop, daemon=True)
@@ -134,53 +105,6 @@ class ImprovedMultiRobotVisualizer(Node):
 
         return callback
 
-    def landmarks_callback_factory(self, robot_id):
-        def callback(msg):
-            try:
-                points = list(pc2.read_points(msg, field_names=("x", "y", "z"), skip_nans=True))
-                if points:
-                    with self.vis_lock:
-                        # Transform points to global frame
-                        local_points = np.array([[p[0], p[1], p[2]] for p in points], dtype=np.float64)
-                        global_points = self.transform_points_to_global(local_points, robot_id)
-                        self.robot_landmarks[robot_id] = global_points
-            except Exception as e:
-                self.get_logger().error(f'Error processing landmarks for robot_{robot_id}: {e}')
-
-        return callback
-
-    def raw_landmarks_callback_factory(self, robot_id):
-        def callback(msg):
-            try:
-                points = list(pc2.read_points(msg, field_names=("x", "y", "z"), skip_nans=True))
-                if points:
-                    with self.vis_lock:
-                        # Transform points to global frame
-                        local_points = np.array([[p[0], p[1], p[2]] for p in points], dtype=np.float64)
-                        global_points = self.transform_points_to_global(local_points, robot_id)
-                        self.raw_landmarks[robot_id] = global_points
-            except Exception as e:
-                self.get_logger().error(f'Error processing raw landmarks for robot_{robot_id}: {e}')
-
-        return callback
-
-    def transform_points_to_global(self, local_points, robot_id):
-        """Transform points from robot frame to global frame"""
-        if len(local_points) == 0:
-            return local_points
-
-        transform_matrix = self.robot_transforms[robot_id]
-
-        # Add homogeneous coordinate
-        ones = np.ones((local_points.shape[0], 1))
-        local_homo = np.hstack([local_points, ones])
-
-        # Transform
-        global_homo = (transform_matrix @ local_homo.T).T
-
-        # Return 3D points
-        return global_homo[:, :3]
-
     def merged_map_callback(self, msg):
         """Receive merged map from multi_robot_map_merger"""
         try:
@@ -214,35 +138,12 @@ class ImprovedMultiRobotVisualizer(Node):
         except Exception as e:
             self.get_logger().error(f'Error processing merged map: {e}')
 
-    def request_full_maps(self):
-        """Request full landmark maps from each robot"""
-        for robot_id, client in self.landmark_clients.items():
-            if client.service_is_ready():
-                request = GetAllLandmarksInMap.Request()
-                request.request = True
-                future = client.call_async(request)
-                future.add_done_callback(lambda f, rid=robot_id: self.handle_full_map_response(f, rid))
-
-    def handle_full_map_response(self, future, robot_id):
-        try:
-            response = future.result()
-            if response:
-                points = list(pc2.read_points(response.landmarks, field_names=("x", "y", "z"), skip_nans=True))
-                if points:
-                    with self.vis_lock:
-                        local_points = np.array([[p[0], p[1], p[2]] for p in points], dtype=np.float64)
-                        global_points = self.transform_points_to_global(local_points, robot_id)
-                        self.raw_landmarks[robot_id] = global_points
-                    self.get_logger().info(f'Full map from robot_{robot_id}: {len(points)} points')
-        except Exception as e:
-            self.get_logger().error(f'Error getting full map from robot_{robot_id}: {e}')
-
     def visualizer_loop(self):
         """Main visualization loop"""
         # Create visualizer
         vis = o3d.visualization.Visualizer()
         vis.create_window(
-            window_name='Improved Multi-Robot SLAM Visualization',
+            window_name='Multi-Robot SLAM Visualization (Merged Map)',
             width=1920,
             height=1080
         )
@@ -256,10 +157,8 @@ class ImprovedMultiRobotVisualizer(Node):
         # Initialize geometries
         robot_spheres = {}
         trajectory_lines = {}
-        landmark_clouds = {}
-        raw_landmark_clouds = {}
 
-        # Merged map
+        # Merged map point cloud
         merged_cloud = o3d.geometry.PointCloud()
         vis.add_geometry(merged_cloud)
 
@@ -282,13 +181,6 @@ class ImprovedMultiRobotVisualizer(Node):
             if self.show_trajectory:
                 trajectory_lines[robot_id] = o3d.geometry.LineSet()
                 vis.add_geometry(trajectory_lines[robot_id])
-
-            # Point clouds
-            landmark_clouds[robot_id] = o3d.geometry.PointCloud()
-            vis.add_geometry(landmark_clouds[robot_id])
-
-            raw_landmark_clouds[robot_id] = o3d.geometry.PointCloud()
-            vis.add_geometry(raw_landmark_clouds[robot_id])
 
         # Add coordinate frame at origin
         coord_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=2.0, origin=[0, 0, 0])
@@ -375,27 +267,6 @@ class ImprovedMultiRobotVisualizer(Node):
                         except Exception as e:
                             self.get_logger().error(f'Error updating trajectory for robot_{robot_id}: {e}')
 
-                    # Update raw landmarks (full map)
-                    if self.raw_landmarks[robot_id].shape[0] > 0:
-                        try:
-                            raw_cloud = raw_landmark_clouds[robot_id]
-                            raw_cloud.points = o3d.utility.Vector3dVector(self.raw_landmarks[robot_id])
-                            raw_cloud.paint_uniform_color(self.get_landmark_color(robot_id))
-                            vis.update_geometry(raw_cloud)
-                        except Exception as e:
-                            self.get_logger().error(f'Error updating raw landmarks for robot_{robot_id}: {e}')
-
-                    # Update real-time landmarks
-                    if self.robot_landmarks[robot_id].shape[0] > 0:
-                        try:
-                            landmark_cloud = landmark_clouds[robot_id]
-                            landmark_cloud.points = o3d.utility.Vector3dVector(self.robot_landmarks[robot_id])
-                            light_color = np.array(self.get_robot_color(robot_id)) * 0.5 + 0.5
-                            landmark_cloud.paint_uniform_color(light_color)
-                            vis.update_geometry(landmark_cloud)
-                        except Exception as e:
-                            self.get_logger().error(f'Error updating landmarks for robot_{robot_id}: {e}')
-
                 # Update merged map from multi_robot_map_merger
                 if self.merged_map_points.shape[0] > 0:
                     try:
@@ -447,47 +318,39 @@ class ImprovedMultiRobotVisualizer(Node):
         }
         return colors.get(robot_id, [0.7, 0.7, 0.7])
 
-    def get_landmark_color(self, robot_id):
-        """Get colors for landmark clouds"""
-        base_color = np.array(self.get_robot_color(robot_id))
-        return base_color * 0.8
-
-    def get_trajectory_color(self, robot_id):
-        """Get trajectory colors"""
-        base_color = np.array(self.get_robot_color(robot_id))
-        return base_color * 0.6
-
     def get_merged_color(self, robot_id):
         """Get colors for merged map points"""
         base_color = np.array(self.get_robot_color(robot_id))
-        return base_color * 0.6
+        return base_color * 0.8
 
     def print_status(self):
-        """Print current status of all robots"""
-        status_msg = "\n========== Multi-Robot SLAM Status =========="
+        """Print current status of visualization"""
+        status_msg = "\n========== Multi-Robot SLAM Visualization Status =========="
 
-        total_raw_points = 0
-        total_rt_points = 0
+        # Count points per robot in merged map
+        robot_point_counts = {}
+        for rid in self.robot_configs.keys():
+            robot_point_counts[rid] = 0
+
+        if self.merged_map_points.shape[0] > 0:
+            for point in self.merged_map_points:
+                robot_id = int(point[3])
+                if robot_id in robot_point_counts:
+                    robot_point_counts[robot_id] += 1
 
         for robot_id in self.robot_configs.keys():
             pose = self.robot_poses[robot_id]
-            landmarks_count = self.robot_landmarks[robot_id].shape[0]
-            raw_count = self.raw_landmarks[robot_id].shape[0]
             traj_len = len(self.trajectories[robot_id])
-
-            total_raw_points += raw_count
-            total_rt_points += landmarks_count
 
             if pose is not None:
                 status_msg += f"\nRobot_{robot_id}: Pose=[{pose[0]:.2f}, {pose[1]:.2f}, {pose[2]:.2f}]"
-                status_msg += f" | RT_Points={landmarks_count} | Map_Points={raw_count} | Trajectory={traj_len}"
+                status_msg += f" | Points in merged map: {robot_point_counts[robot_id]} | Trajectory: {traj_len}"
             else:
                 initial_pos = self.robot_configs[robot_id]['position']
-                status_msg += f"\nRobot_{robot_id}: At initial position {initial_pos} | Map_Points={raw_count}"
+                status_msg += f"\nRobot_{robot_id}: At initial position {initial_pos}"
 
-        status_msg += f"\n\nMerged Map: {self.merged_map_points.shape[0]} points"
-        status_msg += f"\nTotal Points: {total_raw_points} (Raw) | {total_rt_points} (Real-time)"
-        status_msg += "\n" + "=" * 45
+        status_msg += f"\n\nTotal Merged Map Points: {self.merged_map_points.shape[0]}"
+        status_msg += "\n" + "=" * 58
 
         self.get_logger().info(status_msg)
 
@@ -510,12 +373,10 @@ def main(args=None):
     )
 
     try:
-        node.get_logger().info("Starting improved multi-robot visualization...")
+        node.get_logger().info("Starting simplified multi-robot visualization...")
         node.get_logger().info("Features:")
-        node.get_logger().info("- Proper coordinate transformations")
-        node.get_logger().info("- Real-time and full map visualization")
-        node.get_logger().info("- Robot trajectories")
-        node.get_logger().info("- Merged map from multi_robot_map_merger")
+        node.get_logger().info("- Visualizes ONLY the merged map from map merger")
+        node.get_logger().info("- Robot poses and trajectories")
         node.get_logger().info("- Grid and coordinate frames")
         node.get_logger().info("\nPress Ctrl+C to exit")
 
