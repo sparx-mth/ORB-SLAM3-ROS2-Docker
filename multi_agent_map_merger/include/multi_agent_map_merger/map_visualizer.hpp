@@ -9,7 +9,7 @@
 #include <set>
 
 #include "slam_msgs/msg/key_frame_full_data.hpp"
-#include "ORB_SLAM3/KeyFrame.h"
+#include "KeyFrame.h"
 
 namespace ORB_SLAM3_Wrapper {
 
