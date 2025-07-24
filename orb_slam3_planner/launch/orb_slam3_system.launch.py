@@ -20,7 +20,7 @@ def generate_launch_description():
     robot_configs = {
         0: {'position': [-5.0, -7.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
         1: {'position': [-1.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        # 2: {'position': [5.0, 5.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
+        2: {'position': [5.0, 5.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
     }
 
     nodes = []
