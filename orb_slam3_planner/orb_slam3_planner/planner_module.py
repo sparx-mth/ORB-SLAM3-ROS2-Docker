@@ -6,7 +6,7 @@ class FrontierPlanner:
     """
     FrontierPlanner is responsible for identifying unexplored frontiers in the occupancy grid
     and selecting optimal exploration targets based on distance, novelty, information gain,
-    and alignment with the robot's heading.
+    alignment with the robot's heading, and coordination with other robots.
     """
 
     def __init__(self, node):
@@ -24,7 +24,7 @@ class FrontierPlanner:
         self.grid_size = node.grid_size
         self.occupied_threshold = node.occupied_threshold
 
-        self.get_logger().info("FrontierPlanner initialized")
+        self.get_logger().info("FrontierPlanner initialized with multi-robot coordination")
 
     def find_frontiers(self):
         """
@@ -53,7 +53,7 @@ class FrontierPlanner:
 
     def find_best_frontier(self):
         """
-        Select the optimal frontier using a multi-factor scoring system.
+        Select the optimal frontier using a multi-factor scoring system including multi-robot coordination.
         Returns None if no valid frontiers are found.
 
         Returns:
@@ -73,6 +73,11 @@ class FrontierPlanner:
         best_frontier = None
         best_score = float('inf')
 
+        # Log current robot positions and goals for debugging
+        if len(self.node.other_robot_positions) > 0 or len(self.node.other_robot_goals) > 0:
+            self.get_logger().debug(
+                f"Other robots: positions={self.node.other_robot_positions}, goals={self.node.other_robot_goals}")
+
         for fx, fy in frontiers:
             if not self.is_safe_position(fx, fy):
                 continue
@@ -83,7 +88,7 @@ class FrontierPlanner:
             distance = math.sqrt((fx - rx) ** 2 + (fy - ry) ** 2)
             if distance < 3:
                 continue
-            if distance > 30:
+            if distance > 20:
                 continue
 
             score = self.calculate_frontier_score(fx, fy, rx, ry)
@@ -91,6 +96,9 @@ class FrontierPlanner:
             if score < best_score:
                 best_score = score
                 best_frontier = (fx, fy)
+
+        if best_frontier:
+            self.get_logger().info(f"Selected frontier {best_frontier} with score {best_score:.2f}")
 
         return best_frontier
 
@@ -105,6 +113,7 @@ class FrontierPlanner:
         if self.node.use_frontier_scoring:
             return self.find_best_frontier()
 
+        # Simple nearest frontier without multi-robot coordination
         if not self.node.robot_pos:
             return None
 
@@ -127,7 +136,7 @@ class FrontierPlanner:
             if distance < 3:
                 continue
 
-            if distance > 20:
+            if distance > 10:
                 continue
 
             if distance < min_distance:
@@ -136,21 +145,63 @@ class FrontierPlanner:
 
         return best_frontier
 
-    def calculate_frontier_score(self, fx, fy, rx, ry):
+    def calculate_multi_robot_factor(self, fx, fy):
         """
-        Compute a score for a given frontier based on distance, novelty, surrounding unknowns, and heading alignment.
+        Calculate a factor that encourages robots to spread out by considering
+        distances to other robots and their goals.
 
         Returns:
-            float: Calculated score for the frontier.
+            float: Factor > 1.0 indicates good separation, < 1.0 indicates too close to others
         """
+        separation_bonus = 1.0
+
+        # Check distance to other robot positions
+        for robot_id, (ox, oy) in self.node.other_robot_positions.items():
+            dist_to_robot = math.sqrt((fx - ox) ** 2 + (fy - oy) ** 2)
+
+            # Penalize if too close to another robot
+            if dist_to_robot < self.node.min_robot_separation:
+                penalty = 1.0 - (dist_to_robot / self.node.min_robot_separation)
+                separation_bonus *= (1.0 - penalty * self.node.robot_position_weight)
+            else:
+                # Reward for being far from other robots
+                bonus = min(dist_to_robot / (self.node.min_robot_separation * 2), 2.0)
+                separation_bonus *= (1.0 + (bonus - 1.0) * self.node.robot_position_weight * 0.5)
+
+        # Check distance to other robot goals
+        for robot_id, (gx, gy) in self.node.other_robot_goals.items():
+            dist_to_goal = math.sqrt((fx - gx) ** 2 + (fy - gy) ** 2)
+
+            # Strongly penalize if too close to another robot's goal
+            if dist_to_goal < self.node.min_robot_separation:
+                penalty = 1.0 - (dist_to_goal / self.node.min_robot_separation)
+                separation_bonus *= (1.0 - penalty * self.node.robot_goal_weight)
+            else:
+                # Reward for being far from other robot goals
+                bonus = min(dist_to_goal / (self.node.min_robot_separation * 2), 2.0)
+                separation_bonus *= (1.0 + (bonus - 1.0) * self.node.robot_goal_weight * 0.5)
+
+        return max(separation_bonus, 0.1)  # Ensure we don't get negative or zero values
+
+    def calculate_frontier_score(self, fx, fy, rx, ry):
+        """
+        Compute a score for a given frontier based on distance, novelty, surrounding unknowns,
+        heading alignment, and multi-robot coordination.
+
+        Returns:
+            float: Calculated score for the frontier (lower is better).
+        """
+        # Distance factor
         distance = math.sqrt((fx - rx) ** 2 + (fy - ry) ** 2)
 
+        # Novelty factor
         novelty_bonus = 1.0
         for vx, vy in self.node.visited_targets:
             if math.sqrt((fx - vx) ** 2 + (fy - vy) ** 2) < self.node.exploration_radius:
                 novelty_bonus = 0.3
                 break
 
+        # Information gain factor (unknown cells nearby)
         unknown_count = 0
         check_radius = 3
         for dx in range(-check_radius, check_radius + 1):
@@ -160,12 +211,29 @@ class FrontierPlanner:
                     if self.get_occupancy_value(nx, ny) == -1:
                         unknown_count += 1
 
+        # Heading alignment factor
         angle_to_frontier = math.atan2(fy - ry, fx - rx)
         angle_diff = abs(self.normalize_angle(angle_to_frontier - self.node.robot_angle))
         angle_factor = 1.0 - (angle_diff / math.pi) * 0.3
 
-        score = distance / novelty_bonus / (1 + unknown_count * 0.1) / angle_factor
-        return score
+        # Multi-robot coordination factor
+        multi_robot_factor = self.calculate_multi_robot_factor(fx, fy)
+
+        # Combined score (lower is better)
+        # Original score calculation
+        base_score = distance / novelty_bonus / (1 + unknown_count * 0.1) / angle_factor
+
+        # Apply multi-robot factor (inverted because lower score is better)
+        final_score = base_score / multi_robot_factor
+
+        # Debug logging for significant coordination effects
+        if abs(multi_robot_factor - 1.0) > 0.3:
+            self.get_logger().debug(
+                f"Frontier ({fx}, {fy}): base_score={base_score:.2f}, "
+                f"multi_robot_factor={multi_robot_factor:.2f}, final_score={final_score:.2f}"
+            )
+
+        return final_score
 
     def is_safe_position(self, x, y):
         """

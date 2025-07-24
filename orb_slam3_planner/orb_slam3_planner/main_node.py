@@ -28,18 +28,24 @@ class AutonomousExplorerNode(Node):
         self.declare_parameter('robot_namespace', '')
         self.robot_namespace = self.get_parameter('robot_namespace').value.rstrip('/')
 
+        # Extract robot ID from namespace (assumes format 'robot_0', 'robot_1', etc.)
+        self.robot_id = int(self.robot_namespace.split('_')[-1]) if self.robot_namespace else 0
+
+        # List of all robot IDs in the system
+        self.all_robot_ids = [0, 1, 2]  # Adjust based on your system
+
         # ======================
         # Map Parameters
         # ======================
         self.cell_size = 0.25
-        self.map_range = 20.0
+        self.map_range = 15.0
         self.grid_size = int(2 * self.map_range / self.cell_size)
 
         # Local copy of the shared map
         self.occupancy_prob = np.full((self.grid_size, self.grid_size), 0.5, dtype=np.float32)
         self.update_count = np.zeros((self.grid_size, self.grid_size), dtype=np.int32)
 
-        self.occupied_threshold = 0.6
+        self.occupied_threshold = 0.75
         self.free_threshold = 0.35
 
         # ======================
@@ -59,6 +65,17 @@ class AutonomousExplorerNode(Node):
         self.use_frontier_scoring = True
         self.visited_targets = set()
         self.exploration_radius = 2
+
+        # ======================
+        # Multi-Robot Coordination
+        # ======================
+        self.other_robot_positions = {}  # {robot_id: (grid_x, grid_y)}
+        self.other_robot_goals = {}  # {robot_id: (grid_x, grid_y)}
+
+        # Weights for multi-robot coordination in scoring
+        self.robot_position_weight = 1.5  # Weight for distance from other robots
+        self.robot_goal_weight = 2.0  # Weight for distance from other robots' goals
+        self.min_robot_separation = 5  # Minimum desired grid cells between robots
 
         # ======================
         # Robot State
@@ -93,6 +110,7 @@ class AutonomousExplorerNode(Node):
         self.goal_pub = self.create_publisher(Point, f'{ns}/goal_grid_pos', 10)
         self.robot_pos_pub = self.create_publisher(Point, f'{ns}/robot_grid_pos', 10)
 
+        # Pass self to planner so it can access other robot data
         self.planner = FrontierPlanner(self)
         self.controller = DroneController(self)
 
@@ -103,9 +121,41 @@ class AutonomousExplorerNode(Node):
         # Subscribe to shared occupancy grid instead of building our own
         self.create_subscription(OccupancyGrid, '/shared_occupancy_grid', self.shared_map_callback, 10)
 
+        # Subscribe to other robots' positions and goals
+        for robot_id in self.all_robot_ids:
+            if robot_id != self.robot_id:  # Don't subscribe to own topics
+                # Robot positions from multi_robot_map_builder
+                self.create_subscription(
+                    Point, f'/robot_{robot_id}/grid_position',
+                    self.create_position_callback(robot_id), 10
+                )
+
+                # Robot goals from autonomous explorer nodes
+                self.create_subscription(
+                    Point, f'/robot_{robot_id}/goal_grid_pos',
+                    self.create_goal_callback(robot_id), 10
+                )
+
         self.create_timer(0.5, self.control_loop)
 
-        self.get_logger().info(f"Autonomous Explorer Node started for namespace: {self.robot_namespace}")
+        self.get_logger().info(
+            f"Autonomous Explorer Node started for namespace: {self.robot_namespace} (ID: {self.robot_id})")
+
+    def create_position_callback(self, robot_id):
+        """Create a callback for receiving other robot positions"""
+
+        def callback(msg):
+            self.other_robot_positions[robot_id] = (int(msg.x), int(msg.y))
+
+        return callback
+
+    def create_goal_callback(self, robot_id):
+        """Create a callback for receiving other robot goals"""
+
+        def callback(msg):
+            self.other_robot_goals[robot_id] = (int(msg.x), int(msg.y))
+
+        return callback
 
     def grid_position_callback(self, msg):
         """

@@ -30,7 +30,7 @@ class MultiRobotMapBuilder(Node):
         # Map Parameters (EXACT match from main_node)
         # ======================
         self.cell_size = 0.25
-        self.map_range = 20.0
+        self.map_range = 15.0
         self.grid_size = int(2 * self.map_range / self.cell_size)
 
         self.occupancy_prob = np.full((self.grid_size, self.grid_size), 0.5, dtype=np.float32)
@@ -45,14 +45,14 @@ class MultiRobotMapBuilder(Node):
         self.free_prob_decrement = -0.05
         self.occupied_threshold = 0.75
         self.free_threshold = 0.35
-        self.freeze_update_count = 8
+        self.freeze_update_count = 24
 
         # ======================
         # Sensor Parameters (from main_node)
         # ======================
         self.camera_fov = math.radians(60)
         self.camera_range = 10.0
-        self.min_points_for_obstacle = 20
+        self.min_points_for_obstacle = 25
 
         # ======================
         # Robot States
