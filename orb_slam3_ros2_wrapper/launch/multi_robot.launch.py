@@ -6,6 +6,7 @@ from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 
+
 robot_coordinates = {
     0: [-5.0, -7.0, 1.0],  # corridor
     1: [-1.0, 0.0, 1.65],
