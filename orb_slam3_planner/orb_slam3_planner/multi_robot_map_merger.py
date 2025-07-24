@@ -4,13 +4,11 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import PointCloud2, PointField
 from geometry_msgs.msg import PoseStamped
-from slam_msgs.srv import GetAllLandmarksInMap
 from std_msgs.msg import Header
 import sensor_msgs_py.point_cloud2 as pc2
 import numpy as np
 import struct
 import threading
-import time
 from scipy.spatial.transform import Rotation as R
 from scipy.spatial import cKDTree
 
@@ -18,7 +16,7 @@ from scipy.spatial import cKDTree
 class MultiRobotMapMerger(Node):
     """
     Dedicated node for merging maps from multiple robots.
-    Handles map requests and publishes merged point cloud without visualization.
+    Subscribes to landmark topics published by landmark_publisher_node.py
     """
 
     def __init__(self, robot_configs):
@@ -35,6 +33,7 @@ class MultiRobotMapMerger(Node):
         # Data storage
         self.robot_poses = {rid: None for rid in robot_configs.keys()}
         self.raw_landmarks = {rid: np.empty((0, 3)) for rid in robot_configs.keys()}
+        self.landmarks_received = {rid: False for rid in robot_configs.keys()}
 
         # Transformation matrices
         self.robot_transforms = {}
@@ -53,24 +52,31 @@ class MultiRobotMapMerger(Node):
 
         # Subscribe to robot poses
         for robot_id in robot_configs.keys():
+            pose_topic = f'/robot_{robot_id}/robot_pose_slam'
             self.create_subscription(
                 PoseStamped,
-                f'/robot_{robot_id}/robot_pose_slam',
+                pose_topic,
                 self.create_pose_callback(robot_id),
                 10
             )
+            self.get_logger().info(f'Subscribed to pose topic: {pose_topic}')
 
-        # Service clients for getting full maps
-        self.landmark_clients = {}
+        # Subscribe to landmark topics from landmark_publisher_node
         for robot_id in robot_configs.keys():
-            service_name = f'/robot_{robot_id}/orb_slam3/get_all_landmarks_in_map'
-            self.landmark_clients[robot_id] = self.create_client(
-                GetAllLandmarksInMap, service_name
+            landmark_topic = f'/robot_{robot_id}/orb_slam3/landmarks_raw'
+            self.create_subscription(
+                PointCloud2,
+                landmark_topic,
+                self.create_landmark_callback(robot_id),
+                10
             )
+            self.get_logger().info(f'Subscribed to landmark topic: {landmark_topic}')
 
-        # Timers
-        self.create_timer(2.0, self.request_full_maps)
+        # Timer for publishing merged map
         self.create_timer(1.0, self.publish_merged_map)
+
+        # Timer for status updates
+        self.create_timer(5.0, self.print_status)
 
         self.get_logger().info(f'Map Merger initialized for robots: {self.robot_ids}')
 
@@ -104,24 +110,13 @@ class MultiRobotMapMerger(Node):
 
         return callback
 
-    def request_full_maps(self):
-        """Request full landmark maps from each robot"""
-        for robot_id, client in self.landmark_clients.items():
-            if client.service_is_ready():
-                request = GetAllLandmarksInMap.Request()
-                request.request = True
-                future = client.call_async(request)
-                future.add_done_callback(
-                    lambda f, rid=robot_id: self.handle_full_map_response(f, rid)
-                )
+    def create_landmark_callback(self, robot_id):
+        """Factory for landmark callbacks"""
 
-    def handle_full_map_response(self, future, robot_id):
-        """Handle response from map service"""
-        try:
-            response = future.result()
-            if response and response.landmarks:
+        def callback(msg):
+            try:
                 points = list(pc2.read_points(
-                    response.landmarks,
+                    msg,
                     field_names=("x", "y", "z"),
                     skip_nans=True
                 ))
@@ -134,15 +129,18 @@ class MultiRobotMapMerger(Node):
                             local_points, robot_id
                         )
                         self.raw_landmarks[robot_id] = global_points
+                        self.landmarks_received[robot_id] = True
 
                     if self.enable_logging:
                         self.get_logger().info(
-                            f'Received map from robot_{robot_id}: {len(points)} points'
+                            f'Updated landmarks from robot_{robot_id}: {len(points)} points'
                         )
-        except Exception as e:
-            self.get_logger().error(
-                f'Error getting map from robot_{robot_id}: {e}'
-            )
+            except Exception as e:
+                self.get_logger().error(
+                    f'Error processing landmarks from robot_{robot_id}: {e}'
+                )
+
+        return callback
 
     def transform_points_to_global(self, local_points, robot_id):
         """Transform points from robot frame to global frame"""
@@ -274,21 +272,22 @@ class MultiRobotMapMerger(Node):
         """Print current status"""
         with self.data_lock:
             total_points = 0
-            status = "Map Merger Status: "
+            status_parts = []
 
             for robot_id in self.robot_ids:
                 count = len(self.raw_landmarks[robot_id])
                 total_points += count
-                status += f"R{robot_id}:{count} "
+                received = "✓" if self.landmarks_received[robot_id] else "✗"
+                status_parts.append(f"R{robot_id}:{count}{received}")
 
-            status += f"| Total: {total_points}"
+            status = f"Map Merger Status: {' | '.join(status_parts)} | Total: {total_points}"
             self.get_logger().info(status)
 
 
 def main(args=None):
     rclpy.init(args=args)
 
-    # Robot configurations
+    # Robot configurations - must match those in launch file
     robot_configs = {
         0: {'position': [-5.0, -7.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
         1: {'position': [-1.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},

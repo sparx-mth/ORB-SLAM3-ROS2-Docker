@@ -20,16 +20,9 @@ setup(
     entry_points={
         'console_scripts': [
             'landmark_publisher_node = orb_slam3_planner.landmark_publisher_node:main',
-            # 'map_merger_node = orb_slam3_planner.map_merger_node:main',
-            # 'shared_map_builder_node = orb_slam3_planner.shared_map_builder_node:main',
-            # 'autonomous_explorer_node = orb_slam3_planner.main_node:main',
-            # 'autonomous_explorer_visualizer = orb_slam3_planner.autonomous_explorer_visualizer:main',
-            # 'global_map_visualizer = orb_slam3_planner.global_map_visualizer:main',
-            # 'multi_robot_visualizer = orb_slam3_planner.multi_robot_visualizer:main',
-            'robot_calibration_tool = orb_slam3_planner.robot_calibration_tool:main',
+            'autonomous_explorer_node = orb_slam3_planner.main_node:main',
+            'multi_robot_visualizer = orb_slam3_planner.multi_robot_visualizer:main',
             'multi_robot_map_builder = orb_slam3_planner.multi_robot_map_builder:main',
-            'multi_robot_planner = orb_slam3_planner.multi_robot_planner:main',
-            'multi_robot_controller = orb_slam3_planner.multi_robot_controller:main',
             'multi_robot_visualizer_2d = orb_slam3_planner.multi_robot_visualizer_2d:main',
             'multi_robot_map_merger = orb_slam3_planner.multi_robot_map_merger:main',
 

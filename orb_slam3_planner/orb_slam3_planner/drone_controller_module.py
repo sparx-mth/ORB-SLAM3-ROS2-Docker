@@ -22,6 +22,20 @@ class DroneController:
         self.cmd_pub = node.cmd_pub  # Publisher to /cmd_vel
         self.get_logger().info("DroneController initialized")
 
+    def grid_to_world(self, grid_x, grid_y):
+        """
+        Convert grid coordinates to world coordinates.
+
+        Args:
+            grid_x, grid_y: Grid coordinates
+
+        Returns:
+            world_x, world_y: World coordinates
+        """
+        world_x = grid_x * self.node.cell_size - self.node.map_range
+        world_y = grid_y * self.node.cell_size - self.node.map_range
+        return world_x, world_y
+
     def move_toward_waypoint(self, waypoint):
         """
         Move the robot towards a specific waypoint on the path.
@@ -35,20 +49,28 @@ class DroneController:
         rx, ry = self.node.robot_pos
         wx, wy = waypoint
 
-        target_angle = math.atan2(wy - ry, wx - rx)
+        # Convert grid coordinates to world coordinates for angle calculation
+        robot_world_x, robot_world_y = self.grid_to_world(rx, ry)
+        waypoint_world_x, waypoint_world_y = self.grid_to_world(wx, wy)
+
+        # Calculate angle in world coordinates
+        target_angle = math.atan2(waypoint_world_y - robot_world_y,
+                                  waypoint_world_x - robot_world_x)
         angle_diff = self.node.normalize_angle(target_angle - self.node.robot_angle)
 
         speed = self.get_adaptive_speed()
 
+        # First align with the target
         if abs(angle_diff) > 0.3:
             twist = Twist()
             twist.angular.z = self.node.angular_speed if angle_diff > 0 else -self.node.angular_speed
             self.cmd_pub.publish(twist)
             return
 
+        # Then move forward
         twist = Twist()
         twist.linear.x = speed
-        twist.angular.z = angle_diff * 0.5
+        twist.angular.z = angle_diff * 0.5  # Proportional control for small corrections
         self.cmd_pub.publish(twist)
 
     def stop_robot(self):
@@ -100,14 +122,15 @@ class DroneController:
         robot_width_cells = 1
         check_distance = self.node.safe_distance
 
-        # Use temporal map if SLAM is lost
-        prob_grid = self.node.temporal_occupancy_prob if self.node.using_temporal_map else self.node.occupancy_prob
+        prob_grid = self.node.occupancy_prob
 
         for dist in range(1, check_distance + 1):
             width_at_dist = max(1, robot_width_cells - dist // 3)
 
             for offset in range(-width_at_dist, width_at_dist + 1):
                 check_angle = self.node.robot_angle + (offset * 0.2 / dist)
+
+                # Check in grid coordinates but using the correct angle
                 check_x = int(rx + dist * math.cos(check_angle))
                 check_y = int(ry + dist * math.sin(check_angle))
 
@@ -132,8 +155,7 @@ class DroneController:
         check_radius = 5
         total_cells = 0
 
-        # Use temporal map if SLAM is lost
-        prob_grid = self.node.temporal_occupancy_prob if self.node.using_temporal_map else self.node.occupancy_prob
+        prob_grid = self.node.occupancy_prob
 
         for dx in range(-check_radius, check_radius + 1):
             for dy in range(-check_radius, check_radius + 1):

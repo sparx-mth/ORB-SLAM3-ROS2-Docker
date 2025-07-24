@@ -174,8 +174,7 @@ class FrontierPlanner:
         Returns:
             bool: True if the area is free from obstacles; False otherwise.
         """
-        # Use temporal map if SLAM is lost
-        prob_grid = self.node.temporal_occupancy_prob if self.node.using_temporal_map else self.node.occupancy_prob
+        prob_grid = self.node.occupancy_prob
 
         for dx in range(-self.node.safe_distance, self.node.safe_distance + 1):
             for dy in range(-self.node.safe_distance, self.node.safe_distance + 1):
@@ -215,8 +214,7 @@ class FrontierPlanner:
         sx, sy = start
         gx, gy = goal
 
-        # Use temporal map if SLAM is lost
-        grid = self.node.temporal_occupancy_prob if self.node.using_temporal_map else self.node.occupancy_prob
+        grid = self.node.occupancy_prob
 
         # A* implementation
         open_set = []

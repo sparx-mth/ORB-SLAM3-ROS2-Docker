@@ -13,7 +13,6 @@ import time
 from collections import deque
 import copy
 from scipy.spatial.transform import Rotation as R
-from scipy.spatial import cKDTree
 
 
 class ImprovedMultiRobotVisualizer(Node):
@@ -37,19 +36,13 @@ class ImprovedMultiRobotVisualizer(Node):
                 config['position'], config.get('orientation', [0, 0, 0])
             )
 
-        # Merged map
+        # Merged map from multi_robot_map_merger
         self.merged_map_points = np.empty((0, 4))  # x, y, z, robot_id
-        self.merged_cloud_data = None
 
         # Visualization state
         self.vis_lock = threading.Lock()
         self.should_reset_view = False
         self.first_pose_received = {rid: False for rid in robot_configs.keys()}
-
-        # ICP alignment parameters
-        self.enable_icp = True
-        self.icp_fitness_threshold = 0.3
-        self.icp_iterations = 50
 
         # Visualization options
         self.show_grid = True
@@ -84,7 +77,7 @@ class ImprovedMultiRobotVisualizer(Node):
                 10
             )
 
-        # Subscribe to merged map
+        # Subscribe to merged map from multi_robot_map_merger
         self.create_subscription(
             PointCloud2,
             '/merged_map',
@@ -92,15 +85,14 @@ class ImprovedMultiRobotVisualizer(Node):
             10
         )
 
-        # Service clients
+        # Service clients for getting full maps
         self.landmark_clients = {}
         for robot_id in robot_configs.keys():
             service_name = f'/robot_{robot_id}/orb_slam3/get_all_landmarks_in_map'
             self.landmark_clients[robot_id] = self.create_client(GetAllLandmarksInMap, service_name)
 
-        # Timers
+        # Timer to request full maps periodically
         self.map_request_timer = self.create_timer(2.0, self.request_full_maps)
-        self.alignment_timer = self.create_timer(5.0, self.perform_map_alignment)
 
         # Launch visualizer
         self.vis_thread = threading.Thread(target=self.visualizer_loop, daemon=True)
@@ -190,6 +182,7 @@ class ImprovedMultiRobotVisualizer(Node):
         return global_homo[:, :3]
 
     def merged_map_callback(self, msg):
+        """Receive merged map from multi_robot_map_merger"""
         try:
             points = list(pc2.read_points(msg, field_names=("x", "y", "z", "rgb"), skip_nans=True))
             if points:
@@ -243,29 +236,6 @@ class ImprovedMultiRobotVisualizer(Node):
                     self.get_logger().info(f'Full map from robot_{robot_id}: {len(points)} points')
         except Exception as e:
             self.get_logger().error(f'Error getting full map from robot_{robot_id}: {e}')
-
-    def perform_map_alignment(self):
-        """Perform ICP alignment between robot maps if enabled"""
-        if not self.enable_icp:
-            return
-
-        with self.vis_lock:
-            # Skip if we don't have enough data
-            if len(self.raw_landmarks) < 2:
-                return
-
-            # Find robots with sufficient landmarks
-            valid_robots = []
-            for rid, landmarks in self.raw_landmarks.items():
-                if len(landmarks) > 100:  # Minimum points for ICP
-                    valid_robots.append(rid)
-
-            if len(valid_robots) < 2:
-                return
-
-            # Perform pairwise ICP alignment
-            # For now, just log that we could do it
-            self.get_logger().info(f'Could perform ICP alignment between robots: {valid_robots}')
 
     def visualizer_loop(self):
         """Main visualization loop"""
@@ -426,7 +396,7 @@ class ImprovedMultiRobotVisualizer(Node):
                         except Exception as e:
                             self.get_logger().error(f'Error updating landmarks for robot_{robot_id}: {e}')
 
-                # Update merged map
+                # Update merged map from multi_robot_map_merger
                 if self.merged_map_points.shape[0] > 0:
                     try:
                         merged_cloud.points = o3d.utility.Vector3dVector(self.merged_map_points[:, :3])
@@ -545,7 +515,7 @@ def main(args=None):
         node.get_logger().info("- Proper coordinate transformations")
         node.get_logger().info("- Real-time and full map visualization")
         node.get_logger().info("- Robot trajectories")
-        node.get_logger().info("- Merged map with duplicate removal")
+        node.get_logger().info("- Merged map from multi_robot_map_merger")
         node.get_logger().info("- Grid and coordinate frames")
         node.get_logger().info("\nPress Ctrl+C to exit")
 

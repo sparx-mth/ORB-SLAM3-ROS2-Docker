@@ -17,49 +17,56 @@ import time
 class MultiRobotMapBuilder(Node):
     """
     Builds a shared 2D occupancy map from multiple robots' point clouds and poses.
-    Optimized version that matches single-robot performance.
+    This version exactly matches the single robot map builder behavior.
     """
 
     def __init__(self, robot_configs):
         super().__init__('multi_robot_map_builder')
 
-        # Configuration flags
-        self.enable_logging = False  # Set to True for debug messages
-        self.enable_neighbor_updates = False  # Disable neighbor cell updates for performance
-        self.enable_decay = False  # Disable probability decay for performance
-
         self.robot_configs = robot_configs
         self.robot_ids = list(robot_configs.keys())
 
-        # Map parameters (same as single robot)
+        # ======================
+        # Map Parameters (EXACT match from main_node)
+        # ======================
         self.cell_size = 0.25
-        self.map_range = 40.0
+        self.map_range = 20.0
         self.grid_size = int(2 * self.map_range / self.cell_size)
 
-        # Shared occupancy grid
         self.occupancy_prob = np.full((self.grid_size, self.grid_size), 0.5, dtype=np.float32)
         self.update_count = np.zeros((self.grid_size, self.grid_size), dtype=np.int32)
 
-        # Height filtering
+        # Height filtering (from main_node)
         self.height_min = 0.1
         self.height_max = 2.0
 
-        # Probability updates
+        # Probability updates (from main_node)
         self.obstacle_prob_increment = 0.2
         self.free_prob_decrement = -0.05
         self.occupied_threshold = 0.75
         self.free_threshold = 0.35
         self.freeze_update_count = 8
 
-        # Sensor parameters
+        # ======================
+        # Sensor Parameters (from main_node)
+        # ======================
         self.camera_fov = math.radians(60)
         self.camera_range = 10.0
         self.min_points_for_obstacle = 20
 
-        # Robot states
-        self.robot_poses = {rid: None for rid in self.robot_ids}
+        # ======================
+        # Robot States
+        # ======================
+        self.robot_poses = {rid: None for rid in self.robot_ids}  # Grid positions
+        self.robot_world_poses = {rid: None for rid in self.robot_ids}  # World positions
         self.robot_angles = {rid: 0.0 for rid in self.robot_ids}
         self.robot_transforms = {}
+
+        # State tracking for each robot (from main_node)
+        self.robot_states = {rid: "EXPLORING" for rid in self.robot_ids}
+        self.recent_point_counts = {rid: [] for rid in self.robot_ids}
+        self.point_count_window = 5
+        self.min_point_ratio = 0.3
 
         # Thread safety
         self.map_lock = threading.Lock()
@@ -70,7 +77,9 @@ class MultiRobotMapBuilder(Node):
                 config['position'], config.get('orientation', [0, 0, 0])
             )
 
+        # ======================
         # Publishers
+        # ======================
         self.map_pub = self.create_publisher(OccupancyGrid, '/shared_occupancy_grid', 10)
         self.robot_grid_pubs = {}
 
@@ -79,7 +88,9 @@ class MultiRobotMapBuilder(Node):
                 Point, f'/robot_{robot_id}/grid_position', 10
             )
 
+        # ======================
         # Subscriptions
+        # ======================
         for robot_id in self.robot_ids:
             # Subscribe to poses
             self.create_subscription(
@@ -97,14 +108,14 @@ class MultiRobotMapBuilder(Node):
                 10
             )
 
-        # Timer for map publishing only
-        self.create_timer(0.5, self.publish_map)
+        # ======================
+        # Timers (matching single robot exactly)
+        # ======================
+        # No timer for control loop - we're just building maps
+        # Map publishing handled after each update in pointcloud callback
+        # Decay handled in pointcloud callback
 
-        if self.enable_decay:
-            self.create_timer(2.0, self.decay_probabilities)
-
-        if self.enable_logging:
-            self.get_logger().info(f'Multi-Robot Map Builder initialized for robots: {self.robot_ids}')
+        self.get_logger().info(f"Multi-Robot Map Builder initialized for robots: {self.robot_ids}")
 
     def create_transformation_matrix(self, position, orientation):
         """Create 4x4 transformation matrix"""
@@ -117,30 +128,35 @@ class MultiRobotMapBuilder(Node):
 
         return transform
 
+    def normalize_angle(self, angle):
+        """Normalize angle to [-pi, pi] (from main_node)"""
+        return (angle + math.pi) % (2 * math.pi) - math.pi
+
     def create_pose_callback(self, robot_id):
-        """Factory function to create pose callbacks for each robot"""
+        """Factory function to create pose callbacks for each robot (matching main_node logic)"""
 
         def callback(msg):
             # Get pose in robot's local frame
-            local_pose = np.array([
-                msg.pose.position.x,
-                msg.pose.position.y,
-                msg.pose.position.z,
-                1.0
-            ])
+            local_x = msg.pose.position.x
+            local_y = msg.pose.position.y
+            local_z = msg.pose.position.z
 
             # Transform to global frame
+            local_pose = np.array([local_x, local_y, local_z, 1.0])
             global_pose = self.robot_transforms[robot_id] @ local_pose
 
             # Extract global position
-            world_x = global_pose[0]
-            world_y = global_pose[1]
+            robot_world_x = global_pose[0]
+            robot_world_y = global_pose[1]
 
-            # Convert to grid coordinates
-            grid_x = int((world_x + self.map_range) / self.cell_size)
-            grid_y = int((world_y + self.map_range) / self.cell_size)
+            # Store world position
+            self.robot_world_poses[robot_id] = (robot_world_x, robot_world_y)
 
-            # Extract orientation
+            # Convert to grid coordinates (matching main_node exactly)
+            grid_x = int((robot_world_x + self.map_range) / self.cell_size)
+            grid_y = int((robot_world_y + self.map_range) / self.cell_size)
+
+            # Extract heading angle (from main_node)
             q = msg.pose.orientation
             local_angle = math.atan2(2.0 * (q.w * q.z + q.x * q.y),
                                      1.0 - 2.0 * (q.y * q.y + q.z * q.z))
@@ -148,91 +164,127 @@ class MultiRobotMapBuilder(Node):
             # Apply rotation from transformation
             rot_matrix = self.robot_transforms[robot_id][:3, :3]
             transform_yaw = math.atan2(rot_matrix[1, 0], rot_matrix[0, 0])
-            global_angle = local_angle + transform_yaw
+            robot_angle = local_angle + transform_yaw
 
-            self.robot_poses[robot_id] = (grid_x, grid_y)
-            self.robot_angles[robot_id] = global_angle
-
-            # Publish grid position
             if 0 <= grid_x < self.grid_size and 0 <= grid_y < self.grid_size:
-                grid_msg = Point()
-                grid_msg.x = float(grid_x)
-                grid_msg.y = float(grid_y)
-                grid_msg.z = float(global_angle)
-                self.robot_grid_pubs[robot_id].publish(grid_msg)
+                self.robot_poses[robot_id] = (grid_x, grid_y)
+                self.robot_angles[robot_id] = robot_angle
+
+                # Publish robot position (matching main_node format exactly)
+                robot_msg = Point()
+                robot_msg.x = float(grid_x)
+                robot_msg.y = float(grid_y)
+                robot_msg.z = float(robot_angle)
+                self.robot_grid_pubs[robot_id].publish(robot_msg)
 
         return callback
 
     def create_pointcloud_callback(self, robot_id):
-        """Factory function to create point cloud callbacks for each robot"""
+        """Factory function matching map_builder_module.py pointcloud_callback exactly"""
 
         def callback(msg):
             if self.robot_poses[robot_id] is None:
                 return
 
-            try:
-                points = list(pc2.read_points(msg, field_names=("x", "y", "z"), skip_nans=True))
-            except Exception as e:
-                if self.enable_logging:
-                    self.get_logger().error(f'Error reading point cloud from robot_{robot_id}: {e}')
+            # Skip if robot is in SLAM_LOST state (from map_builder_module)
+            if self.robot_states[robot_id] == "SLAM_LOST":
                 return
 
-            if not points:
-                return
-
-            # Get robot's position for calculations
+            robot_world_x, robot_world_y = self.robot_world_poses[robot_id]
             robot_grid_x, robot_grid_y = self.robot_poses[robot_id]
             robot_angle = self.robot_angles[robot_id]
 
-            # Process points like single robot - no complex transformations
+            try:
+                points = list(pc2.read_points(msg, field_names=("x", "y", "z"), skip_nans=True))
+            except (AssertionError, Exception) as e:
+                # ORB-SLAM3 might send malformed clouds when tracking is lost
+                return
+
+            # Monitor point cloud count (from map_builder_module)
+            point_count = len(points)
+            self.monitor_point_cloud_count(robot_id, point_count)
+
             cell_points = {}
 
+            # Process points EXACTLY like map_builder_module
             for x, y, z in points:
+                # Transform point to global frame first
+                local_point = np.array([x, y, z, 1.0])
+                global_point = self.robot_transforms[robot_id] @ local_point
+                x = global_point[0]
+                y = global_point[1]
+                z = global_point[2]
+
                 # Height filter
                 if not (self.height_min <= z <= self.height_max):
                     continue
 
-                # Transform point to global frame
-                local_point = np.array([x, y, z, 1.0])
-                global_point = self.robot_transforms[robot_id] @ local_point
+                # FOV and range check (from map_builder_module)
+                angle_to_point = math.atan2(y - robot_world_y, x - robot_world_x)
+                angle_diff = self.normalize_angle(angle_to_point - robot_angle)
 
-                # Get global coordinates
-                global_x = global_point[0]
-                global_y = global_point[1]
+                if abs(angle_diff) > self.camera_fov / 2:
+                    continue
 
-                # Convert to grid
-                grid_x = int((global_x + self.map_range) / self.cell_size)
-                grid_y = int((global_y + self.map_range) / self.cell_size)
+                dist = math.sqrt((x - robot_world_x) ** 2 + (y - robot_world_y) ** 2)
+                if dist > self.camera_range:
+                    continue
+
+                if not (np.isfinite(x) and np.isfinite(y) and np.isfinite(z)):
+                    continue
+
+                grid_x = int((x + self.map_range) / self.cell_size)
+                grid_y = int((y + self.map_range) / self.cell_size)
 
                 if 0 <= grid_x < self.grid_size and 0 <= grid_y < self.grid_size:
-                    cell_points.setdefault((grid_x, grid_y), []).append((global_x, global_y, z))
+                    cell_points.setdefault((grid_x, grid_y), []).append((x, y, z))
 
-            # Update occupancy grid - simplified like single robot
-            occupied_cells = set()
+            # Update map with thread safety
+            with self.map_lock:
+                occupied_cells = set()
 
-            for (gx, gy), pts in cell_points.items():
-                if len(pts) >= self.min_points_for_obstacle:
-                    prob_increase = min(self.obstacle_prob_increment * len(pts), 0.5)
-                    self.update_cell_probability(gx, gy, prob_increase)
-                    occupied_cells.add((gx, gy))
+                # Update occupied cells (from map_builder_module)
+                for (gx, gy), pts in cell_points.items():
+                    if len(pts) >= self.min_points_for_obstacle:
+                        prob_increase = min(self.obstacle_prob_increment * len(pts), 0.5)
+                        self.update_cell_probability(gx, gy, prob_increase)
+                        occupied_cells.add((gx, gy))
 
-                    # Optional: Update neighbors
-                    if self.enable_neighbor_updates:
+                        # Update neighbors (from map_builder_module)
                         for dx in [-1, 0, 1]:
                             for dy in [-1, 0, 1]:
                                 nx, ny = gx + dx, gy + dy
                                 if 0 <= nx < self.grid_size and 0 <= ny < self.grid_size:
                                     self.update_cell_probability(nx, ny, prob_increase * 0.5)
 
-            # Update free space - simplified
-            if self.robot_poses[robot_id]:
-                self.update_free_space_simple(robot_id, robot_grid_x, robot_grid_y,
-                                              robot_angle, occupied_cells)
+                # Update free space (from map_builder_module)
+                if self.robot_poses[robot_id]:
+                    self.update_free_space_probability(robot_id, occupied_cells)
+
+            # Decay probabilities (from map_builder_module)
+            self.decay_probabilities()
+
+            # Publish map (from map_builder_module)
+            self.publish_map()
 
         return callback
 
+    def monitor_point_cloud_count(self, robot_id, point_count):
+        """Monitor point cloud counts to detect sudden drops (from main_node)"""
+        self.recent_point_counts[robot_id].append(point_count)
+
+        if len(self.recent_point_counts[robot_id]) > self.point_count_window:
+            self.recent_point_counts[robot_id].pop(0)
+
+        if len(self.recent_point_counts[robot_id]) == self.point_count_window:
+            avg_count = np.mean(self.recent_point_counts[robot_id][:-1])
+            if avg_count > 0 and point_count < avg_count * self.min_point_ratio:
+                self.get_logger().error(
+                    f"Robot {robot_id}: Point cloud drop detected: {point_count} vs avg {avg_count:.0f}")
+                self.robot_states[robot_id] = "SLAM_LOST"
+
     def update_cell_probability(self, x, y, prob_change):
-        """Update a cell's occupancy probability"""
+        """Update a cell's occupancy probability (from main_node)"""
         if not (0 <= x < self.grid_size and 0 <= y < self.grid_size):
             return
 
@@ -246,45 +298,8 @@ class MultiRobotMapBuilder(Node):
         self.occupancy_prob[y, x] = np.clip(new_prob, 0.01, 0.99)
         self.update_count[y, x] += 1
 
-    def update_free_space_simple(self, robot_id, robot_x, robot_y, robot_angle, occupied_cells):
-        """Simplified free space update matching single robot performance"""
-        # Only process occupied cells within FOV
-        for gx, gy in occupied_cells:
-            dx = gx - robot_x
-            dy = gy - robot_y
-            angle_to_obstacle = math.atan2(dy, dx)
-            angle_diff = self.normalize_angle(angle_to_obstacle - robot_angle)
-
-            if abs(angle_diff) <= self.camera_fov / 2:
-                cells_on_ray = self.bresenham_line(robot_x, robot_y, gx, gy)
-                for (x, y) in cells_on_ray[:-1]:
-                    if 0 <= x < self.grid_size and 0 <= y < self.grid_size:
-                        self.update_cell_probability(x, y, self.free_prob_decrement * 1.5)
-
-        # Simple FOV free space marking
-        fov_half = self.camera_fov / 2
-        num_rays = int(self.camera_fov / math.radians(5))
-        max_range_cells = int(self.camera_range / self.cell_size)
-
-        for i in range(num_rays):
-            angle_offset = -fov_half + (i * self.camera_fov / (num_rays - 1))
-            angle = robot_angle + angle_offset
-
-            for dist in range(1, max_range_cells):
-                x = int(robot_x + dist * math.cos(angle))
-                y = int(robot_y + dist * math.sin(angle))
-
-                if not (0 <= x < self.grid_size and 0 <= y < self.grid_size):
-                    break
-
-                if self.occupancy_prob[y, x] > self.occupied_threshold and \
-                        self.update_count[y, x] > 3:
-                    break
-
-                self.update_cell_probability(x, y, self.free_prob_decrement)
-
     def bresenham_line(self, start_x, start_y, end_x, end_y):
-        """Bresenham's line algorithm"""
+        """Bresenham's line algorithm (from map_builder_module)"""
         cells = []
         dx = abs(end_x - start_x)
         dy = abs(end_y - start_y)
@@ -309,26 +324,60 @@ class MultiRobotMapBuilder(Node):
 
         return cells
 
-    def normalize_angle(self, angle):
-        """Normalize angle to [-pi, pi]"""
-        return (angle + math.pi) % (2 * math.pi) - math.pi
-
-    def decay_probabilities(self):
-        """Slowly decay probabilities - only if enabled"""
-        if not self.enable_decay:
+    def update_free_space_probability(self, robot_id, occupied_cells):
+        """Perform ray tracing from robot to obstacles (EXACT from map_builder_module)"""
+        if not self.robot_poses[robot_id]:
             return
 
+        robot_gx, robot_gy = self.robot_poses[robot_id]
+        robot_angle = self.robot_angles[robot_id]
+
+        # Ray trace to occupied cells
+        for gx, gy in occupied_cells:
+            dx = gx - robot_gx
+            dy = gy - robot_gy
+            angle_to_obstacle = math.atan2(dy, dx)
+            angle_diff = self.normalize_angle(angle_to_obstacle - robot_angle)
+
+            if abs(angle_diff) <= self.camera_fov / 2:
+                cells_on_ray = self.bresenham_line(robot_gx, robot_gy, gx, gy)
+                for (x, y) in cells_on_ray[:-1]:
+                    if 0 <= x < self.grid_size and 0 <= y < self.grid_size:
+                        self.update_cell_probability(x, y, self.free_prob_decrement * 1.5)
+
+        # FOV scanning (from map_builder_module)
+        fov_half = self.camera_fov / 2
+        num_rays = int(self.camera_fov / math.radians(5))
+        max_range_cells = int(self.camera_range / self.cell_size)
+
+        for i in range(num_rays):
+            angle_offset = -fov_half + (i * self.camera_fov / (num_rays - 1))
+            angle = robot_angle + angle_offset
+
+            for dist in range(1, max_range_cells):
+                x = int(robot_gx + dist * math.cos(angle))
+                y = int(robot_gy + dist * math.sin(angle))
+
+                if not (0 <= x < self.grid_size and 0 <= y < self.grid_size):
+                    break
+
+                if self.occupancy_prob[y, x] > self.occupied_threshold and self.update_count[y, x] > 3:
+                    break
+
+                self.update_cell_probability(x, y, self.free_prob_decrement)
+
+    def decay_probabilities(self):
+        """Apply slow decay to occupancy grid (from map_builder_module)"""
         decay_factor = 0.99
 
-        with self.map_lock:
-            for y in range(self.grid_size):
-                for x in range(self.grid_size):
-                    if self.update_count[y, x] < self.freeze_update_count:
-                        old_prob = self.occupancy_prob[y, x]
-                        self.occupancy_prob[y, x] = 0.5 + (old_prob - 0.5) * decay_factor
+        for y in range(self.grid_size):
+            for x in range(self.grid_size):
+                if self.update_count[y, x] < self.freeze_update_count:
+                    old_prob = self.occupancy_prob[y, x]
+                    self.occupancy_prob[y, x] = 0.5 + (old_prob - 0.5) * decay_factor
 
     def publish_map(self):
-        """Publish the shared occupancy grid"""
+        """Publish the occupancy grid map (EXACT from main_node)"""
         msg = OccupancyGrid()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = "map"
@@ -353,7 +402,7 @@ class MultiRobotMapBuilder(Node):
         self.map_pub.publish(msg)
 
     def get_occupancy_value(self, x, y):
-        """Convert probability to occupancy value"""
+        """Convert probability to occupancy value (EXACT from main_node)"""
         if not (0 <= x < self.grid_size and 0 <= y < self.grid_size):
             return -1
 

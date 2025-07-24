@@ -24,15 +24,15 @@ class MultiRobot2DVisualizer(Node):
         self.enable_visualization = True  # Master switch for visualization
         self.enable_fov_visualization = False  # Disable FOV cone drawing for performance
         self.enable_ray_tracing = False  # Disable ray tracing visualization for performance
-        self.enable_trajectories = False  # Disable trajectory tracking for performance
-        self.enable_logging = False  # Disable logging for performance
+        self.enable_trajectories = True  # Enable trajectory tracking
+        self.enable_logging = True  # Enable logging
 
         # Visualization parameters
-        self.scale = 4  # Scale factor for display
+        self.scale = 7  # Scale factor for display
         self.window_name = 'Multi-Robot Exploration Map'
 
-        # Robot IDs and colors
-        self.robot_ids = [0, 1]
+        # Robot IDs and colors - matching multi_robot_map_builder.py configuration
+        self.robot_ids = [0, 1]  # Update this to [0, 1, 2] if using 3 robots
         self.robot_colors = {
             0: (255, 0, 0),  # Blue
             1: (0, 255, 0),  # Green
@@ -55,7 +55,7 @@ class MultiRobot2DVisualizer(Node):
 
         # Only initialize trajectories if enabled
         if self.enable_trajectories:
-            self.trajectories = {rid: deque(maxlen=200) for rid in self.robot_ids}
+            self.trajectories = {rid: deque(maxlen=400) for rid in self.robot_ids}
 
         # Subscriptions
         self.create_subscription(
@@ -64,15 +64,15 @@ class MultiRobot2DVisualizer(Node):
         )
 
         for robot_id in self.robot_ids:
-            # Robot positions
+            # Robot positions from multi_robot_map_builder
             self.create_subscription(
                 Point, f'/robot_{robot_id}/grid_position',
                 self.create_position_callback(robot_id), 10
             )
 
-            # Robot goals
+            # Robot goals from autonomous explorer nodes
             self.create_subscription(
-                Point, f'/robot_{robot_id}/goal',
+                Point, f'/robot_{robot_id}/goal_grid_pos',
                 self.create_goal_callback(robot_id), 10
             )
 
@@ -96,6 +96,7 @@ class MultiRobot2DVisualizer(Node):
         """Factory for goal callbacks"""
 
         def callback(msg):
+            # Store goal position
             self.robot_goals[robot_id] = (int(msg.x), int(msg.y))
             if self.enable_logging:
                 self.get_logger().info(
@@ -124,7 +125,7 @@ class MultiRobot2DVisualizer(Node):
 
         # Color coding for map
         img[grid_data == -1] = (128, 128, 128)  # Unknown = Gray
-        img[grid_data == 0] = (0, 255, 0)  # Free = Green
+        img[grid_data == 0] = (255, 255, 255)  # Free = White
         img[grid_data == 100] = (0, 0, 255)  # Obstacle = Red
 
         # Flip image (ROS coordinate system)
@@ -137,7 +138,7 @@ class MultiRobot2DVisualizer(Node):
         # Draw trajectories if enabled
         if self.enable_trajectories:
             for robot_id in self.robot_ids:
-                if len(self.trajectories[robot_id]) > 1:
+                if robot_id in self.trajectories and len(self.trajectories[robot_id]) > 1:
                     self.draw_trajectory(img_large, robot_id, height)
 
         # Draw FOV if enabled
@@ -156,14 +157,15 @@ class MultiRobot2DVisualizer(Node):
                     gx_large = gx * self.scale
                     gy_large = (height - 1 - gy) * self.scale
 
-                    # Draw goal as yellow circle
+                    # Draw goal as circle with robot's color
+                    color = self.robot_colors[robot_id]
                     cv2.circle(img_large, (gx_large, gy_large),
-                               radius=self.scale * 2, color=(0, 255, 255), thickness=2)
+                               radius=self.scale * 2, color=(0, 0, 0), thickness=2)
 
                     # Add text label
-                    cv2.putText(img_large, 'GOAL',
+                    cv2.putText(img_large, f'G{robot_id}',
                                 (gx_large + 10, gy_large - 10),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1)
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
 
         # Draw robots
         for robot_id in self.robot_ids:
@@ -186,14 +188,22 @@ class MultiRobot2DVisualizer(Node):
 
                         cv2.arrowedLine(img_large, (rx_large, ry_large),
                                         (rx_large + dx, ry_large + dy),
-                                        (0, 255, 255), 2, tipLength=0.4)
+                                        (0, 0, 0), 2, tipLength=0.4)
 
-        # Add minimal info
+                    # Draw robot ID
+                    cv2.putText(img_large, f'R{robot_id}',
+                                (rx_large + 10, ry_large + 10),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+
+        # Add info panel
         cv2.putText(img_large, 'Multi-Robot Explorer',
                     (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
 
+        cv2.putText(img_large, 'White=Free, Red=Obstacle, Gray=Unknown',
+                    (10, 45), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+
         # Show robot positions
-        y_offset = 50
+        y_offset = 65
         for robot_id in self.robot_ids:
             if self.robot_positions[robot_id]:
                 rx, ry = self.robot_positions[robot_id]

@@ -1,118 +1,32 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from ament_index_python.packages import get_package_share_directory
-from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 
 
 def generate_launch_description():
+    """
+    Launch file for multi-robot exploration system.
 
+    This launches:
+    1. One shared map builder (multi_robot_map_builder.py)
+    2. One map merger (multi_robot_map_merger.py)
+    3. Three autonomous explorers (main_node.py) - one for each robot
+    4. Three visualizers (autonomous_explorer_visualizer.py) - one for each robot
+    5. Three landmark publishers (landmark_publisher_node.py) - one for each robot
+    """
 
-    launch_nodes = []
+    # Robot configurations must match those in multi_robot_map_builder.py
+    robot_configs = {
+        0: {'position': [-5.0, -7.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
+        1: {'position': [-1.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
+        # 2: {'position': [5.0, 5.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
+    }
 
-    for i in range(0, 2):
-        robot_ns = f'robot_{i}'
-        # Landmark Publisher
-        launch_nodes.append(
-            Node(
-                package='orb_slam3_planner',
-                executable='landmark_publisher_node',
-                namespace=robot_ns,
-                name=f'landmark_publisher_node_{i}',
-                output='screen',
-                parameters=[
-                    {'robot_namespace': robot_ns},
-                ]
-            )
-        )
-        #
-        # # Autonomous Explorer Node
-        # launch_nodes.append(
-        #     Node(
-        #         package='orb_slam3_planner',
-        #         executable='autonomous_explorer_node',
-        #         namespace=robot_ns,
-        #         name=f'autonomous_explorer_node_{i}',
-        #         output='screen',
-        #         parameters=[
-        #             {'robot_namespace': robot_ns},
-        #         ]
-        #     )
-        # )
-        #
-        # # Visualizer Node
-        # launch_nodes.append(
-        #     Node(
-        #         package='orb_slam3_planner',
-        #         executable='autonomous_explorer_visualizer',
-        #         namespace=robot_ns,
-        #         name=f'autonomous_explorer_visualizer_{i}',
-        #         parameters=[
-        #             {'robot_namespace': robot_ns},
-        #         ],
-        #         output='screen'
-        #     )
-        # )
-        # Multi-Robot Controller (one per robot)
-        launch_nodes.append(
-            Node(
-                package='orb_slam3_planner',
-                executable='multi_robot_controller',
-                name=f'multi_robot_controller_{i}',
-                output='screen',
-                arguments=[str(i)]  # Pass robot ID as argument
-            )
-        )
-    #
-    # # map_merger_node
-    # launch_nodes.append(
-    #     Node(
-    #         package='orb_slam3_planner',
-    #         executable='map_merger_node',
-    #         name='map_merger_node',
-    #         output='screen'
-    #     )
-    # )
-    #
-    # # map_merger_node
-    # launch_nodes.append(
-    #     Node(
-    #         package='orb_slam3_planner',
-    #         executable='shared_map_builder_node',
-    #         name='shared_map_builder_node',
-    #         output='screen'
-    #     )
-    # )
-    # # global_map_visualizer
-    # launch_nodes.append(
-    #     Node(
-    #         package='orb_slam3_planner',
-    #         executable='global_map_visualizer',
-    #         name='global_map_visualizer',
-    #         output='screen'
-    #     )
-    # )
+    nodes = []
 
-    # # multi_robot_visualizer
-    # launch_nodes.append(
-    #     Node(
-    #         package='orb_slam3_planner',
-    #         executable='multi_robot_visualizer',
-    #         name='multi_robot_visualizer',
-    #         output='screen'
-    #     )
-    # )
-
-    # robot_calibration_tool
-    launch_nodes.append(
-        Node(
-            package='orb_slam3_planner',
-            executable='robot_calibration_tool',
-            name='robot_calibration_tool',
-            output='screen'
-        )
-    )
-    # multi_robot_map_builder
-    launch_nodes.append(
+    # 1. Launch shared map builder (only one instance)
+    nodes.append(
         Node(
             package='orb_slam3_planner',
             executable='multi_robot_map_builder',
@@ -121,28 +35,8 @@ def generate_launch_description():
         )
     )
 
-    # multi_robot_planner
-    launch_nodes.append(
-        Node(
-            package='orb_slam3_planner',
-            executable='multi_robot_planner',
-            name='multi_robot_planner',
-            output='screen'
-        )
-    )
-
-    # multi_robot_visualizer_2d
-    launch_nodes.append(
-        Node(
-            package='orb_slam3_planner',
-            executable='multi_robot_visualizer_2d',
-            name='multi_robot_visualizer_2d',
-            output='screen'
-        )
-    )
-
-    # multi_robot_map_merger
-    launch_nodes.append(
+    # 2. Launch map merger (only one instance)
+    nodes.append(
         Node(
             package='orb_slam3_planner',
             executable='multi_robot_map_merger',
@@ -151,5 +45,56 @@ def generate_launch_description():
         )
     )
 
+    nodes.append(
+        Node(
+            package='orb_slam3_planner',
+            executable='multi_robot_visualizer_2d',
+            name='multi_robot_visualizer_2d',
+            output='screen'
+        )
+    )
 
-    return LaunchDescription(launch_nodes)
+    nodes.append(
+        Node(
+            package='orb_slam3_planner',
+            executable='multi_robot_visualizer',
+            name='multi_robot_visualizer',
+            output='screen'
+        )
+    )
+
+    # 3. Launch individual robot nodes
+    for robot_id in robot_configs.keys():
+        namespace = f'robot_{robot_id}'
+
+        # Main autonomous explorer node
+        nodes.append(
+            Node(
+                package='orb_slam3_planner',
+                executable='autonomous_explorer_node',
+                name=f'autonomous_explorer_{robot_id}',
+                namespace='',
+                parameters=[{
+                    'robot_namespace': namespace
+                }],
+                output='screen',
+            )
+        )
+
+        # Landmark publisher for each robot
+        nodes.append(
+            Node(
+                package='orb_slam3_planner',
+                executable='landmark_publisher_node',
+                name=f'landmark_publisher_{robot_id}',
+                namespace='',  # Empty namespace, use parameter instead
+                parameters=[{
+                    'robot_namespace': namespace,
+                    'robot_id': robot_id
+                }],
+                output='screen',
+                respawn=True,  # Restart if it crashes
+                respawn_delay=2.0
+            )
+        )
+    return LaunchDescription(nodes)
