@@ -78,13 +78,31 @@ class AutonomousExplorerNode(Node):
         self.min_robot_separation = 5  # Minimum desired grid cells between robots
 
         # ======================
+        # 360 Scan Parameters
+        # ======================
+        self.scan_enabled = True  # Enable/disable 360 scan feature
+        self.scan_interval_distance = 50.0  # Distance in grid cells between scans (increased from 20)
+        self.scan_interval_time = 180.0  # Time in seconds between scans (increased from 60)
+        self.scan_angle_increment = math.pi / 6  # 30 degrees per step
+        self.scan_forward_distance = 1.0  # Distance to move forward between turns in grid cells
+        self.scan_angular_speed = 0.3  # Slower rotation during scan
+
+        # 360 Scan State
+        self.last_scan_pos = None
+        self.last_scan_time = time.time()
+        self.scan_current_angle = 0.0
+        self.scan_start_angle = 0.0
+        self.scan_step_state = "TURN"  # "TURN" or "FORWARD"
+        self.forward_start_pos = None  # Track start position for forward movement
+
+        # ======================
         # Robot State
         # ======================
         self.robot_pos = None
         self.robot_angle = 0.0
         self.current_pose = None
         self.target = None
-        self.state = "EXPLORING"
+        self.state = "SCANNING_360"  # Start with 360 scan instead of "EXPLORING"
 
         self.collision_counter = 0
         self.stuck_counter = 0
@@ -201,6 +219,36 @@ class AutonomousExplorerNode(Node):
                     self.occupancy_prob[y, x] = 0.9
                     self.update_count[y, x] = 3
 
+    def should_perform_scan(self):
+        """
+        Check if it's time to perform a 360-degree scan based on distance traveled or time elapsed.
+
+        Returns:
+            tuple: (should_scan: bool, reason: str)
+        """
+        if not self.scan_enabled or not self.robot_pos:
+            return False, ""
+
+        current_time = time.time()
+
+        # Check time condition
+        time_elapsed = current_time - self.last_scan_time
+        if time_elapsed >= self.scan_interval_time:
+            return True, f"time ({time_elapsed:.1f}s >= {self.scan_interval_time}s)"
+
+        # Check distance condition
+        if self.last_scan_pos:
+            rx, ry = self.robot_pos
+            lx, ly = self.last_scan_pos
+            distance = math.sqrt((rx - lx) ** 2 + (ry - ly) ** 2)
+            if distance >= self.scan_interval_distance:
+                return True, f"distance ({distance:.1f} cells >= {self.scan_interval_distance} cells)"
+        else:
+            # First scan
+            return True, "initial scan"
+
+        return False, ""
+
     def control_loop(self):
         """
         Main control loop: executes exploration state machine and sends movement commands.
@@ -216,7 +264,32 @@ class AutonomousExplorerNode(Node):
 
         self.last_robot_pos = self.robot_pos
 
-        if self.state == "COLLISION_AVOIDANCE":
+        # Check if we should start a 360 scan (except during certain states)
+        if self.state not in ["SCANNING_360", "COLLISION_AVOIDANCE", "RECOVERY"]:
+            should_scan, reason = self.should_perform_scan()
+            if should_scan:
+                self.get_logger().info(f"Starting 360-degree scan due to {reason}")
+                self.state = "SCANNING_360"
+                self.scan_start_angle = self.robot_angle
+                self.scan_current_angle = 0.0
+                self.scan_step_state = "TURN"
+                self.last_scan_pos = self.robot_pos
+                self.last_scan_time = time.time()
+
+        if self.state == "SCANNING_360":
+            # Initialize scan parameters if not already done
+            if self.scan_start_angle == 0.0 and self.robot_pos:
+                self.scan_start_angle = self.robot_angle
+                self.scan_current_angle = 0.0
+                self.scan_step_state = "TURN"
+                self.last_scan_pos = self.robot_pos
+                self.last_scan_time = time.time()
+                self.get_logger().info("Initializing 360-degree scan at startup")
+
+            if self.robot_pos:  # Only perform scan if we have position
+                self.perform_scan_step()
+
+        elif self.state == "COLLISION_AVOIDANCE":
             if self.collision_counter > 0:
                 twist = Twist()
                 twist.angular.z = self.angular_speed
@@ -325,6 +398,66 @@ class AutonomousExplorerNode(Node):
             else:
                 # Path index out of bounds, replan
                 self.state = "EXPLORING"
+
+    def perform_scan_step(self):
+        """
+        Perform one step of the 360-degree scan.
+        Alternates between turning and moving forward slightly.
+        """
+        if not self.robot_pos:
+            return
+
+        twist = Twist()
+
+        if self.scan_step_state == "TURN":
+            # Calculate how much we've turned from the start
+            current_total_rotation = self.normalize_angle(self.robot_angle - self.scan_start_angle)
+            if current_total_rotation < 0:
+                current_total_rotation += 2 * math.pi
+
+            # Calculate target angle for this step
+            target_rotation = self.scan_current_angle + self.scan_angle_increment
+
+            # Check if we've completed the full 360 degrees
+            if target_rotation >= 2 * math.pi:
+                self.get_logger().info("360-degree scan completed")
+                self.state = "EXPLORING"
+                self.controller.stop_robot()
+                return
+
+            # Check if we've turned enough for this step
+            if current_total_rotation >= target_rotation - 0.1:  # Small tolerance
+                self.scan_current_angle = target_rotation
+                self.scan_step_state = "FORWARD"
+                self.forward_start_pos = self.robot_pos
+                self.controller.stop_robot()  # Stop rotation before moving forward
+                self.get_logger().debug(
+                    f"Scan progress: {math.degrees(self.scan_current_angle):.1f} degrees, switching to FORWARD")
+            else:
+                # Continue turning
+                twist.angular.z = self.scan_angular_speed
+                self.cmd_pub.publish(twist)
+
+        elif self.scan_step_state == "FORWARD":
+            if not self.forward_start_pos:
+                self.forward_start_pos = self.robot_pos
+
+            # Calculate distance moved
+            fx, fy = self.forward_start_pos
+            rx, ry = self.robot_pos
+            distance_moved = math.sqrt((rx - fx) ** 2 + (ry - fy) ** 2)
+
+            # Check if we've moved forward enough
+            if distance_moved >= self.scan_forward_distance:
+                # Finished moving forward, switch back to turning
+                self.scan_step_state = "TURN"
+                self.forward_start_pos = None
+                self.controller.stop_robot()
+                self.get_logger().debug(f"Moved forward {distance_moved:.2f} cells, switching to TURN")
+            else:
+                # Continue moving forward
+                twist.linear.x = self.linear_speed * 0.5  # Half speed for controlled movement
+                self.cmd_pub.publish(twist)
 
     def normalize_angle(self, angle):
         """
