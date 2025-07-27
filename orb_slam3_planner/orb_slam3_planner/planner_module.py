@@ -7,6 +7,8 @@ class FrontierPlanner:
     FrontierPlanner is responsible for identifying unexplored frontiers in the occupancy grid
     and selecting optimal exploration targets based on distance, novelty, information gain,
     alignment with the robot's heading, and coordination with other robots.
+
+    Updated to work with discrete occupancy values: -1=unknown, 0=free, 100=occupied
     """
 
     def __init__(self, node):
@@ -22,7 +24,6 @@ class FrontierPlanner:
         self.normalize_angle = node.normalize_angle
 
         self.grid_size = node.grid_size
-        self.occupied_threshold = node.occupied_threshold
 
         self.get_logger().info("FrontierPlanner initialized with multi-robot coordination")
 
@@ -136,7 +137,7 @@ class FrontierPlanner:
             if distance < 5:
                 continue
 
-            if distance > 10:
+            if distance > 100:  # Adjusted for finer resolution
                 continue
 
             if distance < min_distance:
@@ -153,6 +154,10 @@ class FrontierPlanner:
         Returns:
             float: Factor > 1.0 indicates good separation, < 1.0 indicates too close to others
         """
+        # If no other robots, return neutral factor
+        if not self.node.other_robot_positions and not self.node.other_robot_goals:
+            return 1.0
+
         separation_bonus = 1.0
 
         # Check distance to other robot positions
@@ -242,13 +247,11 @@ class FrontierPlanner:
         Returns:
             bool: True if the area is free from obstacles; False otherwise.
         """
-        prob_grid = self.node.occupancy_prob
-
         for dx in range(-self.node.safe_distance, self.node.safe_distance + 1):
             for dy in range(-self.node.safe_distance, self.node.safe_distance + 1):
                 nx, ny = x + dx, y + dy
                 if 0 <= nx < self.grid_size and 0 <= ny < self.grid_size:
-                    if prob_grid[ny, nx] > self.occupied_threshold:
+                    if self.node.occupancy_grid[ny, nx] == 100:  # Direct check for occupied
                         return False
         return True
 
@@ -282,7 +285,7 @@ class FrontierPlanner:
         sx, sy = start
         gx, gy = goal
 
-        grid = self.node.occupancy_prob
+        grid = self.node.occupancy_grid
 
         # A* implementation
         open_set = []
@@ -327,7 +330,7 @@ class FrontierPlanner:
                     continue
 
                 # Check if occupied
-                if grid[ny, nx] > self.occupied_threshold:
+                if grid[ny, nx] == 100:  # Direct check for occupied
                     continue
 
                 # Check if already visited
@@ -357,7 +360,7 @@ class FrontierPlanner:
 
         Args:
             x, y: Grid coordinates
-            grid: Occupancy probability grid
+            grid: Occupancy grid
 
         Returns:
             float: Penalty value
@@ -369,7 +372,7 @@ class FrontierPlanner:
             for dy in range(-check_radius, check_radius + 1):
                 nx, ny = x + dx, y + dy
                 if 0 <= nx < self.grid_size and 0 <= ny < self.grid_size:
-                    if grid[ny, nx] > self.occupied_threshold:
+                    if grid[ny, nx] == 100:  # Direct check for occupied
                         distance = math.sqrt(dx * dx + dy * dy)
                         if distance > 0:
                             penalty += 2.0 / distance
@@ -382,7 +385,7 @@ class FrontierPlanner:
 
         Args:
             path: List of waypoints
-            grid: Occupancy probability grid
+            grid: Occupancy grid
 
         Returns:
             list: Smoothed path
@@ -415,7 +418,7 @@ class FrontierPlanner:
         Args:
             start: (x, y) starting position
             end: (x, y) ending position
-            grid: Occupancy probability grid
+            grid: Occupancy grid
 
         Returns:
             bool: True if line is clear
@@ -440,7 +443,7 @@ class FrontierPlanner:
                     check_x = x + check_dx
                     check_y = y + check_dy
                     if 0 <= check_x < self.grid_size and 0 <= check_y < self.grid_size:
-                        if grid[check_y, check_x] > self.occupied_threshold:
+                        if grid[check_y, check_x] == 100:  # Direct check for occupied
                             return False
 
             if x == x1 and y == y1:

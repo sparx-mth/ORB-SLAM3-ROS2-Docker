@@ -26,7 +26,7 @@ class MultiRobotMapMerger(Node):
         self.robot_ids = list(robot_configs.keys())
 
         # Configuration
-        self.enable_logging = True
+        self.enable_logging = False
         self.merge_distance_threshold = 0.1  # meters
         self.min_points_for_merge = 100
 
@@ -76,7 +76,7 @@ class MultiRobotMapMerger(Node):
         self.create_timer(1.0, self.publish_merged_map)
 
         # Timer for status updates
-        self.create_timer(5.0, self.print_status)
+        # self.create_timer(5.0, self.print_status)
 
         self.get_logger().info(f'Map Merger initialized for robots: {self.robot_ids}')
 
@@ -137,8 +137,8 @@ class MultiRobotMapMerger(Node):
                         pruned_points_np = self.remove_close_points(points_np)
                         # Check if pruned_points_np is empty before further processing
                         if pruned_points_np.shape[0] == 0:
-                            self.get_logger().info(f'[landmark callback] from robot_{robot_id}: 0 points after close point removal.')
-                            return                        
+                            # self.get_logger().info(f'[landmark callback] from robot_{robot_id}: 0 points after close point removal.')
+                            return
                         final_points_np = self.remove_isolated_points(pruned_points_np)
                         # In handle_full_map_response, after final_points_np is ready:
                         if np.isnan(final_points_np).any():
@@ -317,9 +317,9 @@ class MultiRobotMapMerger(Node):
             keep_mask[j] = False  # Remove duplicates
 
         filtered_points = points_np[keep_mask]
-        self.get_logger().warning(f'Removed {points_np.shape[0] - filtered_points.shape[0]} close points.')
+        # self.get_logger().warning(f'Removed {points_np.shape[0] - filtered_points.shape[0]} close points.')
         return filtered_points
-    
+
     def remove_isolated_points(self, points_np):
         """
         Removes isolated points from a NumPy array of points.
@@ -331,9 +331,9 @@ class MultiRobotMapMerger(Node):
             np.ndarray: Filtered NumPy array of inlier points.
         """
         if points_np.shape[0] < self.min_neighbors + 1:
-            self.get_logger().warning(
-                f"Not enough points ({points_np.shape[0]}) to check for isolated points with min_neighbors={self.min_neighbors}. Skipping."
-            )
+            # self.get_logger().warning(
+            #     f"Not enough points ({points_np.shape[0]}) to check for isolated points with min_neighbors={self.min_neighbors}. Skipping."
+            # )
             return points_np
 
         # Efficient batch neighbor counting using cKDTree.query_ball_point
@@ -346,9 +346,9 @@ class MultiRobotMapMerger(Node):
         keep_mask = neighbor_counts >= self.min_neighbors
 
         filtered_points = points_np[keep_mask]
-        self.get_logger().warning(
-            f'Removed {points_np.shape[0] - filtered_points.shape[0]} isolated points.'
-        )
+        # self.get_logger().warning(
+        #     f'Removed {points_np.shape[0] - filtered_points.shape[0]} isolated points.'
+        # )
         return filtered_points
 
 
@@ -359,7 +359,7 @@ def main(args=None):
     robot_configs = {
         0: {'position': [-5.0, -7.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
         1: {'position': [-1.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        2: {'position': [5.0, 5.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
+        # 2: {'position': [5.0, 5.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
     }
 
     node = MultiRobotMapMerger(robot_configs)

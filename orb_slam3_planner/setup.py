@@ -24,7 +24,7 @@ setup(
             # 'multi_robot_visualizer = orb_slam3_planner.multi_robot_visualizer:main',
             'multi_robot_map_builder = orb_slam3_planner.multi_robot_map_builder:main',
             'multi_robot_visualizer_2d = orb_slam3_planner.multi_robot_visualizer_2d:main',
-            # 'multi_robot_map_merger = orb_slam3_planner.multi_robot_map_merger:main',
+            'multi_robot_map_merger = orb_slam3_planner.multi_robot_map_merger:main',
 
         ],
     },

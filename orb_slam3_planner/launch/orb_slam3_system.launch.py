@@ -19,7 +19,7 @@ def generate_launch_description():
     # Robot configurations must match those in multi_robot_map_builder.py
     robot_configs = {
         0: {'position': [-5.0, -7.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        # 1: {'position': [-1.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
+        1: {'position': [-1.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
         # 2: {'position': [5.0, 5.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
     }
 
@@ -35,15 +35,15 @@ def generate_launch_description():
         )
     )
 
-    # # 2. Launch map merger (only one instance)
-    # nodes.append(
-    #     Node(
-    #         package='orb_slam3_planner',
-    #         executable='multi_robot_map_merger',
-    #         name='multi_robot_map_merger',
-    #         output='screen'
-    #     )
-    # )
+    # 2. Launch map merger (only one instance)
+    nodes.append(
+        Node(
+            package='orb_slam3_planner',
+            executable='multi_robot_map_merger',
+            name='multi_robot_map_merger',
+            output='screen'
+        )
+    )
 
     nodes.append(
         Node(
@@ -53,15 +53,15 @@ def generate_launch_description():
             output='screen'
         )
     )
-    #
-    # nodes.append(
-    #     Node(
-    #         package='orb_slam3_planner',
-    #         executable='multi_robot_visualizer',
-    #         name='multi_robot_visualizer',
-    #         output='screen'
-    #     )
-    # )
+
+    nodes.append(
+        Node(
+            package='orb_slam3_planner',
+            executable='multi_robot_visualizer',
+            name='multi_robot_visualizer',
+            output='screen'
+        )
+    )
 
     # 3. Launch individual robot nodes
     for robot_id in robot_configs.keys():

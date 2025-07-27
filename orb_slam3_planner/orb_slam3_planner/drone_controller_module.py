@@ -7,6 +7,8 @@ class DroneController:
     """
     DroneController is responsible for commanding the robot's movement,
     handling obstacle avoidance, stuck recovery, and adaptive speed control.
+
+    Updated to work with discrete occupancy values: -1=unknown, 0=free, 100=occupied
     """
 
     def __init__(self, node):
@@ -122,7 +124,7 @@ class DroneController:
         robot_width_cells = 1
         check_distance = self.node.safe_distance
 
-        prob_grid = self.node.occupancy_prob
+        grid = self.node.occupancy_grid
 
         for dist in range(1, check_distance + 1):
             width_at_dist = max(1, robot_width_cells - dist // 3)
@@ -135,7 +137,7 @@ class DroneController:
                 check_y = int(ry + dist * math.sin(check_angle))
 
                 if 0 <= check_x < self.node.grid_size and 0 <= check_y < self.node.grid_size:
-                    if prob_grid[check_y, check_x] > self.node.occupied_threshold:
+                    if grid[check_y, check_x] == 100:  # Direct check for occupied
                         return True
 
         return False
@@ -155,14 +157,14 @@ class DroneController:
         check_radius = 5
         total_cells = 0
 
-        prob_grid = self.node.occupancy_prob
+        grid = self.node.occupancy_grid
 
         for dx in range(-check_radius, check_radius + 1):
             for dy in range(-check_radius, check_radius + 1):
                 nx, ny = rx + dx, ry + dy
                 if 0 <= nx < self.node.grid_size and 0 <= ny < self.node.grid_size:
                     total_cells += 1
-                    if prob_grid[ny, nx] > self.node.occupied_threshold:
+                    if grid[ny, nx] == 100:  # Direct check for occupied
                         obstacle_count += 1
 
         return obstacle_count / total_cells if total_cells > 0 else 0.0

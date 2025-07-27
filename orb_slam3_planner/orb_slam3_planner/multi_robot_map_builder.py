@@ -3,96 +3,86 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import PointCloud2
-from geometry_msgs.msg import PoseStamped, Point
+from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import OccupancyGrid
 from std_msgs.msg import Header
 import numpy as np
-import math
 import sensor_msgs_py.point_cloud2 as pc2
 from scipy.spatial.transform import Rotation as R
+import math
+from collections import defaultdict
 import threading
-import time
 
 
-class MultiRobotMapBuilder(Node):
+class EfficientOccupancyGridMapper(Node):
     """
-    Builds a shared 2D occupancy map from multiple robots' point clouds and poses.
-    This version exactly matches the single robot map builder behavior.
+    Efficient real-time occupancy grid mapper for multi-robot SLAM.
+    Converts 3D point clouds to 2D occupancy grid with visibility constraints.
     """
 
     def __init__(self, robot_configs):
-        super().__init__('multi_robot_map_builder')
+        super().__init__('efficient_occupancy_grid_mapper')
 
         self.robot_configs = robot_configs
         self.robot_ids = list(robot_configs.keys())
 
         # ======================
-        # Map Parameters (EXACT match from main_node)
+        # Map Parameters
         # ======================
-        self.cell_size = 0.15
-        self.map_range = 15.0
-        self.grid_size = int(2 * self.map_range / self.cell_size)
+        self.resolution = 0.5  # 10cm cells for good balance
+        self.map_size_meters = 30.0  # Total map size (30m x 30m)
+        self.grid_size = int(self.map_size_meters / self.resolution)
+        self.origin_offset = self.map_size_meters / 2.0
 
-        self.occupancy_prob = np.full((self.grid_size, self.grid_size), 0.5, dtype=np.float32)
-        self.update_count = np.zeros((self.grid_size, self.grid_size), dtype=np.int32)
+        # Height filter for 2D projection
+        self.z_min = 0.1  # Minimum height to consider
+        self.z_max = 2.0  # Maximum height to consider
 
-        # Height filtering (from main_node)
-        self.height_min = 0.1
-        self.height_max = 2.0
-
-        # Probability updates (from main_node)
-        self.obstacle_prob_increment = 0.2
-        self.free_prob_decrement = -0.05
-        self.occupied_threshold = 0.75
-        self.free_threshold = 0.35
-        self.freeze_update_count = 10
+        # Occupancy thresholds
+        self.points_threshold = 3  # Min points in cell to mark as occupied
+        self.max_range = 8.0  # Maximum sensor range in meters
 
         # ======================
-        # Sensor Parameters (from main_node)
+        # Data Structures
         # ======================
-        self.camera_fov = math.radians(60)
-        self.camera_range = 10.0
-        self.min_points_for_obstacle = 25
+        # Main occupancy grid: 0=free, 1=occupied, -1=unknown
+        self.occupancy_grid = np.full((self.grid_size, self.grid_size), -1, dtype=np.int8)
 
-        # ======================
-        # Robot States
-        # ======================
-        self.robot_poses = {rid: None for rid in self.robot_ids}  # Grid positions
-        self.robot_world_poses = {rid: None for rid in self.robot_ids}  # World positions
-        self.robot_angles = {rid: 0.0 for rid in self.robot_ids}
+        # Point count grid for efficient density calculation
+        self.point_count = np.zeros((self.grid_size, self.grid_size), dtype=np.uint16)
+
+        # Robot states
+        self.robot_poses = {rid: None for rid in self.robot_ids}
+        self.robot_grid_poses = {rid: None for rid in self.robot_ids}
+        self.robot_headings = {rid: 0.0 for rid in self.robot_ids}
+
+        # Transformation matrices
         self.robot_transforms = {}
-
-        # State tracking for each robot (from main_node)
-        self.robot_states = {rid: "EXPLORING" for rid in self.robot_ids}
-        self.recent_point_counts = {rid: [] for rid in self.robot_ids}
-        self.point_count_window = 5
-        self.min_point_ratio = 0.3
-
-        # Thread safety
-        self.map_lock = threading.Lock()
-
-        # Create transformation matrices
         for robot_id, config in robot_configs.items():
             self.robot_transforms[robot_id] = self.create_transformation_matrix(
                 config['position'], config.get('orientation', [0, 0, 0])
             )
 
-        # ======================
-        # Publishers
-        # ======================
-        self.map_pub = self.create_publisher(OccupancyGrid, '/shared_occupancy_grid', 10)
-        self.robot_grid_pubs = {}
-
-        for robot_id in self.robot_ids:
-            self.robot_grid_pubs[robot_id] = self.create_publisher(
-                Point, f'/robot_{robot_id}/grid_position', 10
-            )
+        # Thread safety
+        self.lock = threading.Lock()
 
         # ======================
-        # Subscriptions
+        # Publishers & Subscribers
         # ======================
+        self.map_pub = self.create_publisher(
+            OccupancyGrid, '/occupancy_grid', 10
+        )
+
+        # Subscribe to merged point cloud
+        self.create_subscription(
+            PointCloud2,
+            '/merged_map',
+            self.point_cloud_callback,
+            10
+        )
+
+        # Subscribe to robot poses
         for robot_id in self.robot_ids:
-            # Subscribe to poses
             self.create_subscription(
                 PoseStamped,
                 f'/robot_{robot_id}/robot_pose_slam',
@@ -100,22 +90,10 @@ class MultiRobotMapBuilder(Node):
                 10
             )
 
-            # Subscribe to point clouds
-            self.create_subscription(
-                PointCloud2,
-                f'/robot_{robot_id}/orb_slam3/landmarks_raw',
-                self.create_pointcloud_callback(robot_id),
-                10
-            )
+        # Timer for map publishing
+        self.create_timer(0.5, self.publish_map)  # 2Hz publishing
 
-        # ======================
-        # Timers (matching single robot exactly)
-        # ======================
-        # No timer for control loop - we're just building maps
-        # Map publishing handled after each update in pointcloud callback
-        # Decay handled in pointcloud callback
-
-        self.get_logger().info(f"Multi-Robot Map Builder initialized for robots: {self.robot_ids}")
+        self.get_logger().info("Efficient Occupancy Grid Mapper initialized")
 
     def create_transformation_matrix(self, position, orientation):
         """Create 4x4 transformation matrix"""
@@ -128,311 +106,207 @@ class MultiRobotMapBuilder(Node):
 
         return transform
 
-    def normalize_angle(self, angle):
-        """Normalize angle to [-pi, pi] (from main_node)"""
-        return (angle + math.pi) % (2 * math.pi) - math.pi
+    def world_to_grid(self, x, y):
+        """Convert world coordinates to grid indices"""
+        gx = int((x + self.origin_offset) / self.resolution)
+        gy = int((y + self.origin_offset) / self.resolution)
+        return gx, gy
+
+    def is_valid_grid_pos(self, gx, gy):
+        """Check if grid position is valid"""
+        return 0 <= gx < self.grid_size and 0 <= gy < self.grid_size
 
     def create_pose_callback(self, robot_id):
-        """Factory function to create pose callbacks for each robot (matching main_node logic)"""
+        """Create pose callback for each robot"""
 
         def callback(msg):
-            # Get pose in robot's local frame
-            local_x = msg.pose.position.x
-            local_y = msg.pose.position.y
-            local_z = msg.pose.position.z
-
             # Transform to global frame
-            local_pose = np.array([local_x, local_y, local_z, 1.0])
+            local_pose = np.array([
+                msg.pose.position.x,
+                msg.pose.position.y,
+                msg.pose.position.z,
+                1.0
+            ])
             global_pose = self.robot_transforms[robot_id] @ local_pose
 
-            # Extract global position
-            robot_world_x = global_pose[0]
-            robot_world_y = global_pose[1]
-
             # Store world position
-            self.robot_world_poses[robot_id] = (robot_world_x, robot_world_y)
+            world_x, world_y = global_pose[0], global_pose[1]
+            self.robot_poses[robot_id] = (world_x, world_y)
 
-            # Convert to grid coordinates (matching main_node exactly)
-            grid_x = int((robot_world_x + self.map_range) / self.cell_size)
-            grid_y = int((robot_world_y + self.map_range) / self.cell_size)
+            # Convert to grid
+            gx, gy = self.world_to_grid(world_x, world_y)
+            if self.is_valid_grid_pos(gx, gy):
+                self.robot_grid_poses[robot_id] = (gx, gy)
 
-            # Extract heading angle (from main_node)
+            # Calculate heading
             q = msg.pose.orientation
-            local_angle = math.atan2(2.0 * (q.w * q.z + q.x * q.y),
-                                     1.0 - 2.0 * (q.y * q.y + q.z * q.z))
+            local_yaw = math.atan2(2.0 * (q.w * q.z + q.x * q.y),
+                                   1.0 - 2.0 * (q.y * q.y + q.z * q.z))
 
-            # Apply rotation from transformation
+            # Apply transformation rotation
             rot_matrix = self.robot_transforms[robot_id][:3, :3]
             transform_yaw = math.atan2(rot_matrix[1, 0], rot_matrix[0, 0])
-            robot_angle = local_angle + transform_yaw
-
-            if 0 <= grid_x < self.grid_size and 0 <= grid_y < self.grid_size:
-                self.robot_poses[robot_id] = (grid_x, grid_y)
-                self.robot_angles[robot_id] = robot_angle
-
-                # Publish robot position (matching main_node format exactly)
-                robot_msg = Point()
-                robot_msg.x = float(grid_x)
-                robot_msg.y = float(grid_y)
-                robot_msg.z = float(robot_angle)
-                self.robot_grid_pubs[robot_id].publish(robot_msg)
+            self.robot_headings[robot_id] = local_yaw + transform_yaw
 
         return callback
 
-    def create_pointcloud_callback(self, robot_id):
-        """Factory function matching map_builder_module.py pointcloud_callback exactly"""
+    def point_cloud_callback(self, msg):
+        """Process merged point cloud efficiently"""
+        try:
+            # Extract points
+            points = []
+            for p in pc2.read_points(msg, field_names=("x", "y", "z"), skip_nans=True):
+                if self.z_min <= p[2] <= self.z_max:  # Height filter
+                    points.append((p[0], p[1]))
 
-        def callback(msg):
-            if self.robot_poses[robot_id] is None:
+            if not points:
                 return
 
-            # Skip if robot is in SLAM_LOST state (from map_builder_module)
-            if self.robot_states[robot_id] == "SLAM_LOST":
-                return
+            with self.lock:
+                # Reset point count
+                self.point_count.fill(0)
 
-            robot_world_x, robot_world_y = self.robot_world_poses[robot_id]
-            robot_grid_x, robot_grid_y = self.robot_poses[robot_id]
-            robot_angle = self.robot_angles[robot_id]
+                # Count points per cell (very fast operation)
+                for x, y in points:
+                    gx, gy = self.world_to_grid(x, y)
+                    if self.is_valid_grid_pos(gx, gy):
+                        self.point_count[gy, gx] += 1
 
-            try:
-                points = list(pc2.read_points(msg, field_names=("x", "y", "z"), skip_nans=True))
-            except (AssertionError, Exception) as e:
-                # ORB-SLAM3 might send malformed clouds when tracking is lost
-                return
-
-            # Monitor point cloud count (from map_builder_module)
-            point_count = len(points)
-            self.monitor_point_cloud_count(robot_id, point_count)
-
-            cell_points = {}
-
-            # Process points EXACTLY like map_builder_module
-            for x, y, z in points:
-                # Transform point to global frame first
-                local_point = np.array([x, y, z, 1.0])
-                global_point = self.robot_transforms[robot_id] @ local_point
-                x = global_point[0]
-                y = global_point[1]
-                z = global_point[2]
-
-                # Height filter
-                if not (self.height_min <= z <= self.height_max):
-                    continue
-
-                # FOV and range check (from map_builder_module)
-                angle_to_point = math.atan2(y - robot_world_y, x - robot_world_x)
-                angle_diff = self.normalize_angle(angle_to_point - robot_angle)
-
-                if abs(angle_diff) > self.camera_fov / 2:
-                    continue
-
-                dist = math.sqrt((x - robot_world_x) ** 2 + (y - robot_world_y) ** 2)
-                if dist > self.camera_range:
-                    continue
-
-                if not (np.isfinite(x) and np.isfinite(y) and np.isfinite(z)):
-                    continue
-
-                grid_x = int((x + self.map_range) / self.cell_size)
-                grid_y = int((y + self.map_range) / self.cell_size)
-
-                if 0 <= grid_x < self.grid_size and 0 <= grid_y < self.grid_size:
-                    cell_points.setdefault((grid_x, grid_y), []).append((x, y, z))
-
-            # Update map with thread safety
-            with self.map_lock:
+                # Mark cells as occupied based on point density
                 occupied_cells = set()
+                for gy in range(self.grid_size):
+                    for gx in range(self.grid_size):
+                        if self.point_count[gy, gx] >= self.points_threshold:
+                            self.occupancy_grid[gy, gx] = 1
+                            occupied_cells.add((gx, gy))
 
-                # Update occupied cells (from map_builder_module)
-                for (gx, gy), pts in cell_points.items():
-                    if len(pts) >= self.min_points_for_obstacle:
-                        prob_increase = min(self.obstacle_prob_increment * len(pts), 0.5)
-                        self.update_cell_probability(gx, gy, prob_increase)
-                        occupied_cells.add((gx, gy))
+                # Update free space using efficient ray casting
+                self.update_free_space_fast(occupied_cells)
 
-                        # Update neighbors (from map_builder_module)
-                        for dx in [-1, 0, 1]:
-                            for dy in [-1, 0, 1]:
-                                nx, ny = gx + dx, gy + dy
-                                if 0 <= nx < self.grid_size and 0 <= ny < self.grid_size:
-                                    self.update_cell_probability(nx, ny, prob_increase * 0.5)
+        except Exception as e:
+            self.get_logger().error(f"Error in point cloud callback: {e}")
 
-                # Update free space (from map_builder_module)
-                if self.robot_poses[robot_id]:
-                    self.update_free_space_probability(robot_id, occupied_cells)
+    def update_free_space_fast(self, occupied_cells):
+        """
+        Efficient free space update using Bresenham's algorithm.
+        Only traces rays from robots to occupied cells.
+        """
+        for robot_id, robot_grid_pos in self.robot_grid_poses.items():
+            if robot_grid_pos is None:
+                continue
 
-            # Decay probabilities (from map_builder_module)
-            self.decay_probabilities()
+            rx, ry = robot_grid_pos
 
-            # Publish map (from map_builder_module)
-            self.publish_map()
+            # Process only occupied cells within sensor range
+            max_cells = int(self.max_range / self.resolution)
 
-        return callback
+            for (ox, oy) in occupied_cells:
+                # Check if occupied cell is within range
+                dx = ox - rx
+                dy = oy - ry
+                dist_sq = dx * dx + dy * dy
 
-    def monitor_point_cloud_count(self, robot_id, point_count):
-        """Monitor point cloud counts to detect sudden drops (from main_node)"""
-        self.recent_point_counts[robot_id].append(point_count)
+                if dist_sq <= max_cells * max_cells:
+                    # Trace ray from robot to occupied cell
+                    self.trace_ray_bresenham(rx, ry, ox, oy)
 
-        if len(self.recent_point_counts[robot_id]) > self.point_count_window:
-            self.recent_point_counts[robot_id].pop(0)
+    def trace_ray_bresenham(self, x0, y0, x1, y1):
+        """
+        Bresenham's line algorithm for ray tracing.
+        Marks cells as free until hitting the target cell.
+        """
+        dx = abs(x1 - x0)
+        dy = abs(y1 - y0)
+        sx = 1 if x0 < x1 else -1
+        sy = 1 if y0 < y1 else -1
+        err = dx - dy
 
-        if len(self.recent_point_counts[robot_id]) == self.point_count_window:
-            avg_count = np.mean(self.recent_point_counts[robot_id][:-1])
-            if avg_count > 0 and point_count < avg_count * self.min_point_ratio:
-                self.get_logger().error(
-                    f"Robot {robot_id}: Point cloud drop detected: {point_count} vs avg {avg_count:.0f}")
-                self.robot_states[robot_id] = "SLAM_LOST"
-
-    def update_cell_probability(self, x, y, prob_change):
-        """Update a cell's occupancy probability (from main_node)"""
-        if not (0 <= x < self.grid_size and 0 <= y < self.grid_size):
-            return
-
-        old_prob = self.occupancy_prob[y, x]
-
-        if prob_change > 0:
-            new_prob = old_prob + prob_change * (1 - old_prob)
-        else:
-            new_prob = old_prob + prob_change * old_prob
-
-        self.occupancy_prob[y, x] = np.clip(new_prob, 0.01, 0.99)
-        self.update_count[y, x] += 1
-
-    def bresenham_line(self, start_x, start_y, end_x, end_y):
-        """Bresenham's line algorithm (from map_builder_module)"""
-        cells = []
-        dx = abs(end_x - start_x)
-        dy = abs(end_y - start_y)
-        x, y = start_x, start_y
-        x_inc = 1 if end_x > start_x else -1
-        y_inc = 1 if end_y > start_y else -1
-        error = dx - dy
-        dx *= 2
-        dy *= 2
+        x, y = x0, y0
 
         while True:
-            if 0 <= x < self.grid_size and 0 <= y < self.grid_size:
-                cells.append((x, y))
-            if x == end_x and y == end_y:
+            # Don't mark the robot's cell or the final cell as free
+            if (x, y) != (x0, y0) and (x, y) != (x1, y1):
+                if self.is_valid_grid_pos(x, y) and self.occupancy_grid[y, x] != 1:
+                    self.occupancy_grid[y, x] = 0  # Mark as free
+
+            # Check if we've reached the end
+            if x == x1 and y == y1:
                 break
-            if error > 0:
-                x += x_inc
-                error -= dy
-            else:
-                y += y_inc
-                error += dx
 
-        return cells
-
-    def update_free_space_probability(self, robot_id, occupied_cells):
-        """Perform ray tracing from robot to obstacles (EXACT from map_builder_module)"""
-        if not self.robot_poses[robot_id]:
-            return
-
-        robot_gx, robot_gy = self.robot_poses[robot_id]
-        robot_angle = self.robot_angles[robot_id]
-
-        # Ray trace to occupied cells
-        for gx, gy in occupied_cells:
-            dx = gx - robot_gx
-            dy = gy - robot_gy
-            angle_to_obstacle = math.atan2(dy, dx)
-            angle_diff = self.normalize_angle(angle_to_obstacle - robot_angle)
-
-            if abs(angle_diff) <= self.camera_fov / 2:
-                cells_on_ray = self.bresenham_line(robot_gx, robot_gy, gx, gy)
-                for (x, y) in cells_on_ray[:-1]:
-                    if 0 <= x < self.grid_size and 0 <= y < self.grid_size:
-                        self.update_cell_probability(x, y, self.free_prob_decrement * 1.5)
-
-        # FOV scanning (from map_builder_module)
-        fov_half = self.camera_fov / 2
-        num_rays = int(self.camera_fov / math.radians(5))
-        max_range_cells = int(self.camera_range / self.cell_size)
-
-        for i in range(num_rays):
-            angle_offset = -fov_half + (i * self.camera_fov / (num_rays - 1))
-            angle = robot_angle + angle_offset
-
-            for dist in range(1, max_range_cells):
-                x = int(robot_gx + dist * math.cos(angle))
-                y = int(robot_gy + dist * math.sin(angle))
-
-                if not (0 <= x < self.grid_size and 0 <= y < self.grid_size):
-                    break
-
-                if self.occupancy_prob[y, x] > self.occupied_threshold and self.update_count[y, x] > 3:
-                    break
-
-                self.update_cell_probability(x, y, self.free_prob_decrement)
-
-    def decay_probabilities(self):
-        """Apply slow decay to occupancy grid (from map_builder_module)"""
-        decay_factor = 0.99
-
-        for y in range(self.grid_size):
-            for x in range(self.grid_size):
-                if self.update_count[y, x] < self.freeze_update_count:
-                    old_prob = self.occupancy_prob[y, x]
-                    self.occupancy_prob[y, x] = 0.5 + (old_prob - 0.5) * decay_factor
+            # Bresenham's algorithm step
+            e2 = 2 * err
+            if e2 > -dy:
+                err -= dy
+                x += sx
+            if e2 < dx:
+                err += dx
+                y += sy
 
     def publish_map(self):
-        """Publish the occupancy grid map (EXACT from main_node)"""
+        """Publish the occupancy grid"""
         msg = OccupancyGrid()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = "map"
-        msg.info.resolution = self.cell_size
+
+        msg.info.resolution = self.resolution
         msg.info.width = self.grid_size
         msg.info.height = self.grid_size
-        msg.info.origin.position.x = -self.map_range
-        msg.info.origin.position.y = -self.map_range
+        msg.info.origin.position.x = -self.origin_offset
+        msg.info.origin.position.y = -self.origin_offset
+        msg.info.origin.position.z = 0.0
 
-        ros_grid = []
-        for y in range(self.grid_size):
-            for x in range(self.grid_size):
-                value = self.get_occupancy_value(x, y)
-                if value == -1:
-                    ros_grid.append(-1)
-                elif value == 0:
-                    ros_grid.append(0)
-                else:
-                    ros_grid.append(100)
+        # Convert to ROS format: unknown=-1, free=0, occupied=100
+        with self.lock:
+            data = []
+            for y in range(self.grid_size):
+                for x in range(self.grid_size):
+                    val = self.occupancy_grid[y, x]
+                    if val == -1:
+                        data.append(-1)
+                    elif val == 0:
+                        data.append(0)
+                    else:  # val == 1
+                        data.append(100)
 
-        msg.data = ros_grid
+            msg.data = data
+
         self.map_pub.publish(msg)
 
-    def get_occupancy_value(self, x, y):
-        """Convert probability to occupancy value (EXACT from main_node)"""
-        if not (0 <= x < self.grid_size and 0 <= y < self.grid_size):
-            return -1
+        # Log statistics occasionally
+        if hasattr(self, '_last_log_time'):
+            current_time = self.get_clock().now().nanoseconds / 1e9
+            if current_time - self._last_log_time > 5.0:  # Log every 5 seconds
+                self.log_statistics()
+                self._last_log_time = current_time
+        else:
+            self._last_log_time = self.get_clock().now().nanoseconds / 1e9
 
-        prob = self.occupancy_prob[y, x]
-        updates = self.update_count[y, x]
+    def log_statistics(self):
+        """Log map statistics"""
+        with self.lock:
+            unknown = np.sum(self.occupancy_grid == -1)
+            free = np.sum(self.occupancy_grid == 0)
+            occupied = np.sum(self.occupancy_grid == 1)
+            total = self.grid_size * self.grid_size
 
-        if updates < 2:
-            return -1
-        if prob > self.occupied_threshold:
-            return 1
-        if prob < self.free_threshold:
-            return 0
-        return -1
-
-    def get_robot_positions(self):
-        """Get current robot positions in grid coordinates"""
-        return {rid: pos for rid, pos in self.robot_poses.items() if pos is not None}
+            self.get_logger().info(
+                f"Map stats - Unknown: {unknown} ({100 * unknown / total:.1f}%), "
+                f"Free: {free} ({100 * free / total:.1f}%), "
+                f"Occupied: {occupied} ({100 * occupied / total:.1f}%)"
+            )
 
 
 def main(args=None):
     rclpy.init(args=args)
 
-    # Robot configurations
+    # Robot configurations - must match map merger
     robot_configs = {
         0: {'position': [-5.0, -7.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        # 1: {'position': [-1.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
+        1: {'position': [-1.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
         # 2: {'position': [5.0, 5.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
     }
 
-    node = MultiRobotMapBuilder(robot_configs)
+    node = EfficientOccupancyGridMapper(robot_configs)
 
     try:
         rclpy.spin(node)
