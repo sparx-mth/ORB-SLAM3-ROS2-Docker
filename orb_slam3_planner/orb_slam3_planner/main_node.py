@@ -32,12 +32,12 @@ class AutonomousExplorerNode(Node):
         self.robot_id = int(self.robot_namespace.split('_')[-1]) if self.robot_namespace else 0
 
         # List of all robot IDs in the system
-        self.all_robot_ids = [0, 1, 2]  # Adjust based on your system
+        self.all_robot_ids = [0]  # Adjust based on your system
 
         # ======================
         # Map Parameters
         # ======================
-        self.cell_size = 0.25
+        self.cell_size = 0.15
         self.map_range = 15.0
         self.grid_size = int(2 * self.map_range / self.cell_size)
 
@@ -51,13 +51,13 @@ class AutonomousExplorerNode(Node):
         # ======================
         # Motion Parameters
         # ======================
-        self.linear_speed = 0.4
-        self.angular_speed = 0.5
+        self.linear_speed = 0.3
+        self.angular_speed = 0.4
         self.safe_distance = 5
 
         self.adaptive_speed = True
-        self.min_linear_speed = 0.3
-        self.max_linear_speed = 0.6
+        self.min_linear_speed = 0.2
+        self.max_linear_speed = 0.4
 
         # ======================
         # Frontier Planning Parameters

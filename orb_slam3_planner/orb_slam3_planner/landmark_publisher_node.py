@@ -80,7 +80,7 @@ class LandmarkPublisherNode(Node):
                     status = String()
                     status.data = f"{self.robot_namespace} - Raw landmarks: {raw_count}"
                     self.status_pub.publish(status)
-                    self.get_logger().info(status.data)
+                    # self.get_logger().info(status.data)
                     self.last_raw_count = raw_count
 
         except Exception as e:

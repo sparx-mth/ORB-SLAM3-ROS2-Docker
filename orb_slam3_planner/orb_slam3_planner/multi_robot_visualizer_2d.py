@@ -32,7 +32,7 @@ class MultiRobot2DVisualizer(Node):
         self.window_name = 'Multi-Robot Exploration Map'
 
         # Robot IDs and colors - matching multi_robot_map_builder.py configuration
-        self.robot_ids = [0, 1, 2]  # Update this to [0, 1, 2] if using 3 robots
+        self.robot_ids = [0]  # Update this to [0, 1, 2] if using 3 robots
         self.robot_colors = {
             0: (255, 0, 0),  # Blue
             1: (0, 255, 0),  # Green
@@ -47,7 +47,7 @@ class MultiRobot2DVisualizer(Node):
         # Map data
         self.occupancy_grid = None
         self.grid_size = 0
-        self.cell_size = 0.25
+        self.cell_size = 0.15
 
         # Performance tracking
         self.last_update_time = time.time()

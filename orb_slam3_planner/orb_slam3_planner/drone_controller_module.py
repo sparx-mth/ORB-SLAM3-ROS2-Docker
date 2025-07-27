@@ -105,7 +105,7 @@ class DroneController:
         else:
             self.node.stuck_counter = 0
 
-        return self.node.stuck_counter > 10
+        return self.node.stuck_counter > 20
 
     def check_collision_ahead(self):
         """
