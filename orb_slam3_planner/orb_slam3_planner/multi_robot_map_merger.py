@@ -80,6 +80,9 @@ class MultiRobotMapMerger(Node):
 
         self.get_logger().info(f'Map Merger initialized for robots: {self.robot_ids}')
 
+        self.min_neighbors = 2  # Minimum neighbors for isolated point removal
+        self.radius = 0.15  # Radius for isolated point removal
+
     def create_transformation_matrix(self, position, orientation):
         """Create 4x4 transformation matrix"""
         rotation = R.from_euler('xyz', orientation)
@@ -125,8 +128,24 @@ class MultiRobotMapMerger(Node):
                     with self.data_lock:
                         # Transform points to global frame
                         local_points = np.array([[p[0], p[1], p[2]] for p in points])
+                        # Convert to NumPy array (Nx3) and ensure float64 dtype
+                        points_np = np.array(local_points).astype(np.float64)
+                        if np.isnan(points_np).any() or np.isinf(points_np).any():
+                            self.get_logger().error("NaN or Inf detected in points_np!")
+                            return points_np
+                        # Pass NumPy arrays to your helper functions
+                        pruned_points_np = self.remove_close_points(points_np)
+                        # Check if pruned_points_np is empty before further processing
+                        if pruned_points_np.shape[0] == 0:
+                            self.get_logger().info(f'[landmark callback] from robot_{robot_id}: 0 points after close point removal.')
+                            return                        
+                        final_points_np = self.remove_isolated_points(pruned_points_np)
+                        # In handle_full_map_response, after final_points_np is ready:
+                        if np.isnan(final_points_np).any():
+                            self.get_logger().error(f"NaN values found in final_points_np for robot_{robot_id}!")
+
                         global_points = self.transform_points_to_global(
-                            local_points, robot_id
+                            final_points_np, robot_id
                         )
                         self.raw_landmarks[robot_id] = global_points
                         self.landmarks_received[robot_id] = True
@@ -191,22 +210,12 @@ class MultiRobotMapMerger(Node):
         # Remove duplicates using KDTree
         if len(merged_points) > self.min_points_for_merge:
             tree = cKDTree(merged_points)
-
-            # Find points that are too close to each other
+            pairs = tree.query_pairs(self.merge_distance_threshold)
+            # Mark duplicates for removal
             duplicate_mask = np.ones(len(merged_points), dtype=bool)
+            for i, j in pairs:
+                duplicate_mask[j] = False  # Keep the first, remove the second
 
-            for i in range(len(merged_points)):
-                if duplicate_mask[i]:
-                    # Find neighbors within threshold
-                    neighbors = tree.query_ball_point(
-                        merged_points[i],
-                        self.merge_distance_threshold
-                    )
-                    # Keep only the first point in each cluster
-                    for j in neighbors[1:]:
-                        duplicate_mask[j] = False
-
-            # Apply mask
             merged_points = merged_points[duplicate_mask]
             merged_colors = merged_colors[duplicate_mask]
 
@@ -282,6 +291,65 @@ class MultiRobotMapMerger(Node):
 
             status = f"Map Merger Status: {' | '.join(status_parts)} | Total: {total_points}"
             self.get_logger().info(status)
+
+    def remove_close_points(self, points_np, min_dist=0.0005):
+        """
+        Removes points that are too close to others, keeping only one in a cluster.
+
+        Args:
+            points_np (np.ndarray): Nx3 NumPy array of 3D points.
+            min_dist (float): Minimum distance between points to keep.
+            (Assumes self.tree is set)
+
+        Returns:
+            np.ndarray: Filtered NumPy array of unique points.
+        """
+        if points_np.shape[0] == 0:
+            return points_np
+
+        # Ensure the tree is built on the current set of points
+        # For this setup, self.tree is built in handle_full_map_response, so assume it matches points_np.
+
+        tree = cKDTree(points_np)
+        pairs = tree.query_pairs(min_dist)
+        keep_mask = np.ones(points_np.shape[0], dtype=bool)
+        for i, j in pairs:
+            keep_mask[j] = False  # Remove duplicates
+
+        filtered_points = points_np[keep_mask]
+        self.get_logger().warning(f'Removed {points_np.shape[0] - filtered_points.shape[0]} close points.')
+        return filtered_points
+    
+    def remove_isolated_points(self, points_np):
+        """
+        Removes isolated points from a NumPy array of points.
+
+        Args:
+            points_np (np.ndarray): Nx3 NumPy array of 3D points.
+
+        Returns:
+            np.ndarray: Filtered NumPy array of inlier points.
+        """
+        if points_np.shape[0] < self.min_neighbors + 1:
+            self.get_logger().warning(
+                f"Not enough points ({points_np.shape[0]}) to check for isolated points with min_neighbors={self.min_neighbors}. Skipping."
+            )
+            return points_np
+
+        # Efficient batch neighbor counting using cKDTree.query_ball_point
+        tree = cKDTree(points_np)
+        # Use list comprehension for efficiency
+        neighbor_counts = np.array([
+            len(neigh) - 1  # exclude the point itself
+            for neigh in tree.query_ball_point(points_np, self.radius)
+        ])
+        keep_mask = neighbor_counts >= self.min_neighbors
+
+        filtered_points = points_np[keep_mask]
+        self.get_logger().warning(
+            f'Removed {points_np.shape[0] - filtered_points.shape[0]} isolated points.'
+        )
+        return filtered_points
 
 
 def main(args=None):
