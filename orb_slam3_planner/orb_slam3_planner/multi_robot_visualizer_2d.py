@@ -2,7 +2,7 @@
 
 import rclpy
 from rclpy.node import Node
-from nav_msgs.msg import OccupancyGrid
+from nav_msgs.msg import OccupancyGrid, Path
 from geometry_msgs.msg import Point, PoseStamped, PoseArray
 from scipy.spatial.transform import Rotation as R
 import numpy as np
@@ -29,7 +29,7 @@ class MultiRobot2DVisualizer(Node):
         self.enable_fov_visualization = True  # Enable FOV cone drawing
         self.enable_ray_tracing = False  # Disable ray tracing visualization for performance
         self.enable_trajectories = True  # Enable trajectory tracking
-        self.enable_logging = True  # Enable logging
+        self.enable_logging = False  # Enable logging
 
         # Visualization parameters
         self.scale = 20  # Scale factor for display (reduced for larger map)
@@ -47,6 +47,9 @@ class MultiRobot2DVisualizer(Node):
         self.robot_grid_positions = {rid: None for rid in self.robot_ids}
         self.robot_angles = {rid: 0.0 for rid in self.robot_ids}
         self.robot_goals = {rid: None for rid in self.robot_ids}
+
+        # NEW: Store A* paths for each robot
+        self.robot_paths = {rid: [] for rid in self.robot_ids}
 
         # Map data
         self.occupancy_grid = None
@@ -83,8 +86,35 @@ class MultiRobot2DVisualizer(Node):
                 self.create_goal_callback(robot_id), 10
             )
 
+            # NEW: Subscribe to A* paths for each robot
+            self.create_subscription(
+                Path, f'/robot_{robot_id}/planned_path',
+                self.create_path_callback(robot_id), 10
+            )
+
         if self.enable_logging:
             self.get_logger().info(f'Multi-Robot 2D Visualizer started for robots: {self.robot_ids}')
+
+    def create_path_callback(self, robot_id):
+        """NEW: Factory for path callbacks"""
+
+        def callback(msg):
+            # Convert path from world to grid coordinates
+            path_grid = []
+            for pose in msg.poses:
+                # Convert world to grid coordinates
+                gx = int((pose.pose.position.x + self.origin_offset) / self.resolution)
+                gy = int((pose.pose.position.y + self.origin_offset) / self.resolution)
+                path_grid.append((gx, gy))
+
+            self.robot_paths[robot_id] = path_grid
+
+            if self.enable_logging and len(path_grid) > 0:
+                self.get_logger().info(
+                    f'Robot_{robot_id} path updated with {len(path_grid)} waypoints'
+                )
+
+        return callback
 
     def robot_positions_callback(self, msg):
         """
@@ -129,6 +159,38 @@ class MultiRobot2DVisualizer(Node):
 
         return callback
 
+    def draw_path(self, img, robot_id, height):
+        """NEW: Draw the A* path for a robot"""
+        if robot_id not in self.robot_paths or len(self.robot_paths[robot_id]) < 2:
+            return
+
+        path = self.robot_paths[robot_id]
+        color = self.robot_colors[robot_id]
+
+        # Draw path as connected line segments
+        for i in range(len(path) - 1):
+            x1, y1 = path[i]
+            x2, y2 = path[i + 1]
+
+            # Convert to display coordinates
+            x1_large = x1 * self.scale + self.scale // 2
+            y1_large = (height - 1 - y1) * self.scale + self.scale // 2
+            x2_large = x2 * self.scale + self.scale // 2
+            y2_large = (height - 1 - y2) * self.scale + self.scale // 2
+
+            # Draw thick line for path
+            cv2.line(img, (x1_large, y1_large), (x2_large, y2_large), color, 3)
+
+            # Draw waypoints as small circles
+            cv2.circle(img, (x1_large, y1_large), 3, color, -1)
+
+        # Draw last waypoint
+        if len(path) > 0:
+            x, y = path[-1]
+            x_large = x * self.scale + self.scale // 2
+            y_large = (height - 1 - y) * self.scale + self.scale // 2
+            cv2.circle(img, (x_large, y_large), 3, color, -1)
+
     def map_callback(self, msg):
         """Visualize the occupancy grid with robots"""
         # Skip if visualization is disabled
@@ -142,6 +204,7 @@ class MultiRobot2DVisualizer(Node):
         self.resolution = msg.info.resolution
         self.origin_x = msg.info.origin.position.x
         self.origin_y = msg.info.origin.position.y
+        self.origin_offset = -self.origin_x  # Since origin_x is negative
 
         # Convert occupancy grid to numpy array
         grid_data = np.array(msg.data, dtype=np.int8).reshape((height, width))
@@ -174,6 +237,10 @@ class MultiRobot2DVisualizer(Node):
             for robot_id in self.robot_ids:
                 if robot_id in self.trajectories and len(self.trajectories[robot_id]) > 1:
                     self.draw_trajectory(img_large, robot_id, height)
+
+        # NEW: Draw A* paths for each robot
+        for robot_id in self.robot_ids:
+            self.draw_path(img_large, robot_id, height)
 
         # Draw FOV if enabled
         if self.enable_fov_visualization:
@@ -356,9 +423,9 @@ def main(args=None):
 
     # Robot configurations - must match map merger and mapper
     robot_configs = {
-        0: {'position': [-5.0, -7.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
+        0: {'position': [-3, 1.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
         1: {'position': [-1.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        # 2: {'position': [5.0, 5.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
+        2: {'position': [-3, -4.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
     }
 
     node = MultiRobot2DVisualizer(robot_configs)

@@ -2,13 +2,11 @@
 
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import PointCloud2
-from geometry_msgs.msg import PoseStamped, Twist, Point, PoseArray
-from nav_msgs.msg import OccupancyGrid
+from geometry_msgs.msg import Twist, Point, PoseArray, PoseStamped
+from nav_msgs.msg import OccupancyGrid, Path
 import math
 import numpy as np
 import time
-from scipy.spatial.transform import Rotation as R
 
 from orb_slam3_planner.planner_module import FrontierPlanner
 from orb_slam3_planner.drone_controller_module import DroneController
@@ -17,10 +15,10 @@ from orb_slam3_planner.drone_controller_module import DroneController
 class AutonomousExplorerNode(Node):
     """
     The central node that coordinates planning and motion control for autonomous exploration.
-    Now receives robot positions from the map builder instead of SLAM.
+    Adapted to work with the new mapping system.
     """
 
-    def __init__(self, robot_configs):
+    def __init__(self):
         super().__init__('autonomous_explorer_node')
 
         # ======================
@@ -32,47 +30,46 @@ class AutonomousExplorerNode(Node):
         # Extract robot ID from namespace (assumes format 'robot_0', 'robot_1', etc.)
         self.robot_id = int(self.robot_namespace.split('_')[-1]) if self.robot_namespace else 0
 
-        # Robot configurations
-        self.robot_configs = robot_configs
-        self.all_robot_ids = list(robot_configs.keys())
+        # List of all robot IDs in the system
+        self.all_robot_ids = [0, 1, 2]  # Adjust based on your system
 
         # ======================
-        # Map Parameters - Updated to match efficient mapper
+        # Map Parameters (matching new mapper)
         # ======================
-        self.resolution = 0.5  # Match efficient mapper's resolution
-        self.map_size_meters = 30.0  # Match efficient mapper's map size
-        self.grid_size = int(self.map_size_meters / self.resolution)
-        self.origin_offset = self.map_size_meters / 2.0
+        self.cell_size = 0.5  # Resolution from new mapper
+        self.map_size_meters = 30.0  # Total map size (30m x 30m)
+        self.grid_size = int(self.map_size_meters / self.cell_size)
+        self.map_range = self.map_size_meters / 2.0  # For world coordinate conversion
 
-        # For compatibility with existing code
-        self.cell_size = self.resolution
-        self.map_range = self.origin_offset
-
-        # Local copy of the shared map (-1=unknown, 0=free, 100=occupied)
+        # Local copy of the shared map
         self.occupancy_grid = np.full((self.grid_size, self.grid_size), -1, dtype=np.int8)
 
         # ======================
         # Motion Parameters
         # ======================
-        self.linear_speed = 0.4
+        self.linear_speed = 0.5
         self.angular_speed = 0.5
-        self.safe_distance = 5
+        self.safe_distance = 2
 
         self.adaptive_speed = False
         self.min_linear_speed = 0.3
         self.max_linear_speed = 0.6
 
-        # Motion pause parameters
-        self.motion_pause_duration = 1.0  # seconds to pause after each motion
-        self.last_motion_time = 0.0
-        self.is_paused = False
+        # ======================
+        # Initial 360 Turn Parameters
+        # ======================
+        self.initial_turn_complete = False
+        self.initial_turn_start_angle = None
+        self.initial_turn_total_rotation = 0.0
+        self.last_angle_for_turn = None
+        self.turn_direction = 1  # 1 for counter-clockwise, -1 for clockwise
 
         # ======================
         # Frontier Planning Parameters
         # ======================
         self.use_frontier_scoring = True
         self.visited_targets = set()
-        self.exploration_radius = 3  # Increased for larger grid
+        self.exploration_radius = 1
 
         # ======================
         # Multi-Robot Coordination
@@ -81,19 +78,17 @@ class AutonomousExplorerNode(Node):
         self.other_robot_goals = {}  # {robot_id: (grid_x, grid_y)}
 
         # Weights for multi-robot coordination in scoring
-        self.robot_position_weight = 1.5  # Weight for distance from other robots
-        self.robot_goal_weight = 2.0  # Weight for distance from other robots' goals
-        self.min_robot_separation = 10  # Adjusted for finer resolution
+        self.robot_position_weight = 1.5
+        self.robot_goal_weight = 2.0
+        self.min_robot_separation = 5
 
         # ======================
         # Robot State
         # ======================
         self.robot_pos = None
-        self.robot_world_pos = None
         self.robot_angle = 0.0
-        self.current_pose = None
         self.target = None
-        self.state = "EXPLORING"
+        self.state = "INITIAL_TURN"  # Start with initial turn state
 
         self.collision_counter = 0
         self.stuck_counter = 0
@@ -102,13 +97,13 @@ class AutonomousExplorerNode(Node):
         # A* path following
         self.current_path = []
         self.path_index = 0
-        self.waypoint_tolerance = 5  # Adjusted for finer resolution
+        self.waypoint_tolerance = 2
 
         # ======================
         # Goal Timeout
         # ======================
         self.target_start_time = None
-        self.target_timeout = 30.0  # seconds to reach a goal
+        self.target_timeout = 40.0  # seconds to reach a goal
 
         # ======================
         # ROS2 Setup
@@ -117,46 +112,43 @@ class AutonomousExplorerNode(Node):
 
         self.cmd_pub = self.create_publisher(Twist, f'{ns}/cmd_vel', 10)
         self.goal_pub = self.create_publisher(Point, f'{ns}/goal_grid_pos', 10)
+        self.path_pub = self.create_publisher(Path, f'{ns}/planned_path', 10)
 
         # Pass self to planner so it can access other robot data
         self.planner = FrontierPlanner(self)
         self.controller = DroneController(self)
 
-        # NEW: Subscribe to robot positions from map builder instead of individual SLAM poses
-        self.create_subscription(
-            PoseArray,
-            '/robot_grid_positions',
-            self.robot_positions_callback,
-            10
-        )
+        # Subscribe to shared occupancy grid
+        self.create_subscription(OccupancyGrid, '/occupancy_grid', self.map_callback, 10)
 
-        # Subscribe to occupancy grid from efficient mapper
-        self.create_subscription(
-            OccupancyGrid,
-            '/occupancy_grid',  # Updated topic name
-            self.occupancy_grid_callback,
-            10
-        )
+        # Subscribe to robot positions from map builder
+        self.create_subscription(PoseArray, '/robot_grid_positions',
+                                 self.robot_positions_callback, 10)
 
         # Subscribe to other robots' goals
         for robot_id in self.all_robot_ids:
-            if robot_id != self.robot_id:  # Don't subscribe to own topics
-                # Robot goals from autonomous explorer nodes
+            if robot_id != self.robot_id:
                 self.create_subscription(
-                    Point,
-                    f'/robot_{robot_id}/goal_grid_pos',
-                    self.create_goal_callback(robot_id),
-                    10
+                    Point, f'/robot_{robot_id}/goal_grid_pos',
+                    self.create_goal_callback(robot_id), 10
                 )
 
         self.create_timer(0.5, self.control_loop)
 
         self.get_logger().info(
-            f"Autonomous Explorer Node started for namespace: {self.robot_namespace} (ID: {self.robot_id})")
+            f"Autonomous Explorer Node started for robot_{self.robot_id} - Starting with 360 turn")
+
+    def create_goal_callback(self, robot_id):
+        """Create a callback for receiving other robot goals"""
+
+        def callback(msg):
+            self.other_robot_goals[robot_id] = (int(msg.x), int(msg.y))
+
+        return callback
 
     def robot_positions_callback(self, msg):
         """
-        NEW: Handle robot positions from the map builder.
+        Handle robot positions from the map builder.
         The PoseArray contains positions for all robots in grid coordinates.
         Robot ID is encoded in the z position.
         """
@@ -174,36 +166,100 @@ class AutonomousExplorerNode(Node):
                 # Update own position
                 self.robot_pos = (gx, gy)
                 self.robot_angle = yaw
-
-                # Calculate world position for compatibility
-                self.robot_world_pos = (
-                    gx * self.resolution - self.origin_offset,
-                    gy * self.resolution - self.origin_offset
-                )
             else:
                 # Update other robot positions
                 self.other_robot_positions[robot_id] = (gx, gy)
 
-    def create_goal_callback(self, robot_id):
-        """Create a callback for receiving other robot goals"""
-
-        def callback(msg):
-            self.other_robot_goals[robot_id] = (int(msg.x), int(msg.y))
-
-        return callback
-
-    def occupancy_grid_callback(self, msg):
+    def map_callback(self, msg):
         """
-        Update local map from the efficient occupancy grid mapper.
-        Simply copy the discrete values: -1=unknown, 0=free, 100=occupied
+        Update local map from the shared occupancy grid.
         """
         if msg.info.width != self.grid_size or msg.info.height != self.grid_size:
-            self.get_logger().error(
-                f"Map size mismatch: expected {self.grid_size}, got {msg.info.width}x{msg.info.height}")
-            return
+            # Update grid size if map size changed
+            self.grid_size = msg.info.width
+            self.cell_size = msg.info.resolution
+            self.map_size_meters = self.grid_size * self.cell_size
+            self.map_range = self.map_size_meters / 2.0
+            self.occupancy_grid = np.full((self.grid_size, self.grid_size), -1, dtype=np.int8)
 
-        # Direct copy of the occupancy grid data
-        self.occupancy_grid = np.array(msg.data, dtype=np.int8).reshape((self.grid_size, self.grid_size))
+        # Convert ROS occupancy grid to internal format
+        for y in range(self.grid_size):
+            for x in range(self.grid_size):
+                idx = y * self.grid_size + x
+                value = msg.data[idx]
+                self.occupancy_grid[y, x] = value
+
+    def publish_goal(self):
+        """Publish current goal for visualization"""
+        if self.target:
+            goal_msg = Point()
+            goal_msg.x = float(self.target[0])
+            goal_msg.y = float(self.target[1])
+            goal_msg.z = 0.0
+            self.goal_pub.publish(goal_msg)
+
+    def publish_path(self):
+        """Publish current path for visualization"""
+        if self.current_path and len(self.current_path) > 0:
+            path_msg = Path()
+            path_msg.header.stamp = self.get_clock().now().to_msg()
+            path_msg.header.frame_id = "map"
+
+            for gx, gy in self.current_path:
+                pose = PoseStamped()
+                pose.header = path_msg.header
+                # Convert grid to world coordinates for Path message
+                pose.pose.position.x = gx * self.cell_size - self.map_range
+                pose.pose.position.y = gy * self.cell_size - self.map_range
+                pose.pose.position.z = 0.0
+                path_msg.poses.append(pose)
+
+            self.path_pub.publish(path_msg)
+
+    def perform_initial_turn(self):
+        """
+        Perform a 360-degree turn to scan the environment before starting exploration.
+        Returns True when the turn is complete.
+        """
+        if self.robot_angle is None:
+            return False
+
+        # Initialize turn tracking
+        if self.initial_turn_start_angle is None:
+            self.initial_turn_start_angle = self.robot_angle
+            self.last_angle_for_turn = self.robot_angle
+            self.initial_turn_total_rotation = 0.0
+            self.get_logger().info(f"Starting 360 turn from angle: {math.degrees(self.robot_angle):.1f}°")
+
+        # Calculate angle change since last update
+        angle_diff = self.robot_angle - self.last_angle_for_turn
+
+        # Handle angle wrap-around
+        if angle_diff > math.pi:
+            angle_diff -= 2 * math.pi
+        elif angle_diff < -math.pi:
+            angle_diff += 2 * math.pi
+
+        # Accumulate total rotation
+        self.initial_turn_total_rotation += abs(angle_diff)
+        self.last_angle_for_turn = self.robot_angle
+
+        # Check if we've completed a full rotation (with some tolerance)
+        if self.initial_turn_total_rotation >= 2 * math.pi - 0.1:
+            self.get_logger().info(
+                f"Completed 360 turn! Total rotation: {math.degrees(self.initial_turn_total_rotation):.1f}°")
+            return True
+
+        # Continue turning
+        twist = Twist()
+        twist.angular.z = self.angular_speed * self.turn_direction
+        self.cmd_pub.publish(twist)
+
+        # Log progress periodically
+        if int(math.degrees(self.initial_turn_total_rotation)) % 45 == 0:
+            self.get_logger().info(f"Turn progress: {math.degrees(self.initial_turn_total_rotation):.1f}°")
+
+        return False
 
     def control_loop(self):
         """
@@ -213,15 +269,16 @@ class AutonomousExplorerNode(Node):
             self.controller.stop_robot()
             return
 
-        # Check if we're in a pause period
-        current_time = time.time()
-        if self.is_paused:
-            if current_time - self.last_motion_time < self.motion_pause_duration:
-                self.controller.stop_robot()
-                return
-            else:
-                self.is_paused = False
+        # Handle initial 360 turn
+        if self.state == "INITIAL_TURN":
+            if self.perform_initial_turn():
+                self.initial_turn_complete = True
+                self.state = "EXPLORING"
+                self.controller.stop_robot()  # Brief stop before starting exploration
+                self.get_logger().info("Initial 360 turn complete. Starting exploration.")
+            return
 
+        # Check if robot is stuck (only after initial turn)
         if self.controller.is_stuck():
             self.get_logger().warn("Robot stuck. Switching to RECOVERY.")
             self.state = "RECOVERY"
@@ -235,9 +292,6 @@ class AutonomousExplorerNode(Node):
                 twist.angular.z = self.angular_speed
                 self.cmd_pub.publish(twist)
                 self.collision_counter -= 1
-                # Trigger pause after this motion
-                self.last_motion_time = current_time
-                self.is_paused = True
             else:
                 self.state = "EXPLORING"
 
@@ -246,9 +300,6 @@ class AutonomousExplorerNode(Node):
             twist.linear.x = -self.linear_speed * 1.0
             self.cmd_pub.publish(twist)
             self.state = "EXPLORING"
-            # Trigger pause after recovery motion
-            self.last_motion_time = current_time
-            self.is_paused = True
 
         elif self.state == "EXPLORING":
             self.target = self.planner.find_nearest_frontier()
@@ -263,27 +314,17 @@ class AutonomousExplorerNode(Node):
                     self.target_start_time = time.time()
                     self.get_logger().info(f"New target: {self.target}, path length: {len(path)}")
 
-                    # Publish the final goal
-                    goal_msg = Point()
-                    goal_msg.x = float(self.target[0])
-                    goal_msg.y = float(self.target[1])
-                    goal_msg.z = 0.0
-                    self.goal_pub.publish(goal_msg)
+                    # Publish goal and path for visualization
+                    self.publish_goal()
+                    self.publish_path()
                 else:
                     self.get_logger().warn(f"No path found to target {self.target}")
                     self.target = None
             else:
                 self.controller.turn_to_explore()
-                # Trigger pause after exploration turn
-                self.last_motion_time = current_time
-                self.is_paused = True
 
         elif self.state == "MOVING_TO_TARGET":
             if not self.target or not self.current_path:
-                self.state = "EXPLORING"
-                return
-
-            if not self.planner.is_reachable(self.robot_pos[0], self.robot_pos[1]):
                 self.state = "EXPLORING"
                 return
 
@@ -311,9 +352,6 @@ class AutonomousExplorerNode(Node):
                 self.current_path = []
                 self.target_start_time = None
                 self.controller.turn_to_explore()
-                # Trigger pause after reaching target
-                self.last_motion_time = current_time
-                self.is_paused = True
                 return
 
             # Follow the path
@@ -327,9 +365,6 @@ class AutonomousExplorerNode(Node):
                 if distance_to_waypoint < self.waypoint_tolerance:
                     # Reached waypoint, move to next
                     self.path_index += 1
-                    # Trigger pause after reaching waypoint
-                    self.last_motion_time = current_time
-                    self.is_paused = True
                     if self.path_index >= len(self.current_path):
                         # Path completed but haven't reached target, replan
                         self.get_logger().info("Path completed, replanning...")
@@ -344,13 +379,13 @@ class AutonomousExplorerNode(Node):
                         if new_path and len(new_path) > 1:
                             self.current_path = new_path
                             self.path_index = 1
+                            self.publish_path()
                         else:
                             self.get_logger().warn("No alternate path found!")
                             self.state = "EXPLORING"
                             return
                     else:
                         self.controller.move_toward_waypoint(waypoint)
-                        # Don't pause during continuous movement, only at waypoints
             else:
                 # Path index out of bounds, replan
                 self.state = "EXPLORING"
@@ -363,27 +398,17 @@ class AutonomousExplorerNode(Node):
 
     def get_occupancy_value(self, x, y):
         """
-        Get occupancy value for a grid cell.
-        Returns: -1=unknown, 0=free, 100=occupied
+        Get occupancy value from grid.
+        Returns: 100 = occupied, 0 = free, -1 = unknown
         """
         if not (0 <= x < self.grid_size and 0 <= y < self.grid_size):
             return -1
-
         return self.occupancy_grid[y, x]
 
 
 def main(args=None):
     rclpy.init(args=args)
-
-    # Robot configurations - must match map merger and mapper
-    robot_configs = {
-        0: {'position': [-5.0, -7.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        1: {'position': [-1.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        # 2: {'position': [5.0, 5.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
-    }
-
-    node = AutonomousExplorerNode(robot_configs)
-
+    node = AutonomousExplorerNode()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

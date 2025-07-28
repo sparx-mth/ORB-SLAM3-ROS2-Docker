@@ -7,9 +7,9 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 
 robot_coordinates = {
-    0: [-5.0, -7.0, 0.5],  # corridor
+    0: [-3, 1.0, 0.5],  # corridor
     1: [-1.0, 0.0, 0.5],
-    2: [5.0, 5.0, 0.5],
+    2: [-3, -4.0, 0.5],
     3: [-1.0, 8.0, 1.65],
     4: [7.0, 8.0, 1.65],
     5: [7.0, 8.0, 1.65],
@@ -33,7 +33,7 @@ def generate_launch_description():
                 "robot_z": str(robot_coordinates[i][2]),
             }.items(),
         )
-        for i in range(2)
+        for i in range(3)
     ]
 
     return LaunchDescription(

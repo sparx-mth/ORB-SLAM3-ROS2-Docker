@@ -18,9 +18,9 @@ def generate_launch_description():
 
     # Robot configurations must match those in multi_robot_map_builder.py
     robot_configs = {
-        0: {'position': [-5.0, -7.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
+        0: {'position': [-3, 1.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
         1: {'position': [-1.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        # 2: {'position': [5.0, 5.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
+        2: {'position': [-3, -4.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
     }
 
     nodes = []
@@ -54,14 +54,14 @@ def generate_launch_description():
         )
     )
 
-    nodes.append(
-        Node(
-            package='orb_slam3_planner',
-            executable='multi_robot_visualizer',
-            name='multi_robot_visualizer',
-            output='screen'
-        )
-    )
+    # nodes.append(
+    #     Node(
+    #         package='orb_slam3_planner',
+    #         executable='multi_robot_visualizer',
+    #         name='multi_robot_visualizer',
+    #         output='screen'
+    #     )
+    # )
 
     # 3. Launch individual robot nodes
     for robot_id in robot_configs.keys():

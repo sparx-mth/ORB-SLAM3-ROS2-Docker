@@ -40,8 +40,13 @@ class EfficientOccupancyGridMapper(Node):
         self.z_max = 2.0  # Maximum height to consider
 
         # Occupancy thresholds
-        self.points_threshold = 3  # Min points in cell to mark as occupied
+        self.points_threshold = 17  # Min points in cell to mark as occupied
         self.max_range = 8.0  # Maximum sensor range in meters
+        self.open_area_range = 2.5  # Half range for open area detection (when no obstacles)
+
+        # Camera FOV parameters
+        self.camera_fov = math.radians(60)  # 60 degree FOV
+        self.fov_resolution = math.radians(1)  # Angular resolution for FOV scanning
 
         # ======================
         # Data Structures
@@ -74,7 +79,7 @@ class EfficientOccupancyGridMapper(Node):
             OccupancyGrid, '/occupancy_grid', 10
         )
 
-        # NEW: Publisher for all robot positions in grid coordinates
+        # Publisher for all robot positions in grid coordinates
         self.robot_positions_pub = self.create_publisher(
             PoseArray, '/robot_grid_positions', 10
         )
@@ -99,10 +104,10 @@ class EfficientOccupancyGridMapper(Node):
         # Timer for map publishing
         self.create_timer(0.5, self.publish_map)  # 2Hz publishing
 
-        # NEW: Timer for robot positions publishing (can be faster than map)
-        self.create_timer(0.1, self.publish_robot_positions)  # 10Hz publishing
+        # Timer for robot positions publishing
+        self.create_timer(0.5, self.publish_robot_positions)  # 10Hz publishing
 
-        self.get_logger().info("Efficient Occupancy Grid Mapper initialized")
+        self.get_logger().info("Efficient Occupancy Grid Mapper initialized with open area detection")
 
     def create_transformation_matrix(self, position, orientation):
         """Create 4x4 transformation matrix"""
@@ -163,7 +168,7 @@ class EfficientOccupancyGridMapper(Node):
 
     def publish_robot_positions(self):
         """
-        NEW: Publish all robot positions in grid coordinates as a PoseArray.
+        Publish all robot positions in grid coordinates as a PoseArray.
         Each pose in the array corresponds to a robot, with the robot_id encoded in the z position.
         """
         msg = PoseArray()
@@ -199,9 +204,6 @@ class EfficientOccupancyGridMapper(Node):
                 if self.z_min <= p[2] <= self.z_max:  # Height filter
                     points.append((p[0], p[1]))
 
-            if not points:
-                return
-
             with self.lock:
                 # Reset point count
                 self.point_count.fill(0)
@@ -223,8 +225,66 @@ class EfficientOccupancyGridMapper(Node):
                 # Update free space using efficient ray casting
                 self.update_free_space_fast(occupied_cells)
 
+                # NEW: Mark open areas in the field of view even when no obstacles are detected
+                self.mark_open_areas_in_fov()
+
         except Exception as e:
             self.get_logger().error(f"Error in point cloud callback: {e}")
+
+    def mark_open_areas_in_fov(self):
+        """
+        Mark cells as free in the field of view when no obstacles are detected.
+        Uses half the normal range when no obstacles are present.
+        """
+        for robot_id, robot_grid_pos in self.robot_grid_poses.items():
+            if robot_grid_pos is None:
+                continue
+
+            rx, ry = robot_grid_pos
+            robot_heading = self.robot_headings[robot_id]
+
+            # Scan through the FOV
+            left_angle = robot_heading - self.camera_fov / 2
+            right_angle = robot_heading + self.camera_fov / 2
+
+            # Angular steps through FOV
+            angle = left_angle
+            while angle <= right_angle:
+                # Check along this ray direction
+                obstacle_found = False
+                obstacle_distance = self.max_range
+
+                # First, check if there's an obstacle along this ray
+                max_cells = int(self.max_range / self.resolution)
+                for dist_cells in range(1, max_cells + 1):
+                    dist_meters = dist_cells * self.resolution
+
+                    # Calculate grid position
+                    check_x = int(rx + dist_cells * math.cos(angle))
+                    check_y = int(ry + dist_cells * math.sin(angle))
+
+                    if self.is_valid_grid_pos(check_x, check_y):
+                        if self.occupancy_grid[check_y, check_x] == 1:  # Obstacle found
+                            obstacle_found = True
+                            obstacle_distance = dist_meters
+                            break
+
+                # Now mark cells as free based on what we found
+                if obstacle_found:
+                    # If obstacle found, we already marked free cells up to it in update_free_space_fast
+                    pass
+                else:
+                    # No obstacle found - mark cells as free up to half the sensor range
+                    free_range_cells = int(self.open_area_range / self.resolution)
+                    for dist_cells in range(1, free_range_cells + 1):
+                        free_x = int(rx + dist_cells * math.cos(angle))
+                        free_y = int(ry + dist_cells * math.sin(angle))
+
+                        if self.is_valid_grid_pos(free_x, free_y):
+                            if self.occupancy_grid[free_y, free_x] == -1:  # Only mark unknown cells
+                                self.occupancy_grid[free_y, free_x] = 0  # Mark as free
+
+                angle += self.fov_resolution
 
     def update_free_space_fast(self, occupied_cells):
         """
@@ -247,8 +307,22 @@ class EfficientOccupancyGridMapper(Node):
                 dist_sq = dx * dx + dy * dy
 
                 if dist_sq <= max_cells * max_cells:
-                    # Trace ray from robot to occupied cell
-                    self.trace_ray_bresenham(rx, ry, ox, oy)
+                    # Check if within FOV
+                    angle_to_obstacle = math.atan2(dy, dx)
+                    robot_heading = self.robot_headings[robot_id]
+                    angle_diff = abs(self.normalize_angle(angle_to_obstacle - robot_heading))
+
+                    if angle_diff <= self.camera_fov / 2:
+                        # Trace ray from robot to occupied cell
+                        self.trace_ray_bresenham(rx, ry, ox, oy)
+
+    def normalize_angle(self, angle):
+        """Normalize angle to [-pi, pi]"""
+        while angle > math.pi:
+            angle -= 2 * math.pi
+        while angle < -math.pi:
+            angle += 2 * math.pi
+        return angle
 
     def trace_ray_bresenham(self, x0, y0, x1, y1):
         """
@@ -316,7 +390,7 @@ class EfficientOccupancyGridMapper(Node):
         if hasattr(self, '_last_log_time'):
             current_time = self.get_clock().now().nanoseconds / 1e9
             if current_time - self._last_log_time > 5.0:  # Log every 5 seconds
-                self.log_statistics()
+                # self.log_statistics()
                 self._last_log_time = current_time
         else:
             self._last_log_time = self.get_clock().now().nanoseconds / 1e9
@@ -341,9 +415,9 @@ def main(args=None):
 
     # Robot configurations - must match map merger
     robot_configs = {
-        0: {'position': [-5.0, -7.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
+        0: {'position': [-3, 1.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
         1: {'position': [-1.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        # 2: {'position': [5.0, 5.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
+        2: {'position': [-3, -4.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
     }
 
     node = EfficientOccupancyGridMapper(robot_configs)
