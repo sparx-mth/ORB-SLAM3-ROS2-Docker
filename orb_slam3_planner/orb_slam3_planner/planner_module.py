@@ -87,7 +87,7 @@ class FrontierPlanner:
                 continue
 
             distance = math.sqrt((fx - rx) ** 2 + (fy - ry) ** 2)
-            if distance < 5:
+            if distance < 3:
                 continue
             if distance > 30:
                 continue
@@ -134,10 +134,10 @@ class FrontierPlanner:
             if not self.is_safe_position(fx, fy):
                 continue
 
-            if distance < 5:
+            if distance < 3:
                 continue
 
-            if distance > 100:  # Adjusted for finer resolution
+            if distance > 10:  # Adjusted for finer resolution
                 continue
 
             if distance < min_distance:

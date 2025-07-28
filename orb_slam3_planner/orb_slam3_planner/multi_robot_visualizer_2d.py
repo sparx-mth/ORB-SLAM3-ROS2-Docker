@@ -3,7 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from nav_msgs.msg import OccupancyGrid
-from geometry_msgs.msg import Point, PoseStamped
+from geometry_msgs.msg import Point, PoseStamped, PoseArray
 from scipy.spatial.transform import Rotation as R
 import numpy as np
 import cv2
@@ -15,7 +15,7 @@ import time
 class MultiRobot2DVisualizer(Node):
     """
     2D visualization of the multi-robot exploration system.
-    Updated to work with the efficient occupancy grid mapper.
+    Now receives robot positions from the map builder instead of SLAM.
     """
 
     def __init__(self, robot_configs):
@@ -63,13 +63,6 @@ class MultiRobot2DVisualizer(Node):
         if self.enable_trajectories:
             self.trajectories = {rid: deque(maxlen=500) for rid in self.robot_ids}
 
-        # Transformation matrices for each robot
-        self.robot_transforms = {}
-        for robot_id, config in robot_configs.items():
-            self.robot_transforms[robot_id] = self.create_transformation_matrix(
-                config['position'], config.get('orientation', [0, 0, 0])
-            )
-
         # Subscriptions
         # Subscribe to the new occupancy grid topic
         self.create_subscription(
@@ -77,14 +70,14 @@ class MultiRobot2DVisualizer(Node):
             self.map_callback, 10
         )
 
-        # Subscribe to robot poses directly
-        for robot_id in self.robot_ids:
-            self.create_subscription(
-                PoseStamped, f'/robot_{robot_id}/robot_pose_slam',
-                self.create_pose_callback(robot_id), 10
-            )
+        # NEW: Subscribe to robot positions from map builder instead of individual poses
+        self.create_subscription(
+            PoseArray, '/robot_grid_positions',
+            self.robot_positions_callback, 10
+        )
 
-            # Robot goals from autonomous explorer nodes (if available)
+        # Robot goals from autonomous explorer nodes (if available)
+        for robot_id in self.robot_ids:
             self.create_subscription(
                 Point, f'/robot_{robot_id}/goal_grid_pos',
                 self.create_goal_callback(robot_id), 10
@@ -93,61 +86,35 @@ class MultiRobot2DVisualizer(Node):
         if self.enable_logging:
             self.get_logger().info(f'Multi-Robot 2D Visualizer started for robots: {self.robot_ids}')
 
-    def create_transformation_matrix(self, position, orientation):
-        """Create 4x4 transformation matrix"""
-        rotation = R.from_euler('xyz', orientation)
-        rotation_matrix = rotation.as_matrix()
+    def robot_positions_callback(self, msg):
+        """
+        NEW: Handle robot positions from the map builder.
+        The PoseArray contains positions for all robots in grid coordinates.
+        Robot ID is encoded in the z position.
+        """
+        for pose in msg.poses:
+            robot_id = int(pose.position.z)
+            if robot_id in self.robot_ids:
+                gx = int(pose.position.x)
+                gy = int(pose.position.y)
 
-        transform = np.eye(4)
-        transform[:3, :3] = rotation_matrix
-        transform[:3, 3] = position
+                # Extract heading from quaternion
+                q = pose.orientation
+                yaw = math.atan2(2.0 * (q.w * q.z + q.x * q.y),
+                                 1.0 - 2.0 * (q.y * q.y + q.z * q.z))
 
-        return transform
+                # Update robot position
+                self.robot_grid_positions[robot_id] = (gx, gy)
+                self.robot_angles[robot_id] = yaw
 
-    def world_to_grid(self, x, y):
-        """Convert world coordinates to grid indices"""
-        gx = int((x - self.origin_x) / self.resolution)
-        gy = int((y - self.origin_y) / self.resolution)
-        return gx, gy
+                # Calculate world position for display
+                world_x = gx * self.resolution - self.resolution * self.grid_size / 2.0
+                world_y = gy * self.resolution - self.resolution * self.grid_size / 2.0
+                self.robot_world_positions[robot_id] = (world_x, world_y)
 
-    def create_pose_callback(self, robot_id):
-        """Factory for pose callbacks"""
-
-        def callback(msg):
-            # Transform to global frame
-            local_pose = np.array([
-                msg.pose.position.x,
-                msg.pose.position.y,
-                msg.pose.position.z,
-                1.0
-            ])
-            global_pose = self.robot_transforms[robot_id] @ local_pose
-
-            # Store world position
-            world_x, world_y = global_pose[0], global_pose[1]
-            self.robot_world_positions[robot_id] = (world_x, world_y)
-
-            # Convert to grid if we have map info
-            if self.resolution > 0 and self.grid_size > 0:
-                gx, gy = self.world_to_grid(world_x, world_y)
-                if 0 <= gx < self.grid_size and 0 <= gy < self.grid_size:
-                    self.robot_grid_positions[robot_id] = (gx, gy)
-
-                    # Track trajectory
-                    if self.enable_trajectories:
-                        self.trajectories[robot_id].append((gx, gy))
-
-            # Calculate heading
-            q = msg.pose.orientation
-            local_yaw = math.atan2(2.0 * (q.w * q.z + q.x * q.y),
-                                   1.0 - 2.0 * (q.y * q.y + q.z * q.z))
-
-            # Apply transformation rotation
-            rot_matrix = self.robot_transforms[robot_id][:3, :3]
-            transform_yaw = math.atan2(rot_matrix[1, 0], rot_matrix[0, 0])
-            self.robot_angles[robot_id] = local_yaw + transform_yaw
-
-        return callback
+                # Track trajectory
+                if self.enable_trajectories:
+                    self.trajectories[robot_id].append((gx, gy))
 
     def create_goal_callback(self, robot_id):
         """Factory for goal callbacks"""

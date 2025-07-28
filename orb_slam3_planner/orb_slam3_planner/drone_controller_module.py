@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from geometry_msgs.msg import Twist
+import time
 
 
 class DroneController:
@@ -22,6 +23,11 @@ class DroneController:
         self.get_logger = node.get_logger
         self.get_clock = node.get_clock
         self.cmd_pub = node.cmd_pub  # Publisher to /cmd_vel
+
+        # Track motion for pausing
+        self.last_motion_type = None  # 'turn' or 'move'
+        self.motion_completed = False
+
         self.get_logger().info("DroneController initialized")
 
     def grid_to_world(self, grid_x, grid_y):
@@ -67,6 +73,12 @@ class DroneController:
             twist = Twist()
             twist.angular.z = self.node.angular_speed if angle_diff > 0 else -self.node.angular_speed
             self.cmd_pub.publish(twist)
+
+            # Mark that we just completed a turn
+            if self.last_motion_type != 'turn':
+                self.last_motion_type = 'turn'
+                self.node.last_motion_time = time.time()
+                self.node.is_paused = True
             return
 
         # Then move forward
@@ -74,6 +86,9 @@ class DroneController:
         twist.linear.x = speed
         twist.angular.z = angle_diff * 0.5  # Proportional control for small corrections
         self.cmd_pub.publish(twist)
+
+        # Track continuous movement (pause happens at waypoints in main loop)
+        self.last_motion_type = 'move'
 
     def stop_robot(self):
         """

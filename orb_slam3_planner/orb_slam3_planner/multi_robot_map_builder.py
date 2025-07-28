@@ -3,7 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import PointCloud2
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, PoseArray, Pose
 from nav_msgs.msg import OccupancyGrid
 from std_msgs.msg import Header
 import numpy as np
@@ -18,6 +18,7 @@ class EfficientOccupancyGridMapper(Node):
     """
     Efficient real-time occupancy grid mapper for multi-robot SLAM.
     Converts 3D point clouds to 2D occupancy grid with visibility constraints.
+    Now also publishes robot positions in grid coordinates.
     """
 
     def __init__(self, robot_configs):
@@ -73,6 +74,11 @@ class EfficientOccupancyGridMapper(Node):
             OccupancyGrid, '/occupancy_grid', 10
         )
 
+        # NEW: Publisher for all robot positions in grid coordinates
+        self.robot_positions_pub = self.create_publisher(
+            PoseArray, '/robot_grid_positions', 10
+        )
+
         # Subscribe to merged point cloud
         self.create_subscription(
             PointCloud2,
@@ -92,6 +98,9 @@ class EfficientOccupancyGridMapper(Node):
 
         # Timer for map publishing
         self.create_timer(0.5, self.publish_map)  # 2Hz publishing
+
+        # NEW: Timer for robot positions publishing (can be faster than map)
+        self.create_timer(0.1, self.publish_robot_positions)  # 10Hz publishing
 
         self.get_logger().info("Efficient Occupancy Grid Mapper initialized")
 
@@ -131,24 +140,55 @@ class EfficientOccupancyGridMapper(Node):
 
             # Store world position
             world_x, world_y = global_pose[0], global_pose[1]
-            self.robot_poses[robot_id] = (world_x, world_y)
 
-            # Convert to grid
-            gx, gy = self.world_to_grid(world_x, world_y)
-            if self.is_valid_grid_pos(gx, gy):
-                self.robot_grid_poses[robot_id] = (gx, gy)
+            with self.lock:
+                self.robot_poses[robot_id] = (world_x, world_y)
 
-            # Calculate heading
-            q = msg.pose.orientation
-            local_yaw = math.atan2(2.0 * (q.w * q.z + q.x * q.y),
-                                   1.0 - 2.0 * (q.y * q.y + q.z * q.z))
+                # Convert to grid
+                gx, gy = self.world_to_grid(world_x, world_y)
+                if self.is_valid_grid_pos(gx, gy):
+                    self.robot_grid_poses[robot_id] = (gx, gy)
 
-            # Apply transformation rotation
-            rot_matrix = self.robot_transforms[robot_id][:3, :3]
-            transform_yaw = math.atan2(rot_matrix[1, 0], rot_matrix[0, 0])
-            self.robot_headings[robot_id] = local_yaw + transform_yaw
+                # Calculate heading
+                q = msg.pose.orientation
+                local_yaw = math.atan2(2.0 * (q.w * q.z + q.x * q.y),
+                                       1.0 - 2.0 * (q.y * q.y + q.z * q.z))
+
+                # Apply transformation rotation
+                rot_matrix = self.robot_transforms[robot_id][:3, :3]
+                transform_yaw = math.atan2(rot_matrix[1, 0], rot_matrix[0, 0])
+                self.robot_headings[robot_id] = local_yaw + transform_yaw
 
         return callback
+
+    def publish_robot_positions(self):
+        """
+        NEW: Publish all robot positions in grid coordinates as a PoseArray.
+        Each pose in the array corresponds to a robot, with the robot_id encoded in the z position.
+        """
+        msg = PoseArray()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = "map"
+
+        with self.lock:
+            for robot_id in sorted(self.robot_ids):  # Sort to ensure consistent order
+                if self.robot_grid_poses[robot_id] is not None:
+                    pose = Pose()
+                    gx, gy = self.robot_grid_poses[robot_id]
+
+                    # Grid coordinates
+                    pose.position.x = float(gx)
+                    pose.position.y = float(gy)
+                    pose.position.z = float(robot_id)  # Encode robot_id in z
+
+                    # Orientation (heading)
+                    yaw = self.robot_headings[robot_id]
+                    pose.orientation.z = math.sin(yaw / 2.0)
+                    pose.orientation.w = math.cos(yaw / 2.0)
+
+                    msg.poses.append(pose)
+
+        self.robot_positions_pub.publish(msg)
 
     def point_cloud_callback(self, msg):
         """Process merged point cloud efficiently"""
