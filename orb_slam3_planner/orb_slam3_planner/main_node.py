@@ -7,7 +7,7 @@ from nav_msgs.msg import OccupancyGrid, Path
 import math
 import numpy as np
 import time
-
+import yaml
 from orb_slam3_planner.planner_module import FrontierPlanner
 from orb_slam3_planner.drone_controller_module import DroneController
 
@@ -25,13 +25,17 @@ class AutonomousExplorerNode(Node):
         # Namespace & Parameters
         # ======================
         self.declare_parameter('robot_namespace', '')
+        self.declare_parameter('robot_configs', '{}')
+
         self.robot_namespace = self.get_parameter('robot_namespace').value.rstrip('/')
+        robot_configs_yaml = self.get_parameter('robot_configs').value
+        self.robot_configs = yaml.safe_load(robot_configs_yaml)
 
         # Extract robot ID from namespace (assumes format 'robot_0', 'robot_1', etc.)
         self.robot_id = int(self.robot_namespace.split('_')[-1]) if self.robot_namespace else 0
 
-        # List of all robot IDs in the system
-        self.all_robot_ids = [0, 1, 2]  # Adjust based on your system
+        # Dynamically extract all robot IDs from the config
+        self.all_robot_ids = list(self.robot_configs.keys())
 
         # ======================
         # Map Parameters (matching new mapper)

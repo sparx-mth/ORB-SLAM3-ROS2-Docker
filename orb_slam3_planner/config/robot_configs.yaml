@@ -1,0 +1,12 @@
+# Use integer keys (0, 1, 2) instead of string keys (robot_0, robot_1, robot_2)
+0:
+  position: [-3.0, 2.0, 0.5]
+  orientation: [0.0, 0.0, 0.0]
+
+1:
+  position: [-2.0, 0.0, 0.5]
+  orientation: [0.0, 0.0, 0.0]
+
+2:
+  position: [-3.0, -4.0, 0.5]
+  orientation: [0.0, 0.0, 0.0]

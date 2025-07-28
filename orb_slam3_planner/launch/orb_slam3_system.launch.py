@@ -2,6 +2,9 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
+import os
+import yaml
+from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
@@ -17,11 +20,15 @@ def generate_launch_description():
     """
 
     # Robot configurations must match those in multi_robot_map_builder.py
-    robot_configs = {
-        0: {'position': [-3, 2.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        1: {'position': [-2.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        2: {'position': [-3, -4.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
-    }
+    config_file = os.path.join(
+        get_package_share_directory('orb_slam3_planner'),
+        'config',
+        'robot_configs.yaml'
+    )
+
+    with open(config_file, 'r') as f:
+        robot_configs = yaml.safe_load(f)
+    robot_configs_yaml = yaml.dump(robot_configs)  # for passing to nodes
 
     nodes = []
 
@@ -31,7 +38,8 @@ def generate_launch_description():
             package='orb_slam3_planner',
             executable='multi_robot_map_builder',
             name='multi_robot_map_builder',
-            output='screen'
+            output='screen',
+            parameters=[{'robot_configs': robot_configs_yaml}]
         )
     )
 
@@ -41,7 +49,8 @@ def generate_launch_description():
             package='orb_slam3_planner',
             executable='multi_robot_map_merger',
             name='multi_robot_map_merger',
-            output='screen'
+            output='screen',
+            parameters=[{'robot_configs': robot_configs_yaml}]
         )
     )
 
@@ -50,7 +59,8 @@ def generate_launch_description():
             package='orb_slam3_planner',
             executable='multi_robot_visualizer_2d',
             name='multi_robot_visualizer_2d',
-            output='screen'
+            output='screen',
+            parameters=[{'robot_configs': robot_configs_yaml}]
         )
     )
 
@@ -59,15 +69,14 @@ def generate_launch_description():
             package='orb_slam3_planner',
             executable='multi_robot_visualizer',
             name='multi_robot_visualizer',
-            output='screen'
+            output='screen',
+            parameters=[{'robot_configs': robot_configs_yaml}]
         )
     )
 
-    # 3. Launch individual robot nodes
     for robot_id in robot_configs.keys():
         namespace = f'robot_{robot_id}'
 
-        # Main autonomous explorer node
         nodes.append(
             Node(
                 package='orb_slam3_planner',
@@ -75,25 +84,25 @@ def generate_launch_description():
                 name=f'autonomous_explorer_{robot_id}',
                 namespace='',
                 parameters=[{
-                    'robot_namespace': namespace
+                    'robot_namespace': namespace,
+                    'robot_configs': robot_configs_yaml
                 }],
                 output='screen',
             )
         )
 
-        # Landmark publisher for each robot
         nodes.append(
             Node(
                 package='orb_slam3_planner',
                 executable='landmark_publisher_node',
                 name=f'landmark_publisher_{robot_id}',
-                namespace='',  # Empty namespace, use parameter instead
+                namespace='',
                 parameters=[{
                     'robot_namespace': namespace,
                     'robot_id': robot_id
                 }],
                 output='screen',
-                respawn=True,  # Restart if it crashes
+                respawn=True,
                 respawn_delay=2.0
             )
         )

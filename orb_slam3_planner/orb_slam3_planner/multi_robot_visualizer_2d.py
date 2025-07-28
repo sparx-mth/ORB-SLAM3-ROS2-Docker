@@ -10,6 +10,7 @@ import cv2
 import math
 from collections import deque
 import time
+import yaml
 
 
 class MultiRobot2DVisualizer(Node):
@@ -18,11 +19,16 @@ class MultiRobot2DVisualizer(Node):
     Now receives robot positions from the map builder instead of SLAM.
     """
 
-    def __init__(self, robot_configs):
+    def __init__(self):
         super().__init__('multi_robot_2d_visualizer')
 
-        self.robot_configs = robot_configs
-        self.robot_ids = list(robot_configs.keys())
+        # Declare and read robot_configs parameter
+        self.declare_parameter('robot_configs', '{}')
+        robot_configs_yaml = self.get_parameter('robot_configs').value
+        self.robot_configs = yaml.safe_load(robot_configs_yaml)
+
+        # Extract robot IDs from config
+        self.robot_ids = list(self.robot_configs.keys())
 
         # Configuration flags
         self.enable_visualization = True  # Master switch for visualization
@@ -420,16 +426,7 @@ class MultiRobot2DVisualizer(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-
-    # Robot configurations - must match map merger and mapper
-    robot_configs = {
-        0: {'position': [-3, 2.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        1: {'position': [-2.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        2: {'position': [-3, -4.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
-    }
-
-    node = MultiRobot2DVisualizer(robot_configs)
-
+    node = MultiRobot2DVisualizer()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

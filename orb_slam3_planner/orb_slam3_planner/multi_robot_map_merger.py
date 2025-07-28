@@ -11,7 +11,7 @@ import struct
 import threading
 from scipy.spatial.transform import Rotation as R
 from scipy.spatial import cKDTree
-
+import yaml
 
 class MultiRobotMapMerger(Node):
     """
@@ -19,11 +19,16 @@ class MultiRobotMapMerger(Node):
     Subscribes to landmark topics published by landmark_publisher_node.py
     """
 
-    def __init__(self, robot_configs):
+    def __init__(self):
         super().__init__('multi_robot_map_merger')
 
-        self.robot_configs = robot_configs
-        self.robot_ids = list(robot_configs.keys())
+        # Declare and read robot_configs parameter
+        self.declare_parameter('robot_configs', '{}')
+        robot_configs_yaml = self.get_parameter('robot_configs').value
+        self.robot_configs = yaml.safe_load(robot_configs_yaml)
+
+        # Extract robot IDs from config
+        self.robot_ids = list(self.robot_configs.keys())
 
         # Configuration
         self.enable_logging = False
@@ -31,13 +36,13 @@ class MultiRobotMapMerger(Node):
         self.min_points_for_merge = 100
 
         # Data storage
-        self.robot_poses = {rid: None for rid in robot_configs.keys()}
-        self.raw_landmarks = {rid: np.empty((0, 3)) for rid in robot_configs.keys()}
-        self.landmarks_received = {rid: False for rid in robot_configs.keys()}
+        self.robot_poses = {rid: None for rid in self.robot_configs.keys()}
+        self.raw_landmarks = {rid: np.empty((0, 3)) for rid in self.robot_configs.keys()}
+        self.landmarks_received = {rid: False for rid in self.robot_configs.keys()}
 
         # Transformation matrices
         self.robot_transforms = {}
-        for robot_id, config in robot_configs.items():
+        for robot_id, config in self.robot_configs.items():
             self.robot_transforms[robot_id] = self.create_transformation_matrix(
                 config['position'], config.get('orientation', [0, 0, 0])
             )
@@ -51,7 +56,7 @@ class MultiRobotMapMerger(Node):
         )
 
         # Subscribe to robot poses
-        for robot_id in robot_configs.keys():
+        for robot_id in self.robot_configs.keys():
             pose_topic = f'/robot_{robot_id}/robot_pose_slam'
             self.create_subscription(
                 PoseStamped,
@@ -62,7 +67,7 @@ class MultiRobotMapMerger(Node):
             self.get_logger().info(f'Subscribed to pose topic: {pose_topic}')
 
         # Subscribe to landmark topics from landmark_publisher_node
-        for robot_id in robot_configs.keys():
+        for robot_id in self.robot_configs.keys():
             landmark_topic = f'/robot_{robot_id}/orb_slam3/landmarks_raw'
             self.create_subscription(
                 PointCloud2,
@@ -354,16 +359,7 @@ class MultiRobotMapMerger(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-
-    # Robot configurations - must match those in launch file
-    robot_configs = {
-        0: {'position': [-3, 2.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        1: {'position': [-2.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        2: {'position': [-3, -4.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
-    }
-
-    node = MultiRobotMapMerger(robot_configs)
-
+    node = MultiRobotMapMerger()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

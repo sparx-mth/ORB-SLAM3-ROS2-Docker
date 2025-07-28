@@ -12,7 +12,7 @@ from scipy.spatial.transform import Rotation as R
 import math
 from collections import defaultdict
 import threading
-
+import yaml
 
 class EfficientOccupancyGridMapper(Node):
     """
@@ -21,11 +21,16 @@ class EfficientOccupancyGridMapper(Node):
     Now also publishes robot positions in grid coordinates.
     """
 
-    def __init__(self, robot_configs):
+    def __init__(self):
         super().__init__('efficient_occupancy_grid_mapper')
 
-        self.robot_configs = robot_configs
-        self.robot_ids = list(robot_configs.keys())
+        # Declare and read robot_configs parameter
+        self.declare_parameter('robot_configs', '{}')
+        robot_configs_yaml = self.get_parameter('robot_configs').value
+        self.robot_configs = yaml.safe_load(robot_configs_yaml)
+
+        # Extract robot IDs from config
+        self.robot_ids = list(self.robot_configs.keys())
 
         # ======================
         # Map Parameters
@@ -71,7 +76,7 @@ class EfficientOccupancyGridMapper(Node):
 
         # Transformation matrices
         self.robot_transforms = {}
-        for robot_id, config in robot_configs.items():
+        for robot_id, config in self.robot_configs.items():
             self.robot_transforms[robot_id] = self.create_transformation_matrix(
                 config['position'], config.get('orientation', [0, 0, 0])
             )
@@ -472,16 +477,7 @@ class EfficientOccupancyGridMapper(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-
-    # Robot configurations - must match map merger
-    robot_configs = {
-        0: {'position': [-3, 2.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        1: {'position': [-2.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        2: {'position': [-3, -4.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
-    }
-
-    node = EfficientOccupancyGridMapper(robot_configs)
-
+    node = EfficientOccupancyGridMapper()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

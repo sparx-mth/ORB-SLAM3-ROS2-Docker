@@ -11,23 +11,27 @@ import threading
 import time
 from collections import deque
 from scipy.spatial.transform import Rotation as R
-
+import yaml
 
 class ImprovedMultiRobotVisualizer(Node):
-    def __init__(self, robot_configs, show_trajectory=True, trajectory_length=200):
+    def __init__(self, show_trajectory=True, trajectory_length=200):
         super().__init__('improved_multi_robot_visualizer')
 
-        self.robot_configs = robot_configs
+        # Declare and read robot_configs parameter
+        self.declare_parameter('robot_configs', '{}')
+        robot_configs_yaml = self.get_parameter('robot_configs').value
+        self.robot_configs = yaml.safe_load(robot_configs_yaml)
+
         self.show_trajectory = show_trajectory
         self.trajectory_length = trajectory_length
 
         # Data storage
-        self.robot_poses = {rid: None for rid in robot_configs.keys()}
-        self.trajectories = {rid: deque(maxlen=trajectory_length) for rid in robot_configs.keys()}
+        self.robot_poses = {rid: None for rid in self.robot_configs.keys()}
+        self.trajectories = {rid: deque(maxlen=trajectory_length) for rid in self.robot_configs.keys()}
 
         # Transformation matrices
         self.robot_transforms = {}
-        for robot_id, config in robot_configs.items():
+        for robot_id, config in self.robot_configs.items():
             self.robot_transforms[robot_id] = self.create_transformation_matrix(
                 config['position'], config.get('orientation', [0, 0, 0])
             )
@@ -38,17 +42,17 @@ class ImprovedMultiRobotVisualizer(Node):
         # Visualization state
         self.vis_lock = threading.Lock()
         self.should_reset_view = False
-        self.first_pose_received = {rid: False for rid in robot_configs.keys()}
+        self.first_pose_received = {rid: False for rid in self.robot_configs.keys()}
 
         # Visualization options
         self.show_grid = True
         self.show_axes = True
         self.point_size = 2.0
 
-        self.get_logger().info(f'Initializing Improved Multi-Robot Visualizer for robots: {list(robot_configs.keys())}')
+        self.get_logger().info(f'Initializing Improved Multi-Robot Visualizer for robots: {list(self.robot_configs.keys())}')
 
         # Subscribe to robot poses only
-        for robot_id in robot_configs.keys():
+        for robot_id in self.robot_configs.keys():
             # Pose subscription
             self.create_subscription(
                 PoseStamped,
@@ -357,17 +361,8 @@ class ImprovedMultiRobotVisualizer(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-
-    # Robot configurations with positions and orientations
-    robot_configs = {
-        0: {'position': [-3, 2.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        1: {'position': [-2.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        2: {'position': [-3, -4.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
-    }
-
     # Create visualizer
     node = ImprovedMultiRobotVisualizer(
-        robot_configs=robot_configs,
         show_trajectory=True,
         trajectory_length=500
     )

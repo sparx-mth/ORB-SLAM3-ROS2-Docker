@@ -9,6 +9,7 @@ setup(
     data_files=[
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/launch', ['launch/orb_slam3_system.launch.py']),
+        ('share/' + package_name + '/config', ['config/robot_configs.yaml']),
     ],
 
     install_requires=['setuptools'],
