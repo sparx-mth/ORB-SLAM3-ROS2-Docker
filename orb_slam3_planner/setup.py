@@ -12,7 +12,11 @@ setup(
         ('share/' + package_name + '/config', ['config/robot_configs.yaml']),
     ],
 
-    install_requires=['setuptools'],
+    install_requires=[
+        'setuptools',
+        'open3d',
+        'numpy==1.26.4',
+    ],
     zip_safe=True,
     maintainer='nadav',
     maintainer_email='nadavcherry@gmail.com',

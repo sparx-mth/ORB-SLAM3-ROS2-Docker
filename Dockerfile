@@ -1,4 +1,3 @@
-# Image taken from https://github.com/turlucode/ros-docker-gui
 FROM osrf/ros:humble-desktop-full-jammy
 ARG USE_CI
 
@@ -6,6 +5,11 @@ RUN apt-get update
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get install -y gnupg2 curl lsb-core vim wget python3-pip libpng16-16 libjpeg-turbo8 libtiff5
+
+# Install pinned Python packages to avoid Open3D conflicts
+RUN python3 -m pip install --upgrade pip
+RUN pip install numpy==1.26.4
+RUN pip install open3d
 
 RUN apt-get install -y \
     # Base tools
@@ -15,8 +19,6 @@ RUN apt-get install -y \
     unzip \
     pkg-config \
     python3-dev \
-    # OpenCV dependencies
-    python3-numpy \
     # Pangolin dependencies
     libgl1-mesa-dev \
     libglew-dev \
@@ -30,7 +32,7 @@ RUN apt update
 
 
 # Build OpenCV
-RUN apt-get install -y python3-dev python3-numpy python2-dev
+RUN apt-get install -y python3-dev python2-dev
 RUN apt-get install -y libavcodec-dev libavformat-dev libswscale-dev
 RUN apt-get install -y libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev
 RUN apt-get install -y libgtk-3-dev
