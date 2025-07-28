@@ -357,8 +357,8 @@ def main(args=None):
 
     # Robot configurations - must match those in launch file
     robot_configs = {
-        0: {'position': [-3, 1.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        1: {'position': [-1.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
+        0: {'position': [-3, 2.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
+        1: {'position': [-2.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
         2: {'position': [-3, -4.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
     }
 

@@ -375,6 +375,9 @@ class AutonomousExplorerNode(Node):
                     if self.controller.check_collision_ahead():
                         # Obstacle detected, replan path
                         self.get_logger().warn("Obstacle on path! Replanning...")
+                        twist = Twist()
+                        twist.linear.x = -self.linear_speed * 1.0
+                        self.cmd_pub.publish(twist)
                         new_path = self.planner.plan_path(self.robot_pos, self.target)
                         if new_path and len(new_path) > 1:
                             self.current_path = new_path

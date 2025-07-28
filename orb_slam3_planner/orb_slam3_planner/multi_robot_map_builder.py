@@ -37,16 +37,20 @@ class EfficientOccupancyGridMapper(Node):
 
         # Height filter for 2D projection
         self.z_min = 0.1  # Minimum height to consider
-        self.z_max = 2.0  # Maximum height to consider
+        self.z_max = 3.5  # Maximum height to consider
 
         # Occupancy thresholds
-        self.points_threshold = 17  # Min points in cell to mark as occupied
+        self.points_threshold = 15  # Min points in cell to mark as occupied
         self.max_range = 8.0  # Maximum sensor range in meters
-        self.open_area_range = 2.5  # Half range for open area detection (when no obstacles)
+        self.open_area_range = 2.0
 
         # Camera FOV parameters
         self.camera_fov = math.radians(60)  # 60 degree FOV
         self.fov_resolution = math.radians(1)  # Angular resolution for FOV scanning
+
+        # Robot filtering parameters
+        self.robot_radius = 0.5 # Radius around robot to ignore points (meters)
+        self.robot_clearance_radius = 0.5  # Radius for guaranteed free space around robots
 
         # ======================
         # Data Structures
@@ -56,6 +60,9 @@ class EfficientOccupancyGridMapper(Node):
 
         # Point count grid for efficient density calculation
         self.point_count = np.zeros((self.grid_size, self.grid_size), dtype=np.uint16)
+
+        # Track cells that robots have traversed (guaranteed free)
+        self.traversed_cells = set()
 
         # Robot states
         self.robot_poses = {rid: None for rid in self.robot_ids}
@@ -68,6 +75,9 @@ class EfficientOccupancyGridMapper(Node):
             self.robot_transforms[robot_id] = self.create_transformation_matrix(
                 config['position'], config.get('orientation', [0, 0, 0])
             )
+
+        # Mark initial positions as free
+        self.mark_initial_positions_free()
 
         # Thread safety
         self.lock = threading.Lock()
@@ -107,7 +117,24 @@ class EfficientOccupancyGridMapper(Node):
         # Timer for robot positions publishing
         self.create_timer(0.5, self.publish_robot_positions)  # 10Hz publishing
 
-        self.get_logger().info("Efficient Occupancy Grid Mapper initialized with open area detection")
+        self.get_logger().info("Efficient Occupancy Grid Mapper initialized with robot filtering and path tracking")
+
+    def mark_initial_positions_free(self):
+        """Mark initial robot positions as free space"""
+        for robot_id, config in self.robot_configs.items():
+            x, y = config['position'][0], config['position'][1]
+            gx, gy = self.world_to_grid(x, y)
+
+            # Mark a radius around initial position as free
+            radius_cells = int(self.robot_clearance_radius / self.resolution)
+            for dx in range(-radius_cells, radius_cells + 1):
+                for dy in range(-radius_cells, radius_cells + 1):
+                    cell_x, cell_y = gx + dx, gy + dy
+                    if self.is_valid_grid_pos(cell_x, cell_y):
+                        dist_sq = dx * dx + dy * dy
+                        if dist_sq <= radius_cells * radius_cells:
+                            self.traversed_cells.add((cell_x, cell_y))
+                            self.occupancy_grid[cell_y, cell_x] = 0
 
     def create_transformation_matrix(self, position, orientation):
         """Create 4x4 transformation matrix"""
@@ -129,6 +156,27 @@ class EfficientOccupancyGridMapper(Node):
     def is_valid_grid_pos(self, gx, gy):
         """Check if grid position is valid"""
         return 0 <= gx < self.grid_size and 0 <= gy < self.grid_size
+
+    def is_near_any_robot(self, world_x, world_y):
+        """Check if a point is near any robot (to filter out robot points)"""
+        for robot_id, robot_pose in self.robot_poses.items():
+            if robot_pose is not None:
+                rx, ry = robot_pose
+                dist_sq = (world_x - rx) ** 2 + (world_y - ry) ** 2
+                if dist_sq <= self.robot_radius ** 2:
+                    return True
+        return False
+
+    def mark_robot_path_free(self, robot_id, gx, gy):
+        """Mark cells around robot's current position as free (traversed)"""
+        # Mark a small radius around the robot as definitely free
+        radius_cells = int(0.5 / self.resolution)  # 0.5m radius
+        for dx in range(-radius_cells, radius_cells + 1):
+            for dy in range(-radius_cells, radius_cells + 1):
+                cell_x, cell_y = gx + dx, gy + dy
+                if self.is_valid_grid_pos(cell_x, cell_y):
+                    self.traversed_cells.add((cell_x, cell_y))
+                    self.occupancy_grid[cell_y, cell_x] = 0
 
     def create_pose_callback(self, robot_id):
         """Create pose callback for each robot"""
@@ -153,6 +201,8 @@ class EfficientOccupancyGridMapper(Node):
                 gx, gy = self.world_to_grid(world_x, world_y)
                 if self.is_valid_grid_pos(gx, gy):
                     self.robot_grid_poses[robot_id] = (gx, gy)
+                    # Mark robot's path as free
+                    self.mark_robot_path_free(robot_id, gx, gy)
 
                 # Calculate heading
                 q = msg.pose.orientation
@@ -202,7 +252,9 @@ class EfficientOccupancyGridMapper(Node):
             points = []
             for p in pc2.read_points(msg, field_names=("x", "y", "z"), skip_nans=True):
                 if self.z_min <= p[2] <= self.z_max:  # Height filter
-                    points.append((p[0], p[1]))
+                    # Filter out points near any robot
+                    if not self.is_near_any_robot(p[0], p[1]):
+                        points.append((p[0], p[1]))
 
             with self.lock:
                 # Reset point count
@@ -212,12 +264,18 @@ class EfficientOccupancyGridMapper(Node):
                 for x, y in points:
                     gx, gy = self.world_to_grid(x, y)
                     if self.is_valid_grid_pos(gx, gy):
-                        self.point_count[gy, gx] += 1
+                        # Don't count points in traversed cells
+                        if (gx, gy) not in self.traversed_cells:
+                            self.point_count[gy, gx] += 1
 
                 # Mark cells as occupied based on point density
                 occupied_cells = set()
                 for gy in range(self.grid_size):
                     for gx in range(self.grid_size):
+                        # Never mark traversed cells as occupied
+                        if (gx, gy) in self.traversed_cells:
+                            continue
+
                         if self.point_count[gy, gx] >= self.points_threshold:
                             self.occupancy_grid[gy, gx] = 1
                             occupied_cells.add((gx, gy))
@@ -341,7 +399,9 @@ class EfficientOccupancyGridMapper(Node):
             # Don't mark the robot's cell or the final cell as free
             if (x, y) != (x0, y0) and (x, y) != (x1, y1):
                 if self.is_valid_grid_pos(x, y) and self.occupancy_grid[y, x] != 1:
-                    self.occupancy_grid[y, x] = 0  # Mark as free
+                    # Don't override traversed cells
+                    if (x, y) not in self.traversed_cells:
+                        self.occupancy_grid[y, x] = 0  # Mark as free
 
             # Check if we've reached the end
             if x == x1 and y == y1:
@@ -415,8 +475,8 @@ def main(args=None):
 
     # Robot configurations - must match map merger
     robot_configs = {
-        0: {'position': [-3, 1.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
-        1: {'position': [-1.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
+        0: {'position': [-3, 2.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
+        1: {'position': [-2.0, 0.0, 0.5], 'orientation': [0.0, 0.0, 0.0]},
         2: {'position': [-3, -4.0, 0.5], 'orientation': [0.0, 0.0, 0.0]}
     }
 
