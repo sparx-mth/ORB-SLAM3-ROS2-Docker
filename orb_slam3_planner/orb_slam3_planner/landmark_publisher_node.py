@@ -87,8 +87,9 @@ class LandmarkPublisherNode(Node):
         """
         Send an asynchronous service request to retrieve all current landmarks.
 
-        This function checks that the SLAM service is ready and, if so, requests
+        This function first checks that the SLAM service is ready. If so, it requests
         all available 3D landmarks. The response is handled via a callback.
+        If the service is not ready, the function returns without making a request.
         """
         ...
 

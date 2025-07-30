@@ -251,6 +251,8 @@ class EfficientOccupancyGridMapper(Node):
         """
         Mark a radius around the robot's current grid position as free space.
 
+        The radius is 0.5 meters, which translates to cells based on the current resolution.
+
         Args:
             robot_id (str): ID of the robot.
             gx (int): Grid x index of robot position.

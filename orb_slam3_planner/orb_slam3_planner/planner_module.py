@@ -33,15 +33,16 @@ class FrontierPlanner:
     -----------------------------------
     - self.node.robot_pos: (int, int) – current grid cell of the robot
     - self.node.robot_angle: float – robot orientation in radians
-    - self.node.visited_targets: List[(int, int)] – previously chosen frontier points
+    - self.node.visited_targets: Set[(int, int)] – previously chosen frontier points
     - self.node.safe_distance: int – safety buffer (cells) near obstacles
     - self.node.grid_size: int – grid map dimensions
     - self.node.get_occupancy_value(x, y): -> int – map query function
     - self.node.other_robot_positions: Dict[int, Tuple[int, int]]
     - self.node.other_robot_goals: Dict[int, Tuple[int, int]]
     - self.node.min_robot_separation: float – required spacing between robots
-    - self.node.exploration_radius: float – range for novelty filtering
+    - self.node.exploration_radius: int – range for novelty filtering (in grid cells)
     - self.node.use_frontier_scoring: bool – toggle advanced scoring
+    - self.node.all_robot_ids: List[int] – list of all robot IDs in the system
 
     Usage:
     ------
@@ -129,6 +130,12 @@ class FrontierPlanner:
         - Information gain (near unknowns)
         - Heading alignment
         - Separation from other robots (goals + positions)
+
+        Logs debug information about other robot positions and goals when present.
+        Falls back to exploration tour if no suitable frontier is found.
+
+        Returns:
+            Tuple[int, int]: Best frontier coordinates, or exploration tour point, or None.
         """
         if not self.node.robot_pos:
             return None

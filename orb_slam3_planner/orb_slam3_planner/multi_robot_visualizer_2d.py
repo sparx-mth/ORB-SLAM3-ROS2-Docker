@@ -160,6 +160,7 @@ class MultiRobot2DVisualizer(Node):
         Creates a callback to receive and store the planned A* path for a given robot.
 
         Converts path from world coordinates to grid coordinates for visualization.
+        Note: Requires that at least one map has been received to initialize origin_offset.
 
         Args:
             robot_id (int): ID of the robot.

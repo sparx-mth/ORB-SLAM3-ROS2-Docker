@@ -165,7 +165,8 @@ class MultiRobotMapMerger(Node):
         """
         Generate a ROS subscriber callback for receiving raw landmark point clouds.
 
-        Applies filtering and transformation to align landmarks with the global frame.
+        Applies filtering (removing close and isolated points) and transformation
+        to align landmarks with the global frame.
 
         Args:
             robot_id (int): The ID of the robot for which the callback is created.

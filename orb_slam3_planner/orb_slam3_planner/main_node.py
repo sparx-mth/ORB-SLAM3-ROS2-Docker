@@ -16,7 +16,7 @@ class AutonomousExplorerNode(Node):
     """
     ROS2 node for autonomous frontier-based exploration in a 2D occupancy grid map.
 
-    This node manages a single robot’s exploration behavior while coordinating with other robots
+    This node manages a single robot's exploration behavior while coordinating with other robots
     through a shared occupancy grid and goal exchange. It uses a finite-state machine to govern
     behaviors such as initial map scanning, frontier planning, obstacle avoidance, and recovery.
 
@@ -32,7 +32,7 @@ class AutonomousExplorerNode(Node):
     Subscribed Topics:
     ------------------
     - /occupancy_grid: Shared occupancy grid from central map merger
-    - /robot_grid_positions: PoseArray with all robots’ positions and headings
+    - /robot_grid_positions: PoseArray with all robots' positions and headings
     - /robot_<id>/goal_grid_pos: Current goal position of other robots
 
     Published Topics:
@@ -44,7 +44,8 @@ class AutonomousExplorerNode(Node):
     Parameters:
     -----------
     - robot_namespace (str): Namespace of the robot, used to identify ID
-    - robot_configs (str, YAML): Mapping of all participating robots
+    - robot_configs (str, YAML): Mapping of all participating robots, used to
+      dynamically determine all robot IDs in the system
 
     Internal Modules:
     -----------------
@@ -60,8 +61,9 @@ class AutonomousExplorerNode(Node):
 
     Execution:
     ----------
-    The control loop runs periodically and adapts behavior based on environment, goals,
-    and obstacles. This node is meant to run in tandem with SLAM and map-merging systems.
+    The control loop runs at 2 Hz (every 0.5 seconds) and adapts behavior based
+    on environment, goals, and obstacles. This node is meant to run in tandem
+    with SLAM and map-merging systems.
     """
 
     def __init__(self):
@@ -347,7 +349,8 @@ class AutonomousExplorerNode(Node):
             - EXPLORING: Selects and plans to frontiers using A*.
             - MOVING_TO_TARGET: Follows path to the current target.
             - RECOVERY: Backs up when robot is stuck.
-        Executed periodically via ROS timer (~2 Hz).
+
+        Executed periodically via ROS timer at 2 Hz (every 0.5 seconds).
         """
         if not self.robot_pos:
             self.controller.stop_robot()
