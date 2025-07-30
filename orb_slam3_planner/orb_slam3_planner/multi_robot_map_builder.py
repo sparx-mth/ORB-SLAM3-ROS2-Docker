@@ -16,10 +16,45 @@ import yaml
 
 class EfficientOccupancyGridMapper(Node):
     """
-    Efficient real-time occupancy grid mapper for multi-robot SLAM.
-    Converts 3D point clouds to 2D occupancy grid with visibility constraints.
-    Now also publishes robot positions in grid coordinates.
+    A real-time 2D occupancy grid generator for multi-robot SLAM systems using 3D point clouds.
+
+    This ROS2 node constructs and maintains a global 2D occupancy grid by projecting filtered 3D
+    point clouds from multiple robots. It performs obstacle detection, visibility ray-tracing,
+    and robot-aware filtering to improve accuracy and robustness.
+
+    Key Features:
+    -------------
+    - Subscribes to:
+        * /merged_map (PointCloud2): Merged 3D map from all robots.
+        * /robot_<id>/robot_pose_slam (PoseStamped): Per-robot SLAM pose for position and heading.
+    - Publishes:
+        * /occupancy_grid (OccupancyGrid): 2D occupancy map with unknown, free, and occupied states.
+        * /robot_grid_positions (PoseArray): Per-robot grid cell positions and headings (encoded in pose).
+    - Supports:
+        * Robot body filtering to ignore robot parts as obstacles
+        * Free-space marking along robot paths and within their field-of-view (FOV)
+        * Efficient ray-casting using Bresenham’s algorithm
+        * Configurable per-robot transforms for frame alignment
+
+    Parameters:
+    -----------
+    - robot_configs (str, YAML): Dictionary mapping robot IDs to initial positions and orientations.
+
+    Internal Map Representation:
+    ----------------------------
+    - Grid resolution: 0.5 meters per cell (configurable)
+    - Map size: 30m x 30m centered around origin
+    - Occupancy values: -1 = unknown, 0 = free, 1 = occupied
+    - Point density threshold to mark occupied space
+    - Robot-safe zones and open area heuristics to reduce false positives
+
+    Use Case:
+    ---------
+    This node should be launched in systems using ORB-SLAM3, map merging, and multi-agent exploration.
+    It enables all agents to operate with a consistent shared 2D map while avoiding marking robots
+    themselves as obstacles.
     """
+
 
     def __init__(self):
         super().__init__('efficient_occupancy_grid_mapper')
@@ -125,7 +160,11 @@ class EfficientOccupancyGridMapper(Node):
         self.get_logger().info("Efficient Occupancy Grid Mapper initialized with robot filtering and path tracking")
 
     def mark_initial_positions_free(self):
-        """Mark initial robot positions as free space"""
+        """
+        Mark the initial configuration positions of all robots as free space in the occupancy grid.
+
+        This prevents false-positive obstacle markings at the robots' starting locations.
+        """
         for robot_id, config in self.robot_configs.items():
             x, y = config['position'][0], config['position'][1]
             gx, gy = self.world_to_grid(x, y)
@@ -142,7 +181,16 @@ class EfficientOccupancyGridMapper(Node):
                             self.occupancy_grid[cell_y, cell_x] = 0
 
     def create_transformation_matrix(self, position, orientation):
-        """Create 4x4 transformation matrix"""
+        """
+        Create a 4x4 transformation matrix from position and orientation (Euler angles).
+
+        Args:
+            position (list): [x, y, z] position of robot.
+            orientation (list): [roll, pitch, yaw] in radians.
+
+        Returns:
+            np.ndarray: 4x4 homogeneous transformation matrix.
+        """
         rotation = R.from_euler('xyz', orientation)
         rotation_matrix = rotation.as_matrix()
 
@@ -153,17 +201,44 @@ class EfficientOccupancyGridMapper(Node):
         return transform
 
     def world_to_grid(self, x, y):
-        """Convert world coordinates to grid indices"""
+        """
+        Convert world coordinates (in meters) to grid indices.
+
+        Args:
+            x (float): World x-coordinate.
+            y (float): World y-coordinate.
+
+        Returns:
+            tuple: (grid_x, grid_y) indices in the occupancy grid.
+        """
         gx = int((x + self.origin_offset) / self.resolution)
         gy = int((y + self.origin_offset) / self.resolution)
         return gx, gy
 
     def is_valid_grid_pos(self, gx, gy):
-        """Check if grid position is valid"""
+        """
+        Check if grid cell indices are within the map bounds.
+
+        Args:
+            gx (int): Grid x index.
+            gy (int): Grid y index.
+
+        Returns:
+            bool: True if indices are valid.
+        """
         return 0 <= gx < self.grid_size and 0 <= gy < self.grid_size
 
     def is_near_any_robot(self, world_x, world_y):
-        """Check if a point is near any robot (to filter out robot points)"""
+        """
+        Determine whether a given point is within a robot's physical body radius.
+
+        Args:
+            world_x (float): World x-coordinate of the point.
+            world_y (float): World y-coordinate of the point.
+
+        Returns:
+            bool: True if point is within robot radius.
+        """
         for robot_id, robot_pose in self.robot_poses.items():
             if robot_pose is not None:
                 rx, ry = robot_pose
@@ -173,7 +248,14 @@ class EfficientOccupancyGridMapper(Node):
         return False
 
     def mark_robot_path_free(self, robot_id, gx, gy):
-        """Mark cells around robot's current position as free (traversed)"""
+        """
+        Mark a radius around the robot's current grid position as free space.
+
+        Args:
+            robot_id (str): ID of the robot.
+            gx (int): Grid x index of robot position.
+            gy (int): Grid y index of robot position.
+        """
         # Mark a small radius around the robot as definitely free
         radius_cells = int(0.5 / self.resolution)  # 0.5m radius
         for dx in range(-radius_cells, radius_cells + 1):
@@ -184,8 +266,20 @@ class EfficientOccupancyGridMapper(Node):
                     self.occupancy_grid[cell_y, cell_x] = 0
 
     def create_pose_callback(self, robot_id):
-        """Create pose callback for each robot"""
+        """
+        Generate a pose subscriber callback for a given robot.
 
+        The callback updates:
+        - Robot world and grid position.
+        - Robot heading.
+        - Traversed path markings.
+
+        Args:
+            robot_id (str): Robot identifier.
+
+        Returns:
+            function: Callback to handle incoming PoseStamped messages.
+        """
         def callback(msg):
             # Transform to global frame
             local_pose = np.array([
@@ -223,8 +317,9 @@ class EfficientOccupancyGridMapper(Node):
 
     def publish_robot_positions(self):
         """
-        Publish all robot positions in grid coordinates as a PoseArray.
-        Each pose in the array corresponds to a robot, with the robot_id encoded in the z position.
+        Publish all robot positions as a `PoseArray`, in grid coordinates.
+
+        The z field of each pose encodes the robot ID (as float).
         """
         msg = PoseArray()
         msg.header.stamp = self.get_clock().now().to_msg()
@@ -251,7 +346,14 @@ class EfficientOccupancyGridMapper(Node):
         self.robot_positions_pub.publish(msg)
 
     def point_cloud_callback(self, msg):
-        """Process merged point cloud efficiently"""
+        """
+        Main processing function for the merged point cloud.
+
+        - Filters 3D points based on height and robot proximity.
+        - Populates a point count grid.
+        - Marks high-density cells as occupied.
+        - Performs visibility-based ray tracing for free space.
+        """
         try:
             # Extract points
             points = []
@@ -296,8 +398,10 @@ class EfficientOccupancyGridMapper(Node):
 
     def mark_open_areas_in_fov(self):
         """
-        Mark cells as free in the field of view when no obstacles are detected.
-        Uses half the normal range when no obstacles are present.
+        Mark unknown cells as free within the robot's field of view (FOV),
+        when no obstacles are detected.
+
+        This helps fill in gaps in open spaces.
         """
         for robot_id, robot_grid_pos in self.robot_grid_poses.items():
             if robot_grid_pos is None:
@@ -351,8 +455,12 @@ class EfficientOccupancyGridMapper(Node):
 
     def update_free_space_fast(self, occupied_cells):
         """
-        Efficient free space update using Bresenham's algorithm.
-        Only traces rays from robots to occupied cells.
+        Perform fast ray tracing from each robot to observed obstacles using Bresenham’s algorithm.
+
+        This clears free space between the robot and each obstacle (line-of-sight visibility).
+
+        Args:
+            occupied_cells (set): Set of (gx, gy) cells marked as occupied.
         """
         for robot_id, robot_grid_pos in self.robot_grid_poses.items():
             if robot_grid_pos is None:
@@ -380,7 +488,15 @@ class EfficientOccupancyGridMapper(Node):
                         self.trace_ray_bresenham(rx, ry, ox, oy)
 
     def normalize_angle(self, angle):
-        """Normalize angle to [-pi, pi]"""
+        """
+        Normalize an angle to the [-pi, pi] range.
+
+        Args:
+            angle (float): Input angle in radians.
+
+        Returns:
+            float: Normalized angle.
+        """
         while angle > math.pi:
             angle -= 2 * math.pi
         while angle < -math.pi:
@@ -389,8 +505,15 @@ class EfficientOccupancyGridMapper(Node):
 
     def trace_ray_bresenham(self, x0, y0, x1, y1):
         """
-        Bresenham's line algorithm for ray tracing.
-        Marks cells as free until hitting the target cell.
+        Apply Bresenham's line algorithm to trace a ray between two grid cells.
+
+        Marks all intermediate cells as free unless already occupied or traversed.
+
+        Args:
+            x0 (int): Start grid x index (robot position).
+            y0 (int): Start grid y index.
+            x1 (int): End grid x index (obstacle).
+            y1 (int): End grid y index.
         """
         dx = abs(x1 - x0)
         dy = abs(y1 - y0)
@@ -422,7 +545,11 @@ class EfficientOccupancyGridMapper(Node):
                 y += sy
 
     def publish_map(self):
-        """Publish the occupancy grid"""
+        """
+        Publish the current occupancy grid as a ROS `OccupancyGrid` message.
+
+        Unknown = -1, Free = 0, Occupied = 100.
+        """
         msg = OccupancyGrid()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = "map"
@@ -461,7 +588,11 @@ class EfficientOccupancyGridMapper(Node):
             self._last_log_time = self.get_clock().now().nanoseconds / 1e9
 
     def log_statistics(self):
-        """Log map statistics"""
+        """
+        Log the number of free, occupied, and unknown cells in the map.
+
+        This is called periodically and intended for monitoring/debugging.
+        """
         with self.lock:
             unknown = np.sum(self.occupancy_grid == -1)
             free = np.sum(self.occupancy_grid == 0)

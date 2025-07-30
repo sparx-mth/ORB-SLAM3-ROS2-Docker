@@ -9,30 +9,34 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     """
-    Launch file for multi-robot exploration system.
+    Launch description for the full multi-robot autonomous exploration system.
 
-    This launches:
-    1. One shared map builder (multi_robot_map_builder.py)
-    2. One map merger (multi_robot_map_merger.py)
-    3. Three autonomous explorers (main_node.py) - one for each robot
-    4. Three visualizers (autonomous_explorer_visualizer.py) - one for each robot
-    5. Three landmark publishers (landmark_publisher_node.py) - one for each robot
+    This launch file initializes:
+    - A centralized occupancy grid mapper that processes merged 3D point clouds.
+    - A global map merger that aligns and fuses 3D landmarks from multiple robots.
+    - A 2D visualizer using OpenCV to display grid map, paths, goals, and robot locations.
+    - A 3D visualizer using Open3D to show merged point cloud and robot trajectories.
+    - One autonomous exploration node per robot, handling planning and motion.
+    - One landmark publisher node per robot, requesting and publishing raw SLAM landmarks.
+
+    Each node receives the `robot_configs.yaml` which defines robot IDs, positions, and transforms.
     """
 
-    # Robot configurations must match those in multi_robot_map_builder.py
+    # Load robot configuration YAML
     config_file = os.path.join(
         get_package_share_directory('orb_slam3_planner'),
         'config',
         'robot_configs.yaml'
     )
-
     with open(config_file, 'r') as f:
         robot_configs = yaml.safe_load(f)
-    robot_configs_yaml = yaml.dump(robot_configs)  # for passing to nodes
+    robot_configs_yaml = yaml.dump(robot_configs)  # pass as parameter to nodes
 
     nodes = []
 
-    # 1. Launch shared map builder (only one instance)
+    # === 1. Occupancy Grid Builder ===
+    # Converts merged 3D point cloud into 2D occupancy grid.
+    # Publishes /occupancy_grid and robot grid positions (PoseArray).
     nodes.append(
         Node(
             package='orb_slam3_planner',
@@ -43,7 +47,9 @@ def generate_launch_description():
         )
     )
 
-    # 2. Launch map merger (only one instance)
+    # === 2. Landmark-Based Map Merger ===
+    # Merges landmark clouds from each robot into a single fused global map.
+    # Outputs /merged_map (PointCloud2) and filters noise.
     nodes.append(
         Node(
             package='orb_slam3_planner',
@@ -54,6 +60,8 @@ def generate_launch_description():
         )
     )
 
+    # === 3. 2D Grid Map Visualizer ===
+    # Displays the occupancy grid, robot positions, paths, and goals in OpenCV window.
     nodes.append(
         Node(
             package='orb_slam3_planner',
@@ -64,6 +72,8 @@ def generate_launch_description():
         )
     )
 
+    # === 4. 3D Point Cloud Visualizer ===
+    # Uses Open3D to visualize merged landmarks and robot trajectories.
     nodes.append(
         Node(
             package='orb_slam3_planner',
@@ -74,9 +84,13 @@ def generate_launch_description():
         )
     )
 
+    # === 5. Per-Robot Nodes ===
     for robot_id in robot_configs.keys():
         namespace = f'robot_{robot_id}'
 
+        # --- 5a. Autonomous Explorer ---
+        # Handles planning (frontier detection) and navigation using A*.
+        # Receives map, tracks pose, and publishes cmd_vel and goals.
         nodes.append(
             Node(
                 package='orb_slam3_planner',
@@ -91,6 +105,9 @@ def generate_launch_description():
             )
         )
 
+        # --- 5b. Landmark Publisher ---
+        # Periodically requests landmarks from the robot's SLAM service
+        # and publishes them to /robot_X/orb_slam3/landmarks_raw.
         nodes.append(
             Node(
                 package='orb_slam3_planner',
@@ -106,4 +123,5 @@ def generate_launch_description():
                 respawn_delay=2.0
             )
         )
+
     return LaunchDescription(nodes)

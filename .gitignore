@@ -33,3 +33,6 @@ container_root/profilers/**
 container_root/ros_env_vars.sh
 __pycache__/
 *.pyc
+.idea/
+venv/
+.env/

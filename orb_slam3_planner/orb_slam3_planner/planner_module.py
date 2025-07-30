@@ -4,9 +4,56 @@ import heapq
 
 class FrontierPlanner:
     """
-    FrontierPlanner is responsible for identifying unexplored frontiers in the occupancy grid
-    and selecting optimal exploration targets based on distance, novelty, information gain,
-    alignment with the robot's heading, and coordination with other robots.
+    A high-level exploration planner for autonomous multi-robot systems using 2D occupancy grids.
+
+    This module detects frontiers—boundaries between known and unknown regions—and selects
+    optimal exploration targets using a multi-factor scoring system. It integrates spatial
+    reasoning, local information gain, novelty, heading alignment, and multi-robot coordination
+    to balance efficiency and coverage.
+
+    Key Features:
+    -------------
+    - Frontier detection:
+        * Identifies free cells adjacent to unknown areas
+        * Filters out frontiers near walls or obstacles
+    - Scoring-based target selection:
+        * Factors in distance, heading alignment, information gain, and novelty
+        * Penalizes proximity to teammates' goals and positions
+    - Multi-robot coordination:
+        * Encourages spatial separation between robots
+        * Avoids target conflicts and promotes exploration diversity
+    - Fallback strategy:
+        * Generates exploration tour points when no frontier is found
+    - Local A* path planning:
+        * Computes collision-aware paths using grid search
+        * Applies obstacle and unknown-cell penalties
+        * Includes path smoothing via line-of-sight pruning
+
+    Inputs Required (from parent node):
+    -----------------------------------
+    - self.node.robot_pos: (int, int) – current grid cell of the robot
+    - self.node.robot_angle: float – robot orientation in radians
+    - self.node.visited_targets: List[(int, int)] – previously chosen frontier points
+    - self.node.safe_distance: int – safety buffer (cells) near obstacles
+    - self.node.grid_size: int – grid map dimensions
+    - self.node.get_occupancy_value(x, y): -> int – map query function
+    - self.node.other_robot_positions: Dict[int, Tuple[int, int]]
+    - self.node.other_robot_goals: Dict[int, Tuple[int, int]]
+    - self.node.min_robot_separation: float – required spacing between robots
+    - self.node.exploration_radius: float – range for novelty filtering
+    - self.node.use_frontier_scoring: bool – toggle advanced scoring
+
+    Usage:
+    ------
+    This class is used by each autonomous robot’s control loop to select a target cell
+    for exploration. It is typically called at regular planning intervals or after
+    completing a previous goal.
+
+    Notes:
+    ------
+    - Occupancy values: -1 = unknown, 0 = free, 100 = occupied
+    - Designed for synchronized use in centralized map-sharing environments
+    - Assumes square occupancy grid centered around origin
     """
 
     def __init__(self, node):
@@ -24,11 +71,12 @@ class FrontierPlanner:
 
     def find_frontiers(self):
         """
-        Scan the occupancy grid to identify frontiers—cells that are known to be free but border unknown space.
-        A frontier must be:
-        1. A free cell (value = 0)
-        2. Adjacent to at least one unknown cell (value = -1)
-        3. Not too close to walls/obstacles (value = 100)
+        Identify frontiers: free cells adjacent to unknown cells and not too close to walls.
+
+        A frontier is defined as:
+        1. A free cell (occupancy value == 0)
+        2. At least one adjacent unknown cell (occupancy == -1)
+        3. Not within `min_wall_distance` of occupied cells (value == 100)
         """
         frontiers = []
 
@@ -75,7 +123,12 @@ class FrontierPlanner:
 
     def find_best_frontier(self):
         """
-        Select the optimal frontier using a multi-factor scoring system including multi-robot coordination.
+        Choose the best frontier based on a multi-factor score:
+        - Distance from robot
+        - Novelty (hasn't been visited)
+        - Information gain (near unknowns)
+        - Heading alignment
+        - Separation from other robots (goals + positions)
         """
         if not self.node.robot_pos:
             return None
@@ -124,8 +177,10 @@ class FrontierPlanner:
 
     def get_exploration_tour_point(self):
         """
-        Generate an exploration tour point when no suitable frontier is available.
-        This helps robots explore different areas when frontiers are too crowded.
+        Generate a fallback goal when no frontier is found.
+
+        Uses robot ID to divide the map into angular sectors for exploration diversity,
+        and avoids conflicts with other robots' positions and goals.
         """
         if not self.node.robot_pos:
             return None
@@ -177,7 +232,10 @@ class FrontierPlanner:
 
     def find_nearest_frontier(self):
         """
-        Wrapper function to find a frontier based either on scoring or pure distance.
+        Find nearest safe frontier using pure distance or full scoring (based on setting).
+
+        Returns:
+            Tuple[int, int]: Grid coordinates of selected frontier, or None if none found.
         """
         if self.node.use_frontier_scoring:
             return self.find_best_frontier()
@@ -213,8 +271,12 @@ class FrontierPlanner:
 
     def calculate_multi_robot_factor(self, fx, fy):
         """
-        Calculate a factor that encourages robots to spread out.
-        Returns a penalty factor (higher is worse for final score).
+        Penalize frontiers that are too close to other robots' goals or current positions.
+
+        Encourages spread-out exploration across the team.
+
+        Returns:
+            float: A multiplicative penalty (1.0 = neutral, >1 = worse).
         """
         # Start with neutral factor
         separation_penalty = 0.0
@@ -250,7 +312,13 @@ class FrontierPlanner:
 
     def calculate_frontier_score(self, fx, fy, rx, ry):
         """
-        Compute a score for a given frontier based on multiple factors.
+        Compute total score for a frontier candidate using:
+        - Distance to robot
+        - Novelty bonus (not previously visited)
+        - Information gain (surrounding unknown cells)
+        - Heading alignment (smaller angle difference is better)
+        - Multi-robot penalty (closeness to teammates)
+
         Lower score is better.
         """
         # Distance factor - closer is better
@@ -298,8 +366,9 @@ class FrontierPlanner:
 
     def is_safe_position(self, x, y):
         """
-        Determine if the specified position is safe by checking for nearby obstacles.
-        This is used for validating frontier positions and path planning.
+        Check whether a given cell is free and not near any obstacles.
+
+        Safety margin is defined by `self.node.safe_distance`.
         """
         # Must be a free cell
         if self.get_occupancy_value(x, y) != 0:
@@ -318,7 +387,9 @@ class FrontierPlanner:
 
     def is_reachable(self, tx, ty):
         """
-        Check if there is a valid path from the robot's current position to (tx, ty) using A*.
+        Determine whether a valid path exists from current robot position to (tx, ty).
+
+        Uses A* planner. Returns False if path is blocked or not found.
         """
         if not self.node.robot_pos:
             return False
@@ -328,7 +399,14 @@ class FrontierPlanner:
 
     def plan_path(self, start, goal):
         """
-        Plan a path from start to goal using A* algorithm.
+        Plan a safe path from start to goal using A* search with:
+        - Diagonal movement allowed
+        - Obstacle penalties
+        - Unknown cell avoidance
+        - Smoothing applied after path extraction
+
+        Returns:
+            List[Tuple[int, int]]: Smoothed path or None if no path found.
         """
         if not start or not goal:
             return None
@@ -412,7 +490,9 @@ class FrontierPlanner:
 
     def calculate_obstacle_penalty(self, x, y):
         """
-        Calculate a penalty for being close to obstacles to encourage safer paths.
+        Compute a penalty for cells near obstacles.
+
+        Cells close to occupied space get higher penalties to promote safer routing.
         """
         penalty = 0.0
         check_radius = 2
@@ -430,7 +510,9 @@ class FrontierPlanner:
 
     def smooth_path(self, path):
         """
-        Smooth the path by removing unnecessary waypoints while ensuring the path remains collision-free.
+        Post-process a path to remove redundant waypoints by checking straight-line visibility.
+
+        Uses `is_line_clear` to ensure no collisions along skipped segments.
         """
         if len(path) <= 2:
             return path
@@ -455,7 +537,9 @@ class FrontierPlanner:
 
     def is_line_clear(self, start, end):
         """
-        Check if a straight line between two points is clear of obstacles.
+        Check if a straight line between two grid cells is free of obstacles.
+
+        Uses Bresenham's algorithm with 1-cell safety margin in all directions.
         """
         x0, y0 = start
         x1, y1 = end

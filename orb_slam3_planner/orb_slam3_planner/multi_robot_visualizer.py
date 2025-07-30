@@ -14,6 +14,52 @@ from scipy.spatial.transform import Rotation as R
 import yaml
 
 class ImprovedMultiRobotVisualizer(Node):
+    """
+    A ROS2 node for real-time 3D visualization of multi-robot SLAM using Open3D.
+
+    This node visualizes the merged 3D point cloud from multiple robots alongside their real-time poses,
+    trajectories, and coordinate frames. It helps monitor SLAM consistency, pose alignment, and overall
+    spatial layout in multi-agent systems.
+
+    Core Responsibilities:
+    ----------------------
+    - Subscribes to robot SLAM poses (`/robot_<id>/robot_pose_slam`)
+    - Subscribes to a merged point cloud (`/merged_map`) with robot ID encoded in RGB
+    - Visualizes each robot as a colored sphere with optional trajectory trails
+    - Displays the merged map with per-robot coloring
+    - Adds ground grid and global coordinate frame for orientation
+    - Runs the visualization in a separate Open3D thread
+
+    Visualization Features:
+    -----------------------
+    - Robot spheres at current 3D position (distinct color per robot)
+    - Optional trajectories (fading lines connecting past poses)
+    - Colored merged point cloud (mapped by robot ID)
+    - Ground grid and axes for spatial context
+    - Auto-reset of camera view when first pose is received
+
+    Parameters:
+    -----------
+    robot_configs (dict):
+        Dictionary of robot configurations, with robot IDs as keys.
+        Each entry includes:
+            - 'position': Initial 3D position [x, y, z]
+            - 'orientation': Optional Euler angles [roll, pitch, yaw] in radians
+
+    Args:
+    -----
+    show_trajectory (bool):
+        Whether to display motion trails (default: True)
+
+    trajectory_length (int):
+        Maximum number of past poses to retain per robot (default: 200)
+
+    Usage:
+    ------
+    This node is typically launched alongside the SLAM and map merger nodes
+    to provide a visual overview of robot positions and the reconstructed 3D environment.
+    """
+
     def __init__(self, show_trajectory=True, trajectory_length=200):
         super().__init__('improved_multi_robot_visualizer')
 
@@ -75,7 +121,16 @@ class ImprovedMultiRobotVisualizer(Node):
         self.get_logger().info('Open3D visualizer thread started.')
 
     def create_transformation_matrix(self, position, orientation):
-        """Create 4x4 transformation matrix"""
+        """
+        Create a 4x4 homogeneous transformation matrix from position and orientation.
+
+        Args:
+            position (list): Translation vector [x, y, z].
+            orientation (list): Euler angles [roll, pitch, yaw] in radians.
+
+        Returns:
+            np.ndarray: 4x4 transformation matrix (world ← local).
+        """
         rotation = R.from_euler('xyz', orientation)
         rotation_matrix = rotation.as_matrix()
 
@@ -86,6 +141,17 @@ class ImprovedMultiRobotVisualizer(Node):
         return transform
 
     def pose_callback_factory(self, robot_id):
+        """
+        Factory that returns a callback for receiving pose updates for a specific robot.
+
+        Updates the robot's global position and adds it to the trajectory.
+
+        Args:
+            robot_id (int): ID of the robot.
+
+        Returns:
+            Callable[[PoseStamped], None]: ROS2 callback function.
+        """
         def callback(msg):
             with self.vis_lock:
                 # Get pose in robot's local frame
@@ -110,7 +176,12 @@ class ImprovedMultiRobotVisualizer(Node):
         return callback
 
     def merged_map_callback(self, msg):
-        """Receive merged map from multi_robot_map_merger"""
+        """
+        Callback for receiving merged point cloud data.
+
+        Decodes points and assigns them to the correct robot ID based on RGB color encoding.
+        Stores the merged point cloud as a NumPy array for visualization.
+        """
         try:
             points = list(pc2.read_points(msg, field_names=("x", "y", "z", "rgb"), skip_nans=True))
             if points:
@@ -143,7 +214,17 @@ class ImprovedMultiRobotVisualizer(Node):
             self.get_logger().error(f'Error processing merged map: {e}')
 
     def visualizer_loop(self):
-        """Main visualization loop"""
+        """
+        Main loop running the Open3D visualizer.
+
+        Visualizes:
+        - Robot positions (spheres)
+        - Trajectories (line sets)
+        - Merged map (colored point cloud)
+        - Optional grid and coordinate frame
+
+        Runs at ~30 FPS in a separate thread.
+        """
         # Create visualizer
         vis = o3d.visualization.Visualizer()
         vis.create_window(
@@ -311,7 +392,17 @@ class ImprovedMultiRobotVisualizer(Node):
                 self.print_status()
 
     def get_robot_color(self, robot_id):
-        """Get distinct colors for each robot"""
+        """
+        Return a distinct color for a given robot ID.
+
+        Used for visualizing robot spheres and trajectories.
+
+        Args:
+            robot_id (int): Robot identifier.
+
+        Returns:
+            list: RGB color as [r, g, b] with values in range [0.0, 1.0].
+        """
         colors = {
             0: [0.2, 0.4, 1.0],  # Blue
             1: [0.2, 1.0, 0.2],  # Green
@@ -323,12 +414,30 @@ class ImprovedMultiRobotVisualizer(Node):
         return colors.get(robot_id, [0.7, 0.7, 0.7])
 
     def get_merged_color(self, robot_id):
-        """Get colors for merged map points"""
+        """
+        Get the color for merged point cloud data based on robot ID.
+
+        Applies slight darkening to differentiate from trajectory lines.
+
+        Args:
+            robot_id (int): Robot identifier.
+
+        Returns:
+            np.ndarray: RGB color for merged map visualization.
+        """
         base_color = np.array(self.get_robot_color(robot_id))
         return base_color * 0.8
 
     def print_status(self):
-        """Print current status of visualization"""
+        """
+        Log current status of each robot and overall map.
+
+        Includes:
+        - Robot poses
+        - Number of points in merged map per robot
+        - Trajectory length
+        - Total point count
+        """
         status_msg = "\n========== Multi-Robot SLAM Visualization Status =========="
 
         # Count points per robot in merged map

@@ -14,8 +14,55 @@ from orb_slam3_planner.drone_controller_module import DroneController
 
 class AutonomousExplorerNode(Node):
     """
-    The central node that coordinates planning and motion control for autonomous exploration.
-    Adapted to work with the new mapping system.
+    ROS2 node for autonomous frontier-based exploration in a 2D occupancy grid map.
+
+    This node manages a single robot’s exploration behavior while coordinating with other robots
+    through a shared occupancy grid and goal exchange. It uses a finite-state machine to govern
+    behaviors such as initial map scanning, frontier planning, obstacle avoidance, and recovery.
+
+    Core Responsibilities:
+    ----------------------
+    - Maintains local robot state (position, angle, target, motion state)
+    - Integrates multi-robot coordination via shared poses and goals
+    - Executes periodic planning toward unexplored frontiers
+    - Publishes motion goals and visualization data (goal markers, A* paths)
+    - Controls low-level motion using the DroneController interface
+    - Interfaces with FrontierPlanner for path planning in dynamic maps
+
+    Subscribed Topics:
+    ------------------
+    - /occupancy_grid: Shared occupancy grid from central map merger
+    - /robot_grid_positions: PoseArray with all robots’ positions and headings
+    - /robot_<id>/goal_grid_pos: Current goal position of other robots
+
+    Published Topics:
+    -----------------
+    - /<robot_ns>/cmd_vel: Velocity command to move robot
+    - /<robot_ns>/goal_grid_pos: Current target cell of this robot
+    - /<robot_ns>/planned_path: Full A* path toward target for visualization
+
+    Parameters:
+    -----------
+    - robot_namespace (str): Namespace of the robot, used to identify ID
+    - robot_configs (str, YAML): Mapping of all participating robots
+
+    Internal Modules:
+    -----------------
+    - FrontierPlanner: Selects optimal exploration targets using scoring
+    - DroneController: Controls motion, collision checks, and recovery
+
+    States:
+    -------
+    - INITIAL_TURN: Performs 360° scan to initialize mapping
+    - EXPLORING: Selects new frontier and plans path
+    - MOVING_TO_TARGET: Follows current A* path to target
+    - COLLISION_AVOIDANCE: Avoids nearby obstacles by rotating
+    - RECOVERY: Backs up after being detected as stuck
+
+    Execution:
+    ----------
+    The control loop runs periodically and adapts behavior based on environment, goals,
+    and obstacles. This node is meant to run in tandem with SLAM and map-merging systems.
     """
 
     def __init__(self):
@@ -38,7 +85,7 @@ class AutonomousExplorerNode(Node):
         self.all_robot_ids = list(self.robot_configs.keys())
 
         # ======================
-        # Map Parameters (matching new mapper)
+        # Map Parameters
         # ======================
         self.cell_size = 0.5  # Resolution from new mapper
         self.map_size_meters = 30.0  # Total map size (30m x 30m)
@@ -55,12 +102,12 @@ class AutonomousExplorerNode(Node):
         self.angular_speed = 0.5
         self.safe_distance = 2
 
-        self.adaptive_speed = False
+        self.adaptive_speed = True
         self.min_linear_speed = 0.3
         self.max_linear_speed = 0.6
 
         # ======================
-        # Initial 360 Turn Parameters
+        # Initial Turn (360 Scan)
         # ======================
         self.initial_turn_complete = False
         self.initial_turn_start_angle = None
@@ -69,7 +116,7 @@ class AutonomousExplorerNode(Node):
         self.turn_direction = 1  # 1 for counter-clockwise, -1 for clockwise
 
         # ======================
-        # Frontier Planning Parameters
+        # Frontier Planning
         # ======================
         self.use_frontier_scoring = True
         self.visited_targets = set()
@@ -143,18 +190,28 @@ class AutonomousExplorerNode(Node):
             f"Autonomous Explorer Node started for robot_{self.robot_id} - Starting with 360 turn")
 
     def create_goal_callback(self, robot_id):
-        """Create a callback for receiving other robot goals"""
+        """
+        Create a subscriber callback for receiving another robot's goal.
 
+        Args:
+            robot_id (int): ID of the robot whose goal this callback handles.
+
+        Returns:
+            function: A callback function that stores the goal grid position.
+        """
         def callback(msg):
             self.other_robot_goals[robot_id] = (int(msg.x), int(msg.y))
-
         return callback
 
     def robot_positions_callback(self, msg):
         """
-        Handle robot positions from the map builder.
-        The PoseArray contains positions for all robots in grid coordinates.
-        Robot ID is encoded in the z position.
+        Callback for updating robot positions and orientations from PoseArray.
+
+        Own robot's position and angle are stored in `self.robot_pos` and `self.robot_angle`.
+        Other robots' positions are stored in `self.other_robot_positions`.
+
+        Args:
+            msg (PoseArray): Message containing position and orientation data of all robots.
         """
         for pose in msg.poses:
             robot_id = int(pose.position.z)
@@ -176,7 +233,12 @@ class AutonomousExplorerNode(Node):
 
     def map_callback(self, msg):
         """
-        Update local map from the shared occupancy grid.
+        Callback for updating the local occupancy grid from a shared OccupancyGrid message.
+
+        Converts the ROS OccupancyGrid into a NumPy 2D array.
+
+        Args:
+            msg (OccupancyGrid): The received occupancy map message.
         """
         if msg.info.width != self.grid_size or msg.info.height != self.grid_size:
             # Update grid size if map size changed
@@ -194,7 +256,10 @@ class AutonomousExplorerNode(Node):
                 self.occupancy_grid[y, x] = value
 
     def publish_goal(self):
-        """Publish current goal for visualization"""
+        """
+        Publish the robot's current target grid cell (goal) for visualization.
+        Only publishes if a valid target exists.
+        """
         if self.target:
             goal_msg = Point()
             goal_msg.x = float(self.target[0])
@@ -203,7 +268,11 @@ class AutonomousExplorerNode(Node):
             self.goal_pub.publish(goal_msg)
 
     def publish_path(self):
-        """Publish current path for visualization"""
+        """
+        Publish the current planned A* path as a ROS2 Path message for visualization tools.
+
+        Converts grid coordinates to world coordinates and adds PoseStamped entries.
+        """
         if self.current_path and len(self.current_path) > 0:
             path_msg = Path()
             path_msg.header.stamp = self.get_clock().now().to_msg()
@@ -222,8 +291,13 @@ class AutonomousExplorerNode(Node):
 
     def perform_initial_turn(self):
         """
-        Perform a 360-degree turn to scan the environment before starting exploration.
-        Returns True when the turn is complete.
+        Execute an in-place 360° rotation to help initialize mapping and scanning.
+
+        Tracks cumulative rotation and compares it to a full circle (2π radians).
+        Publishes Twist messages to rotate the robot.
+
+        Returns:
+            bool: True if the full turn is completed, otherwise False.
         """
         if self.robot_angle is None:
             return False
@@ -267,7 +341,16 @@ class AutonomousExplorerNode(Node):
 
     def control_loop(self):
         """
-        Main control loop: executes exploration state machine and sends movement commands.
+        Main control loop and state machine for autonomous exploration.
+
+        States:
+            - INITIAL_TURN: Robot performs 360° scan to bootstrap mapping.
+            - EXPLORING: Selects and plans to frontiers using A*.
+            - MOVING_TO_TARGET: Follows path to the current target.
+            - RECOVERY: Backs up when robot is stuck.
+            - COLLISION_AVOIDANCE: Rotates when obstacle is directly ahead.
+
+        Executed periodically via ROS timer (~2 Hz).
         """
         if not self.robot_pos:
             self.controller.stop_robot()
@@ -399,14 +482,29 @@ class AutonomousExplorerNode(Node):
 
     def normalize_angle(self, angle):
         """
-        Normalize an angle to the range [-pi, pi].
+        Normalize an angle to the range [-π, π].
+
+        Args:
+            angle (float): Angle in radians.
+
+        Returns:
+            float: Normalized angle in range [-π, π].
         """
         return (angle + math.pi) % (2 * math.pi) - math.pi
 
     def get_occupancy_value(self, x, y):
         """
-        Get occupancy value from grid.
-        Returns: 100 = occupied, 0 = free, -1 = unknown
+        Get the occupancy status of a specific grid cell.
+
+        Args:
+            x (int): X coordinate (grid index).
+            y (int): Y coordinate (grid index).
+
+        Returns:
+            int: Occupancy value:
+                - 100 = occupied,
+                - 0 = free,
+                - -1 = unknown or out of bounds.
         """
         if not (0 <= x < self.grid_size and 0 <= y < self.grid_size):
             return -1

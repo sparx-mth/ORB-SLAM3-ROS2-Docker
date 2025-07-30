@@ -15,8 +15,62 @@ import yaml
 
 class MultiRobot2DVisualizer(Node):
     """
-    2D visualization of the multi-robot exploration system.
-    Now receives robot positions from the map builder instead of SLAM.
+    A ROS2 node for real-time 2D visualization of a multi-robot exploration system.
+
+    This visualizer renders:
+    - The occupancy grid map received from a centralized mapper
+    - Robot positions, orientations, trajectories, goals, and planned A* paths
+    - Optional field-of-view (FOV) cones for each robot
+    - An info panel showing robot coordinates and map statistics
+
+    Key Features:
+    --------------
+    - Subscribes to:
+        * /occupancy_grid: Full map from the centralized mapper
+        * /robot_grid_positions: PoseArray containing each robot’s grid cell and orientation
+        * /robot_<id>/goal_grid_pos: Target goal for each robot
+        * /robot_<id>/planned_path: A* planned path as a Path message
+
+    - Visual Elements:
+        * Colored occupancy grid (Free, Occupied, Unknown)
+        * Robot positions as colored circles with heading arrows
+        * Robot IDs, current goals, and optional field-of-view visualization
+        * A* paths drawn as thick polylines per robot
+        * Historical trajectories with fading color effect
+
+    Parameters (ROS2):
+    ------------------
+    - robot_configs (YAML string): Configuration of all robot IDs and optional per-robot settings
+
+    Attributes:
+    -----------
+    - robot_ids (List[int]): All robot IDs in the system
+    - robot_grid_positions (Dict[int, Tuple[int, int]]): Grid (map) position of each robot
+    - robot_world_positions (Dict[int, Tuple[float, float]]): World coordinates for info panel
+    - robot_angles (Dict[int, float]): Robot orientations in radians
+    - robot_paths (Dict[int, List[Tuple[int, int]]]): A* paths for each robot
+    - robot_goals (Dict[int, Tuple[int, int]]): Current goal position per robot
+    - trajectories (Dict[int, Deque[Tuple[int, int]]]): Past positions for trajectory drawing
+    - occupancy_grid (np.ndarray): Latest 2D occupancy grid from the map
+    - resolution (float): Grid resolution in meters per cell
+    - scale (int): Number of pixels per grid cell for display
+    - robot_colors (Dict[int, Tuple[int, int, int]]): Per-robot RGB colors for visualization
+
+    Usage:
+    ------
+    This node should be launched alongside the mapping, exploration, and path-planning nodes
+    in a multi-robot system. It opens a real-time OpenCV window titled "Multi-Robot Exploration Map".
+    Visualization options can be configured by modifying the internal flags:
+        * enable_visualization
+        * enable_trajectories
+        * enable_fov_visualization
+        * enable_ray_tracing
+
+    Limitations:
+    ------------
+    - Designed for 2D grid-based planning environments
+    - Assumes square map centered around the origin
+    - Does not currently support asynchronous robot configuration updates
     """
 
     def __init__(self):
@@ -73,13 +127,13 @@ class MultiRobot2DVisualizer(Node):
             self.trajectories = {rid: deque(maxlen=500) for rid in self.robot_ids}
 
         # Subscriptions
-        # Subscribe to the new occupancy grid topic
+        # Subscribe to the occupancy grid topic
         self.create_subscription(
             OccupancyGrid, '/occupancy_grid',
             self.map_callback, 10
         )
 
-        # NEW: Subscribe to robot positions from map builder instead of individual poses
+        # Subscribe to robot positions from map builder instead of individual poses
         self.create_subscription(
             PoseArray, '/robot_grid_positions',
             self.robot_positions_callback, 10
@@ -102,8 +156,17 @@ class MultiRobot2DVisualizer(Node):
             self.get_logger().info(f'Multi-Robot 2D Visualizer started for robots: {self.robot_ids}')
 
     def create_path_callback(self, robot_id):
-        """NEW: Factory for path callbacks"""
+        """
+        Creates a callback to receive and store the planned A* path for a given robot.
 
+        Converts path from world coordinates to grid coordinates for visualization.
+
+        Args:
+            robot_id (int): ID of the robot.
+
+        Returns:
+            Callable: ROS2 subscription callback function.
+        """
         def callback(msg):
             # Convert path from world to grid coordinates
             path_grid = []
@@ -124,9 +187,13 @@ class MultiRobot2DVisualizer(Node):
 
     def robot_positions_callback(self, msg):
         """
-        NEW: Handle robot positions from the map builder.
-        The PoseArray contains positions for all robots in grid coordinates.
-        Robot ID is encoded in the z position.
+        Handles incoming robot poses (grid positions and orientations) from PoseArray.
+
+        Updates internal state of each robot's grid position, heading, and world coordinates.
+        Also appends position to robot trajectory if enabled.
+
+        Args:
+            msg (PoseArray): Array of robot poses, one per robot.
         """
         for pose in msg.poses:
             robot_id = int(pose.position.z)
@@ -153,8 +220,15 @@ class MultiRobot2DVisualizer(Node):
                     self.trajectories[robot_id].append((gx, gy))
 
     def create_goal_callback(self, robot_id):
-        """Factory for goal callbacks"""
+        """
+        Creates a callback to receive and store the current goal grid position for a robot.
 
+        Args:
+            robot_id (int): ID of the robot.
+
+        Returns:
+            Callable: ROS2 subscription callback function.
+        """
         def callback(msg):
             # Store goal position
             self.robot_goals[robot_id] = (int(msg.x), int(msg.y))
@@ -166,7 +240,14 @@ class MultiRobot2DVisualizer(Node):
         return callback
 
     def draw_path(self, img, robot_id, height):
-        """NEW: Draw the A* path for a robot"""
+        """
+        Draws the planned path (as line and waypoints) of a robot on the image.
+
+        Args:
+            img (np.ndarray): OpenCV image to draw on.
+            robot_id (int): ID of the robot.
+            height (int): Height of the occupancy grid.
+        """
         if robot_id not in self.robot_paths or len(self.robot_paths[robot_id]) < 2:
             return
 
@@ -198,7 +279,15 @@ class MultiRobot2DVisualizer(Node):
             cv2.circle(img, (x_large, y_large), 3, color, -1)
 
     def map_callback(self, msg):
-        """Visualize the occupancy grid with robots"""
+        """
+        Callback for the occupancy grid topic.
+
+        Updates map parameters, renders the full visualization including:
+        map, grid lines, robot positions, goals, paths, trajectories, and FOVs.
+
+        Args:
+            msg (OccupancyGrid): Latest occupancy grid map.
+        """
         # Skip if visualization is disabled
         if not self.enable_visualization:
             return
@@ -359,7 +448,14 @@ class MultiRobot2DVisualizer(Node):
             self.frame_count = 0
 
     def draw_trajectory(self, img, robot_id, grid_height):
-        """Draw robot trajectory if enabled"""
+        """
+        Draws the trajectory of a robot as a fading line over time.
+
+        Args:
+            img (np.ndarray): OpenCV image to draw on.
+            robot_id (int): ID of the robot.
+            grid_height (int): Grid height for coordinate flipping.
+        """
         color = self.robot_colors[robot_id]
         trajectory_points = list(self.trajectories[robot_id])
 
@@ -381,7 +477,14 @@ class MultiRobot2DVisualizer(Node):
                      (x2_large, y2_large), faded_color, 2)
 
     def draw_robot_fov(self, img, robot_id, grid_height):
-        """Draw the field of view for a robot if enabled"""
+        """
+        Draws a visual cone representing the robot's current field of view.
+
+        Args:
+            img (np.ndarray): OpenCV image to draw on.
+            robot_id (int): ID of the robot.
+            grid_height (int): Grid height for coordinate flipping.
+        """
         if not self.robot_grid_positions[robot_id]:
             return
 
@@ -419,7 +522,11 @@ class MultiRobot2DVisualizer(Node):
         cv2.fillPoly(img, [np.array(points)], color)
 
     def destroy_node(self):
-        """Clean up on shutdown"""
+        """
+        Clean up before shutdown.
+
+        Closes all OpenCV windows and calls base class shutdown logic.
+        """
         cv2.destroyAllWindows()
         super().destroy_node()
 

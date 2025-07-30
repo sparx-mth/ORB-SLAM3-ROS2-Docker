@@ -15,8 +15,32 @@ import yaml
 
 class MultiRobotMapMerger(Node):
     """
-    Dedicated node for merging maps from multiple robots.
-    Subscribes to landmark topics published by landmark_publisher_node.py
+    A ROS2 node for centralized 3D map merging in multi-robot SLAM systems.
+
+    This node receives local 3D landmark maps and SLAM poses from multiple robots,
+    transforms them into a shared global frame, filters noise and duplicates,
+    and publishes a unified global point cloud for use by other modules.
+
+    Responsibilities:
+    -----------------
+    - Subscribes to:
+        * /robot_<id>/orb_slam3/landmarks_raw (PointCloud2): Local 3D landmarks.
+        * /robot_<id>/robot_pose_slam (PoseStamped): SLAM-based robot pose in local frame.
+    - Maintains:
+        * Static transform from each robot's local frame to global frame (based on config).
+        * Per-robot landmark storage and SLAM pose tracking.
+    - Processing:
+        * Filters raw point clouds using radius-based and proximity filtering.
+        * Transforms all points to a global frame using the robot-specific transform.
+        * Merges and deduplicates points across robots using KD-tree queries.
+    - Publishes:
+        * /merged_map (PointCloud2): The combined global point cloud with per-robot color encoding.
+
+    Notes:
+    ------
+    - Each robot must be configured via the `robot_configs` parameter, providing initial position and orientation.
+    - Robot colors are hardcoded per ID for visual differentiation.
+    - Point filtering removes redundant and isolated landmarks before merging.
     """
 
     def __init__(self):
@@ -89,7 +113,16 @@ class MultiRobotMapMerger(Node):
         self.radius = 0.15  # Radius for isolated point removal
 
     def create_transformation_matrix(self, position, orientation):
-        """Create 4x4 transformation matrix"""
+        """
+        Create a 4x4 homogeneous transformation matrix from position and Euler orientation.
+
+        Args:
+            position (list[float]): Translation vector [x, y, z].
+            orientation (list[float]): Euler angles [roll, pitch, yaw] in radians.
+
+        Returns:
+            np.ndarray: 4x4 transformation matrix.
+        """
         rotation = R.from_euler('xyz', orientation)
         rotation_matrix = rotation.as_matrix()
 
@@ -100,7 +133,17 @@ class MultiRobotMapMerger(Node):
         return transform
 
     def create_pose_callback(self, robot_id):
-        """Factory for pose callbacks"""
+        """
+        Generate a ROS subscriber callback for robot poses.
+
+        Converts local pose to global frame using robot-specific transform.
+
+        Args:
+            robot_id (int): The ID of the robot for which the callback is created.
+
+        Returns:
+            Callable: A function to handle `PoseStamped` messages.
+        """
 
         def callback(msg):
             with self.data_lock:
@@ -119,7 +162,17 @@ class MultiRobotMapMerger(Node):
         return callback
 
     def create_landmark_callback(self, robot_id):
-        """Factory for landmark callbacks"""
+        """
+        Generate a ROS subscriber callback for receiving raw landmark point clouds.
+
+        Applies filtering and transformation to align landmarks with the global frame.
+
+        Args:
+            robot_id (int): The ID of the robot for which the callback is created.
+
+        Returns:
+            Callable: A function to handle `PointCloud2` messages.
+        """
 
         def callback(msg):
             try:
@@ -167,7 +220,16 @@ class MultiRobotMapMerger(Node):
         return callback
 
     def transform_points_to_global(self, local_points, robot_id):
-        """Transform points from robot frame to global frame"""
+        """
+        Transform local 3D points from robot frame to global frame using robot's transform.
+
+        Args:
+            local_points (np.ndarray): Nx3 array of points in robot's local frame.
+            robot_id (int): The ID of the robot.
+
+        Returns:
+            np.ndarray: Nx3 array of transformed points in global frame.
+        """
         if len(local_points) == 0:
             return local_points
 
@@ -184,7 +246,14 @@ class MultiRobotMapMerger(Node):
         return global_homo[:, :3]
 
     def merge_maps(self):
-        """Merge maps from all robots and remove duplicates"""
+        """
+        Merge and deduplicate landmark maps from all robots.
+
+        Returns:
+            Tuple[np.ndarray, np.ndarray]:
+                - Merged 3D points (Nx3 array).
+                - Corresponding RGB color for each point (Nx3 array).
+        """
         all_points = []
         all_colors = []
 
@@ -227,7 +296,11 @@ class MultiRobotMapMerger(Node):
         return merged_points, merged_colors
 
     def publish_merged_map(self):
-        """Publish the merged point cloud"""
+        """
+        Construct and publish the merged map as a PointCloud2 message on the `/merged_map` topic.
+
+        Combines points from all robots and applies filtering before publishing.
+        """
         merged_points, merged_colors = self.merge_maps()
 
         if merged_points is None or len(merged_points) == 0:
@@ -283,7 +356,10 @@ class MultiRobotMapMerger(Node):
             )
 
     def print_status(self):
-        """Print current status"""
+        """
+        Print debug information about number of points received from each robot.
+        (Disabled by default unless called manually.)
+        """
         with self.data_lock:
             total_points = 0
             status_parts = []
