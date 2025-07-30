@@ -56,7 +56,6 @@ class AutonomousExplorerNode(Node):
     - INITIAL_TURN: Performs 360° scan to initialize mapping
     - EXPLORING: Selects new frontier and plans path
     - MOVING_TO_TARGET: Follows current A* path to target
-    - COLLISION_AVOIDANCE: Avoids nearby obstacles by rotating
     - RECOVERY: Backs up after being detected as stuck
 
     Execution:
@@ -348,8 +347,6 @@ class AutonomousExplorerNode(Node):
             - EXPLORING: Selects and plans to frontiers using A*.
             - MOVING_TO_TARGET: Follows path to the current target.
             - RECOVERY: Backs up when robot is stuck.
-            - COLLISION_AVOIDANCE: Rotates when obstacle is directly ahead.
-
         Executed periodically via ROS timer (~2 Hz).
         """
         if not self.robot_pos:
@@ -370,25 +367,24 @@ class AutonomousExplorerNode(Node):
             self.get_logger().warn("Robot stuck. Switching to RECOVERY.")
             self.state = "RECOVERY"
             self.stuck_counter = 0
+            return
 
+        # Update last position for stuck detection
         self.last_robot_pos = self.robot_pos
 
-        if self.state == "COLLISION_AVOIDANCE":
-            if self.collision_counter > 0:
-                twist = Twist()
-                twist.angular.z = self.angular_speed
-                self.cmd_pub.publish(twist)
-                self.collision_counter -= 1
-            else:
-                self.state = "EXPLORING"
-
-        elif self.state == "RECOVERY":
+        # State machine
+        if self.state == "RECOVERY":
+            # Back up briefly, then return to exploring
             twist = Twist()
-            twist.linear.x = -self.linear_speed * 1.0
+            twist.linear.x = -self.linear_speed * 0.8
             self.cmd_pub.publish(twist)
             self.state = "EXPLORING"
 
         elif self.state == "EXPLORING":
+            # Clear any collision counter when entering exploration
+            self.collision_counter = 0
+
+            # Find new frontier target
             self.target = self.planner.find_nearest_frontier()
 
             if self.target:
@@ -408,6 +404,7 @@ class AutonomousExplorerNode(Node):
                     self.get_logger().warn(f"No path found to target {self.target}")
                     self.target = None
             else:
+                # No frontier found, turn to explore
                 self.controller.turn_to_explore()
 
         elif self.state == "MOVING_TO_TARGET":
@@ -441,6 +438,15 @@ class AutonomousExplorerNode(Node):
                 self.controller.turn_to_explore()
                 return
 
+            # Handle collision avoidance
+            if self.collision_counter > 0:
+                # Continue rotating to avoid obstacle
+                twist = Twist()
+                twist.angular.z = self.angular_speed
+                self.cmd_pub.publish(twist)
+                self.collision_counter -= 1
+                return
+
             # Follow the path
             if self.path_index < len(self.current_path):
                 waypoint = self.current_path[self.path_index]
@@ -460,21 +466,26 @@ class AutonomousExplorerNode(Node):
                 else:
                     # Move toward current waypoint
                     if self.controller.check_collision_ahead():
-                        # Obstacle detected, replan path
-                        self.get_logger().warn("Obstacle on path! Replanning...")
-                        twist = Twist()
-                        twist.linear.x = -self.linear_speed * 1.0
-                        self.cmd_pub.publish(twist)
-                        new_path = self.planner.plan_path(self.robot_pos, self.target)
-                        if new_path and len(new_path) > 1:
-                            self.current_path = new_path
-                            self.path_index = 1
-                            self.publish_path()
-                        else:
-                            self.get_logger().warn("No alternate path found!")
-                            self.state = "EXPLORING"
-                            return
+                        # Obstacle detected - try avoidance first, then replan if needed
+                        self.get_logger().warn("Obstacle detected ahead!")
+
+                        # Set collision counter to rotate for a bit
+                        self.collision_counter = 2  # Rotate for ~1 seconds at 2Hz
+
+                        # Try to replan path after some rotation
+                        if self.path_index > len(self.current_path) // 2:
+                            # If we're more than halfway, try replanning
+                            new_path = self.planner.plan_path(self.robot_pos, self.target)
+                            if new_path and len(new_path) > 1:
+                                self.current_path = new_path
+                                self.path_index = 1
+                                self.publish_path()
+                                self.get_logger().info("Found alternate path!")
+                            else:
+                                # No alternate path, will rotate and then abandon target
+                                self.get_logger().warn("No alternate path found, will rotate and retry")
                     else:
+                        # No collision, move normally
                         self.controller.move_toward_waypoint(waypoint)
             else:
                 # Path index out of bounds, replan
